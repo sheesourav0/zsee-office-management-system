@@ -13,9 +13,18 @@ interface TransportationStatusProps {
   updates: StatusUpdate[];
 }
 
+type StatusStep = {
+  title: string;
+  completed: boolean;
+  current: boolean;
+  location?: string;
+  timestamp?: string;
+  note?: string;
+}
+
 const TransportationStatus = ({ status, updates }: TransportationStatusProps) => {
   // Default status steps if no updates are provided
-  const defaultSteps = [
+  const defaultSteps: StatusStep[] = [
     { title: "Order Placed", completed: true, current: false },
     { title: "Processing", completed: status !== "Not Shipped", current: status === "Processing" },
     { title: "Shipped", completed: ["In Transit", "Delivered"].includes(status), current: status === "Shipped" },
@@ -24,7 +33,7 @@ const TransportationStatus = ({ status, updates }: TransportationStatusProps) =>
   ];
 
   // Use provided updates if available, otherwise use default steps
-  const steps = updates.length > 0 
+  const steps: StatusStep[] = updates.length > 0 
     ? updates.map(update => ({
         title: update.status,
         location: update.location,
