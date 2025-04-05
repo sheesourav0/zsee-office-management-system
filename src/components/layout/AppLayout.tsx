@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Outlet, Navigate, useLocation, Link } from "react-router-dom";
+import { Outlet, Navigate, useLocation, Link, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 const MainNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   
   useEffect(() => {
@@ -31,7 +32,7 @@ const MainNav = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     toast.success("Logged out successfully");
-    window.location.href = "/login";
+    navigate("/login", { replace: true });
   };
 
   const navItems = [
@@ -92,15 +93,27 @@ const MainNav = () => {
 const AppLayout = () => {
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
+    const checkAuth = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        setUser(JSON.parse(userData));
+      } else {
+        navigate("/login", { replace: true });
+      }
+    };
+    
+    checkAuth();
+    
+    // Add event listener for storage changes (for multi-tab support)
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
+  }, [navigate]);
 
-  if (!user && location.pathname !== "/login") {
+  // If no user found and not already on login page, redirect to login
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

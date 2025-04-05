@@ -12,21 +12,31 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate authentication
-    setTimeout(() => {
+    try {
+      // Simulate authentication
       if (email === "admin@example.com" && password === "password") {
+        // Store user in localStorage
         localStorage.setItem("user", JSON.stringify({ name: "Admin User", email, role: "admin" }));
         toast.success("Login successful!");
-        navigate("/dashboard");
+        
+        // Force a small delay to ensure localStorage is updated before navigation
+        setTimeout(() => {
+          // Use replace to prevent back navigation to login page
+          navigate("/dashboard", { replace: true });
+        }, 500);
       } else {
         toast.error("Invalid credentials. Use admin@example.com / password");
+        setIsLoading(false);
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login");
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

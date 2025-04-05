@@ -10,7 +10,8 @@ const Login = () => {
     // Check if user is already logged in
     const user = localStorage.getItem("user");
     if (user) {
-      navigate("/dashboard");
+      // Use replace to prevent back navigation to login page
+      navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
 
