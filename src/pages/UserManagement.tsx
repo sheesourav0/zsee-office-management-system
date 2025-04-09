@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddUserForm from "@/components/users/AddUserForm";
 import UsersList from "@/components/users/UsersList";
+import RolesManagement from "@/components/users/RolesManagement";
+import ImportUsers from "@/components/users/ImportUsers";
 import { toast } from "sonner";
 
 const UserManagement = () => {
@@ -11,13 +13,15 @@ const UserManagement = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage users and permissions</p>
+        <p className="text-muted-foreground">Manage users, roles and permissions</p>
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="users">User List</TabsTrigger>
           <TabsTrigger value="add">Add User</TabsTrigger>
+          <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
+          <TabsTrigger value="import">Import Users</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
           <Card>
@@ -38,6 +42,28 @@ const UserManagement = () => {
             </CardHeader>
             <CardContent>
               <AddUserForm />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="roles">
+          <Card>
+            <CardHeader>
+              <CardTitle>Roles & Permissions</CardTitle>
+              <CardDescription>Create and manage roles with specific permissions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RolesManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="import">
+          <Card>
+            <CardHeader>
+              <CardTitle>Import Users</CardTitle>
+              <CardDescription>Import multiple users from Excel spreadsheet</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ImportUsers />
             </CardContent>
           </Card>
         </TabsContent>

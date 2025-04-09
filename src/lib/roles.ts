@@ -1,4 +1,3 @@
-
 export type UserRole = "superadmin" | "admin" | "manager" | "viewer";
 
 export interface RolePermission {
@@ -111,6 +110,16 @@ export const permissions: Record<string, RolePermission> = {
     name: "System Settings",
     description: "Manage system settings",
   },
+  "import:users": {
+    id: "import:users",
+    name: "Import Users",
+    description: "Import users from external sources",
+  },
+  "export:users": {
+    id: "export:users",
+    name: "Export Users",
+    description: "Export user data to external formats",
+  },
 };
 
 // Define roles with their permissions
@@ -141,6 +150,8 @@ export const roles: Record<UserRole, Role> = {
       "read:vendors",
       "update:vendors",
       "delete:vendors",
+      "import:users",
+      "export:users",
     ],
   },
   manager: {
@@ -176,7 +187,13 @@ export const roles: Record<UserRole, Role> = {
 };
 
 // Helper function to check if a role has a specific permission
-export const hasPermission = (role: UserRole, permissionId: string): boolean => {
+export const hasPermission = (role: UserRole, permissionId: string, customPermissions?: Record<string, boolean>): boolean => {
+  // If user has custom permissions, check those first
+  if (customPermissions) {
+    return !!customPermissions[permissionId];
+  }
+  
+  // Otherwise check role-based permissions
   if (!roles[role]) return false;
   return roles[role].permissions.includes(permissionId);
 };
@@ -185,4 +202,15 @@ export const hasPermission = (role: UserRole, permissionId: string): boolean => 
 export const getPermissionsForRole = (role: UserRole): RolePermission[] => {
   if (!roles[role]) return [];
   return roles[role].permissions.map(permId => permissions[permId]);
+};
+
+// Helper to check if a user has permission based on their role or custom permissions
+export const userHasPermission = (
+  user: { role: UserRole, customPermissions?: Record<string, boolean> },
+  permissionId: string
+): boolean => {
+  if (user.customPermissions) {
+    return !!user.customPermissions[permissionId];
+  }
+  return hasPermission(user.role, permissionId);
 };

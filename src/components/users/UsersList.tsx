@@ -18,14 +18,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, UserPlus, Trash, Edit } from "lucide-react";
+import { MoreHorizontal, UserPlus, Trash, Edit, FileCog } from "lucide-react";
 import { toast } from "sonner";
+import EditUserDialog from "./EditUserDialog";
+import { UserRole } from "@/lib/roles";
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
+  phone?: string;
   createdAt: string;
 }
 
@@ -46,6 +49,8 @@ const getRoleBadgeColor = (role: string) => {
 
 const UsersList = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     // In a real app, this would be an API call
@@ -86,6 +91,22 @@ const UsersList = () => {
     } catch (error) {
       toast.error("Failed to delete user");
     }
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUserUpdated = (updatedUser: User) => {
+    const updatedUsers = users.map(user => 
+      user.id === updatedUser.id ? updatedUser : user
+    );
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    setUsers(updatedUsers);
+    setIsEditDialogOpen(false);
+    setSelectedUser(null);
+    toast.success("User updated successfully");
   };
 
   return (
@@ -137,7 +158,7 @@ const UsersList = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditUser(user)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit User
                         </DropdownMenuItem>
@@ -154,6 +175,15 @@ const UsersList = () => {
           </TableBody>
         </Table>
       </div>
+
+      {selectedUser && (
+        <EditUserDialog
+          user={selectedUser}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onUpdate={handleUserUpdated}
+        />
+      )}
     </div>
   );
 };
