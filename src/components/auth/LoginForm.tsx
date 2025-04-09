@@ -14,20 +14,27 @@ const LoginForm = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isLoading) return; // Prevent multiple submissions
+    
     setIsLoading(true);
     
     try {
       // Simulate authentication
       if (email === "admin@example.com" && password === "password") {
         // Store user in localStorage
-        localStorage.setItem("user", JSON.stringify({ name: "Admin User", email, role: "admin" }));
+        localStorage.setItem("user", JSON.stringify({ 
+          name: "Admin User", 
+          email, 
+          role: "admin" 
+        }));
+        
         toast.success("Login successful!");
         
-        // Force a small delay to ensure localStorage is updated before navigation
+        // Navigate after a slight delay to ensure localStorage is updated
         setTimeout(() => {
-          // Use replace to prevent back navigation to login page
           navigate("/dashboard", { replace: true });
-        }, 500);
+        }, 100);
       } else {
         toast.error("Invalid credentials. Use admin@example.com / password");
         setIsLoading(false);
@@ -58,6 +65,7 @@ const LoginForm = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -69,11 +77,16 @@ const LoginForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading}
+          >
             {isLoading ? "Logging in..." : "Login"}
           </Button>
         </CardFooter>

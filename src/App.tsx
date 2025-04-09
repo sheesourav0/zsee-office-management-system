@@ -20,9 +20,6 @@ import NotFound from "@/pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Check if user is logged in
-  const isLoggedIn = !!localStorage.getItem("user");
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -31,7 +28,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/" element={<AppLayout />}>
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="projects" element={<Projects />} />
