@@ -30,6 +30,7 @@ export interface User {
   role: UserRole;
   phone?: string;
   createdAt: string;
+  customPermissions?: Record<string, boolean>;
 }
 
 const getRoleBadgeColor = (role: string) => {
@@ -59,7 +60,7 @@ const UsersList = () => {
     // Check if there's demo data
     if (storedUsers.length === 0) {
       // Add a demo super admin user if none exists
-      const demoUsers = [
+      const demoUsers: User[] = [
         {
           id: "1",
           name: "Super Admin",

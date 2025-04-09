@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +15,6 @@ import { UploadCloud, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-
 import { UserRole, roles } from "@/lib/roles";
 import { User } from "./UsersList";
 import * as XLSX from "xlsx";
-
-<lov-add-dependency>xlsx@0.18.5</lov-add-dependency>
 
 type ImportStatus = "idle" | "validating" | "valid" | "invalid" | "importing" | "success";
 
