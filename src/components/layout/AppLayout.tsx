@@ -13,7 +13,8 @@ import {
   Users, 
   BarChart3, 
   Settings, 
-  LogOut 
+  LogOut,
+  UserPlus
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,6 +46,9 @@ const MainNav = () => {
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
+  // Only show user management to admin or superadmin
+  const isSuperAdmin = user && (user.role === "superadmin" || user.role === "admin");
+
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="border-b p-4">
@@ -65,6 +69,18 @@ const MainNav = () => {
               </Button>
             </Link>
           ))}
+          
+          {isSuperAdmin && (
+            <Link to="/user-management">
+              <Button
+                variant={location.pathname === "/user-management" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                User Management
+              </Button>
+            </Link>
+          )}
         </div>
       </SidebarContent>
       <SidebarFooter className="border-t p-4">
@@ -77,6 +93,11 @@ const MainNav = () => {
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-xs text-muted-foreground">{user.email}</span>
+                {user.role && (
+                  <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5 mt-1">
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </span>
+                )}
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout} className="w-full justify-start">

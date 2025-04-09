@@ -13,6 +13,7 @@ import Transportation from "@/pages/Transportation";
 import Vendors from "@/pages/Vendors";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
+import UserManagement from "@/pages/UserManagement";
 import PaymentDetailView from "@/components/payments/PaymentDetailView";
 import NotFound from "@/pages/NotFound";
 
@@ -40,6 +41,7 @@ const App = () => {
               <Route path="vendors" element={<Vendors />} />
               <Route path="reports" element={<Reports />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="user-management" element={<UserManagement />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
