@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
+import AddProjectForm from "@/components/projects/AddProjectForm";
 
 // Simulated data - in a real app, this would come from an API
 const generateMockProjects = () => {
@@ -86,26 +88,27 @@ const Projects = () => {
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   useEffect(() => {
     const allProjects = generateMockProjects();
     setProjects(allProjects);
-    filterProjects(allProjects);
+    filterProjects(allProjects, statusFilter, searchQuery);
   }, [statusFilter, searchQuery]);
 
-  const filterProjects = (projects: any[]) => {
+  const filterProjects = (projects: any[], status: string, query: string) => {
     let result = [...projects];
     
     // Filter by status
-    if (statusFilter !== "all") {
-      result = result.filter(project => project.status === statusFilter);
+    if (status !== "all") {
+      result = result.filter(project => project.status === status);
     }
     
     // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (query) {
+      const queryLower = query.toLowerCase();
       result = result.filter(project => 
-        project.name.toLowerCase().includes(query)
+        project.name.toLowerCase().includes(queryLower)
       );
     }
     
@@ -115,25 +118,27 @@ const Projects = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="status-paid">Completed</Badge>;
+        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
       case "in-progress":
-        return <Badge className="status-partial">In Progress</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800">In Progress</Badge>;
       case "on-hold":
-        return <Badge className="status-hold">On Hold</Badge>;
+        return <Badge className="bg-orange-100 text-orange-800">On Hold</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
-  const handleAddProject = () => {
-    toast.info("Add project functionality will be implemented here");
+  const handleAddProjectSuccess = () => {
+    setIsAddDialogOpen(false);
+    toast.success("Project added successfully!");
+    // In a real app, we would refresh projects from the API
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-3xl font-bold">Projects</h1>
-        <Button onClick={handleAddProject}>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Project
         </Button>
@@ -211,6 +216,15 @@ const Projects = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Project</DialogTitle>
+          </DialogHeader>
+          <AddProjectForm onSuccess={handleAddProjectSuccess} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

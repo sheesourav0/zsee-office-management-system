@@ -14,7 +14,8 @@ import {
   BarChart3, 
   Settings, 
   LogOut,
-  UserPlus
+  UserPlus,
+  Layers
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ const MainNav = () => {
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: Folder, label: "Projects", path: "/projects" },
+    { icon: Layers, label: "Department Projects", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
     { icon: Truck, label: "Transportation", path: "/transportation" },
     { icon: Users, label: "Vendors", path: "/vendors" },
@@ -138,6 +140,20 @@ const AppLayout = () => {
     return <Navigate to="/login" replace />;
   }
 
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === "/dashboard") return "Dashboard";
+    if (path === "/projects") return "Projects";
+    if (path === "/department-projects") return "Department Projects";
+    if (path === "/payments") return "Payments";
+    if (path === "/transportation") return "Transportation";
+    if (path === "/vendors") return "Vendors";
+    if (path === "/reports") return "Reports";
+    if (path === "/settings") return "Settings";
+    if (path === "/user-management") return "User Management";
+    return "";
+  };
+
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden">
@@ -146,13 +162,7 @@ const AppLayout = () => {
           <div className="h-16 border-b flex items-center px-6">
             <SidebarTrigger />
             <h2 className="text-lg font-medium ml-4">
-              {location.pathname === "/dashboard" && "Dashboard"}
-              {location.pathname === "/projects" && "Projects"}
-              {location.pathname === "/payments" && "Payments"}
-              {location.pathname === "/transportation" && "Transportation"}
-              {location.pathname === "/vendors" && "Vendors"}
-              {location.pathname === "/reports" && "Reports"}
-              {location.pathname === "/settings" && "Settings"}
+              {getPageTitle()}
             </h2>
           </div>
           <main className="p-6">

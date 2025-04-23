@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PaymentFilterBar from "@/components/payments/PaymentFilterBar";
 import RecentPaymentsTable from "@/components/dashboard/RecentPaymentsTable";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import AddPaymentForm from "@/components/payments/AddPaymentForm";
 
 // Simulated data - in a real app, this would come from an API
 const generateMockData = () => {
@@ -101,6 +103,7 @@ const Payments = () => {
   const [payments, setPayments] = useState<any[]>([]);
   const [filteredPayments, setFilteredPayments] = useState<any[]>([]);
   const [filters, setFilters] = useState({});
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   useEffect(() => {
     const allPayments = generateMockData();
@@ -142,15 +145,17 @@ const Payments = () => {
     setFilters(newFilters);
   };
 
-  const handleAddPayment = () => {
-    toast.info("Add payment functionality will be implemented here");
+  const handleAddPaymentSuccess = () => {
+    setIsAddDialogOpen(false);
+    toast.success("Payment added successfully!");
+    // In a real app, we would refresh payments from the API
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-3xl font-bold">Payments</h1>
-        <Button onClick={handleAddPayment}>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Payment
         </Button>
@@ -177,6 +182,15 @@ const Payments = () => {
           <RecentPaymentsTable payments={filteredPayments} />
         </CardContent>
       </Card>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Payment</DialogTitle>
+          </DialogHeader>
+          <AddPaymentForm onSuccess={handleAddPaymentSuccess} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
