@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,8 +166,8 @@ const AddProjectForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <FormItem className="flex flex-col">
                 <FormLabel>Start Date</FormLabel>
                 <DatePicker
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  date={field.value}
+                  setDate={field.onChange}
                 />
                 <FormMessage />
               </FormItem>
@@ -182,8 +181,8 @@ const AddProjectForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <FormItem className="flex flex-col">
                 <FormLabel>End Date</FormLabel>
                 <DatePicker
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  date={field.value}
+                  setDate={field.onChange}
                 />
                 <FormMessage />
               </FormItem>

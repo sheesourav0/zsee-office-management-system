@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,10 +79,8 @@ const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
-      // In a real app, this would be an API call
       console.log("Payment data:", data);
       
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success("Payment record added successfully");
@@ -260,8 +257,8 @@ const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <FormItem className="flex flex-col">
                 <FormLabel>Payment Date</FormLabel>
                 <DatePicker
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  date={field.value}
+                  setDate={field.onChange}
                 />
                 <FormMessage />
               </FormItem>
