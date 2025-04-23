@@ -27,8 +27,8 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-primary">ConstructTrack</h1>
-        <p className="text-muted-foreground">Construction Project Management System</p>
+        <h1 className="text-3xl font-bold text-primary">ZSEE Management</h1>
+        <p className="text-muted-foreground">Management System</p>
       </div>
       <LoginForm />
       <p className="mt-8 text-sm text-muted-foreground">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Outlet, Navigate, useLocation, Link, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
@@ -48,14 +47,13 @@ const MainNav = () => {
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
-  // Only show user management to admin or superadmin
   const isSuperAdmin = user && (user.role === "superadmin" || user.role === "admin");
 
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center justify-center">
-          <h1 className="text-xl font-bold text-primary">ConstructTrack</h1>
+          <h1 className="text-xl font-bold text-primary">ZSEE Management</h1>
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -130,12 +128,10 @@ const AppLayout = () => {
     
     checkAuth();
     
-    // Add event listener for storage changes (for multi-tab support)
     window.addEventListener("storage", checkAuth);
     return () => window.removeEventListener("storage", checkAuth);
   }, [navigate]);
 
-  // If no user found and not already on login page, redirect to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
