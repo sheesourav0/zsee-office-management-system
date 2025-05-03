@@ -4,18 +4,18 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import AppLayout from "@/components/layout/AppLayout";
-import Login from "@/pages/Login";
+import MainLayout from "@/features/layout/components/MainLayout";
+import LoginPage from "@/features/auth/components/LoginPage";
 import Dashboard from "@/pages/Dashboard";
 import Projects from "@/pages/Projects";
 import DepartmentProjects from "@/pages/DepartmentProjects";
 import Payments from "@/pages/Payments";
 import Transportation from "@/pages/Transportation";
 import Vendors from "@/pages/Vendors";
-import Reports from "@/pages/Reports";
+import ReportsPage from "@/features/reports/pages/ReportsPage";
 import Settings from "@/pages/Settings";
-import UserManagement from "@/pages/UserManagement";
-import PaymentDetailView from "@/components/payments/PaymentDetailView";
+import UserManagementPage from "@/features/users/pages/UserManagementPage";
+import PaymentDetailView from "@/features/payments/components/PaymentDetailView";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,9 +28,9 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/" element={<AppLayout />}>
+            <Route path="/" element={<MainLayout />}>
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="projects" element={<Projects />} />
               <Route path="department-projects" element={<DepartmentProjects />} />
@@ -38,9 +38,9 @@ const App = () => {
               <Route path="payments/:id" element={<PaymentDetailView />} />
               <Route path="transportation" element={<Transportation />} />
               <Route path="vendors" element={<Vendors />} />
-              <Route path="reports" element={<Reports />} />
+              <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<Settings />} />
-              <Route path="user-management" element={<UserManagement />} />
+              <Route path="user-management" element={<UserManagementPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

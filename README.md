@@ -1,73 +1,67 @@
-# Welcome to your Lovable project
 
-## Project info
+# ZSEE Management System
 
-**URL**: https://lovable.dev/projects/d716bb4a-6e19-4bb8-a71e-3e89a6bcc549
+A comprehensive management system for projects, payments, transportation, and vendor management, built using React and following the Screaming Architecture pattern.
 
-## How can I edit this code?
+## Architecture
 
-There are several ways of editing your application.
+This project follows the **Screaming Architecture** pattern, which organizes code by business domains rather than technical concerns. 
 
-**Use Lovable**
+### Key features of our architecture:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d716bb4a-6e19-4bb8-a71e-3e89a6bcc549) and start prompting.
+- **Feature-First Organization**: Code is organized by business domains (features) rather than technical types.
+- **Self-Contained Features**: Each feature contains its own components, hooks, utils, and pages.
+- **Clear Boundaries**: Features have clear boundaries and focused responsibilities.
+- **Intuitive Navigation**: The codebase structure makes it easy to find where specific features are implemented.
 
-Changes made via Lovable will be committed automatically to this repo.
+### Directory Structure
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/         # Shared UI components (shadcn/ui)
+├── features/          # Business domains
+│   ├── auth/          # Authentication feature
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── utils/
+│   ├── dashboard/     # Dashboard feature
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── utils/
+│   ├── layout/        # Application layout
+│   │   └── components/
+│   ├── payments/      # Payments feature
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── utils/
+│   ├── projects/      # Projects feature
+│   │   └── components/
+│   ├── reports/       # Reports feature
+│   │   └── pages/
+│   ├── transportation/# Transportation feature
+│   │   └── components/
+│   └── users/         # User management feature
+│       ├── components/
+│       └── pages/
+├── hooks/             # Shared hooks
+├── lib/               # Shared utilities
+└── pages/             # Root pages (being migrated to feature folders)
 ```
 
-**Edit a file directly in GitHub**
+## Benefits of this Architecture
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Maintainability**: Easier to understand and maintain as the application grows
+- **Scalability**: New features can be added without affecting existing ones
+- **Team Collaboration**: Multiple teams can work on different features simultaneously
+- **Domain Focus**: Code organization reflects business requirements rather than technical concerns
+- **Clear Responsibility**: Each feature folder has a clear purpose and responsibility
 
-**Use GitHub Codespaces**
+## Tech Stack
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
 - Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/d716bb4a-6e19-4bb8-a71e-3e89a6bcc549) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- shadcn/ui components
+- React Router for navigation
+- React Query for data fetching
+- Zod for form validation
