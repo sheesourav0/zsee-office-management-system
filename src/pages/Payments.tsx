@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import PaymentFilterBar from "@/features/payments/components/PaymentFilterBar";
 import {
