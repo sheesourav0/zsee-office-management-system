@@ -32,7 +32,7 @@ const Login = () => {
       </div>
       <LoginForm />
       <p className="mt-8 text-sm text-muted-foreground">
-        Demo credentials: admin@example.com / password
+        Demo credentials: Admin / Admin
       </p>
     </div>
   );

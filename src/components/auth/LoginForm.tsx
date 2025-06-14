@@ -20,12 +20,12 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      // Simulate authentication
-      if (email === "admin@example.com" && password === "password") {
+      // Simulate authentication with Admin/Admin credentials
+      if (email === "Admin" && password === "Admin") {
         // Store user in localStorage
         localStorage.setItem("user", JSON.stringify({ 
           name: "Admin User", 
-          email, 
+          email: "admin@example.com", 
           role: "admin" 
         }));
         
@@ -36,7 +36,7 @@ const LoginForm = () => {
           navigate("/dashboard", { replace: true });
         }, 100);
       } else {
-        toast.error("Invalid credentials. Use admin@example.com / password");
+        toast.error("Invalid credentials. Use Admin / Admin");
         setIsLoading(false);
       }
     } catch (error) {
@@ -57,11 +57,11 @@ const LoginForm = () => {
       <form onSubmit={handleLogin}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
+            <label htmlFor="email" className="text-sm font-medium">Username</label>
             <Input
               id="email"
-              type="email"
-              placeholder="you@example.com"
+              type="text"
+              placeholder="Admin"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -73,7 +73,7 @@ const LoginForm = () => {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Admin"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
