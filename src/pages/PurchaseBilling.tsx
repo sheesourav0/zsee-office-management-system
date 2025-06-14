@@ -15,6 +15,8 @@ const PurchaseBilling = () => {
   const [activeTab, setActiveTab] = useState("po");
   const [isPODialogOpen, setIsPODialogOpen] = useState(false);
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const [poFilterTab, setPOFilterTab] = useState("all");
+  const [invoiceFilterTab, setInvoiceFilterTab] = useState("all");
 
   const handleAddPOSuccess = () => {
     setIsPODialogOpen(false);
@@ -61,8 +63,20 @@ const PurchaseBilling = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <POManagement />
+            <CardContent className="space-y-4">
+              <Tabs value={poFilterTab} onValueChange={setPOFilterTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-6">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="project">As per Project</TabsTrigger>
+                  <TabsTrigger value="department">Department</TabsTrigger>
+                  <TabsTrigger value="requested-by">Requested By</TabsTrigger>
+                  <TabsTrigger value="paid">Paid</TabsTrigger>
+                  <TabsTrigger value="pending">Pending</TabsTrigger>
+                </TabsList>
+                <div className="mt-4">
+                  <POManagement filterType={poFilterTab} />
+                </div>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
@@ -81,8 +95,20 @@ const PurchaseBilling = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <InvoiceManagement />
+            <CardContent className="space-y-4">
+              <Tabs value={invoiceFilterTab} onValueChange={setInvoiceFilterTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-6">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="project">As per Project</TabsTrigger>
+                  <TabsTrigger value="department">Department</TabsTrigger>
+                  <TabsTrigger value="requested-by">Requested By</TabsTrigger>
+                  <TabsTrigger value="paid">Paid</TabsTrigger>
+                  <TabsTrigger value="pending">Pending</TabsTrigger>
+                </TabsList>
+                <div className="mt-4">
+                  <InvoiceManagement filterType={invoiceFilterTab} />
+                </div>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
