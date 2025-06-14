@@ -17,6 +17,7 @@ import ReportsPage from "@/features/reports/pages/ReportsPage";
 import Settings from "@/pages/Settings";
 import UserManagementPage from "@/features/users/pages/UserManagementPage";
 import PaymentDetailView from "@/features/payments/components/PaymentDetailView";
+import TeamManagement from "@/pages/TeamManagement";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => {
               <Route path="purchase-billing" element={<PurchaseBilling />} />
               <Route path="transportation" element={<Transportation />} />
               <Route path="vendors" element={<Vendors />} />
+              <Route path="team-management" element={<TeamManagement />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<Settings />} />
               <Route path="user-management" element={<UserManagementPage />} />

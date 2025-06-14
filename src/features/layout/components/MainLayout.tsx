@@ -36,8 +36,10 @@ const MainLayout = () => {
     if (path === "/projects") return "Projects";
     if (path === "/department-projects") return "Department Projects";
     if (path === "/payments") return "Payments";
+    if (path === "/purchase-billing") return "Purchase & Billing";
     if (path === "/transportation") return "Transportation";
     if (path === "/vendors") return "Vendors";
+    if (path === "/team-management") return "Team Management";
     if (path === "/reports") return "Reports";
     if (path === "/settings") return "Settings";
     if (path === "/user-management") return "User Management";

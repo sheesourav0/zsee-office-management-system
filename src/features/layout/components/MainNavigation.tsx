@@ -14,7 +14,8 @@ import {
   LogOut,
   UserPlus,
   Layers,
-  Receipt
+  Receipt,
+  UsersRound
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,6 +41,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
     { icon: Receipt, label: "Purchase & Billing", path: "/purchase-billing" },
     { icon: Truck, label: "Transportation", path: "/transportation" },
     { icon: Users, label: "Vendors", path: "/vendors" },
+    { icon: UsersRound, label: "Team Management", path: "/team-management" },
     { icon: BarChart3, label: "Reports", path: "/reports" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
