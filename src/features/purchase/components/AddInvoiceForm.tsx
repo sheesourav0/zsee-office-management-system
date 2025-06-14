@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +20,27 @@ import { Download } from "lucide-react";
 import { generateInvoicePDF, downloadPDF, type InvoiceData } from "@/utils/pdfGenerator";
 
 const pos = [
-  { id: "1", number: "PO-2024-001", vendor: "Agmatic Technologies", amount: 250000 },
-  { id: "2", number: "PO-2024-002", vendor: "P.R.S ENTERPRISE", amount: 220000 },
-  { id: "3", number: "PO-2024-003", vendor: "BMP SYSTEMS", amount: 45000 }
+  { 
+    id: "1", 
+    number: "ZSEE/2025-06/JUNE/001", 
+    vendor: "Yati Infotech Solution Pvt. Ltd.", 
+    amount: 106578,
+    project: "Amni WTP"
+  },
+  { 
+    id: "2", 
+    number: "ZSEE/2025-06/JUNE/002", 
+    vendor: "P.R.S ENTERPRISE", 
+    amount: 220000,
+    project: "YACHULI"
+  },
+  { 
+    id: "3", 
+    number: "ZSEE/2025-06/JUNE/003", 
+    vendor: "BMP SYSTEMS", 
+    amount: 45000,
+    project: "Piyong IoT"
+  }
 ];
 
 const formSchema = z.object({
@@ -59,7 +78,9 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         baseAmount: 0,
         discountAmount: 0,
         taxableAmount: 0,
-        taxAmount: 0,
+        cgstAmount: 0,
+        sgstAmount: 0,
+        igstAmount: 0,
         totalAmount: 0
       };
     }
@@ -70,14 +91,22 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     
     const discountAmount = (baseAmount * discount) / 100;
     const taxableAmount = baseAmount - discountAmount;
-    const taxAmount = (taxableAmount * taxRate) / 100;
+    
+    // Split GST into CGST and SGST for intrastate, or use IGST for interstate
+    const cgstRate = taxRate / 2;
+    const sgstRate = taxRate / 2;
+    const cgstAmount = (taxableAmount * cgstRate) / 100;
+    const sgstAmount = (taxableAmount * sgstRate) / 100;
+    const totalTax = cgstAmount + sgstAmount;
     
     return {
       baseAmount,
       discountAmount,
       taxableAmount,
-      taxAmount,
-      totalAmount: taxableAmount + taxAmount
+      cgstAmount,
+      sgstAmount,
+      igstAmount: 0, // Use for interstate transactions
+      totalAmount: taxableAmount + totalTax
     };
   };
 
@@ -91,21 +120,28 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Auto-generate Invoice number
-      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+      // Auto-generate Invoice number with proper format
+      const currentDate = new Date();
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const year = currentDate.getFullYear();
+      const invoiceNumber = `001/${day}/${month}/${year}`;
       
       if (selectedPO) {
         const invoiceData: InvoiceData = {
           invoiceNumber,
           poNumber: selectedPO.number,
           vendor: selectedPO.vendor,
-          invoiceDate: data.invoiceDate.toLocaleDateString(),
-          dueDate: data.dueDate.toLocaleDateString(),
+          invoiceDate: data.invoiceDate.toLocaleDateString('en-GB'),
+          dueDate: data.dueDate.toLocaleDateString('en-GB'),
           baseAmount: selectedPO.amount,
           taxRate: parseFloat(data.taxRate),
           discount: parseFloat(data.discount),
-          taxAmount: invoiceCalculation.taxAmount,
+          taxAmount: invoiceCalculation.cgstAmount + invoiceCalculation.sgstAmount,
           totalAmount: invoiceCalculation.totalAmount,
+          cgstAmount: invoiceCalculation.cgstAmount,
+          sgstAmount: invoiceCalculation.sgstAmount,
+          igstAmount: invoiceCalculation.igstAmount,
         };
         
         setLastCreatedInvoice(invoiceData);
@@ -130,7 +166,7 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     
     try {
       const pdf = await generateInvoicePDF(lastCreatedInvoice);
-      downloadPDF(pdf, `${lastCreatedInvoice.invoiceNumber}.pdf`);
+      downloadPDF(pdf, `${lastCreatedInvoice.invoiceNumber.replace(/\//g, '-')}.pdf`);
       toast.success("Invoice PDF downloaded successfully");
     } catch (error) {
       toast.error("Failed to generate PDF");
@@ -156,7 +192,7 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 <SelectContent>
                   {pos.map((po) => (
                     <SelectItem key={po.id} value={po.id}>
-                      {po.number} - {po.vendor} (₹{po.amount.toLocaleString()})
+                      {po.number} - {po.vendor} - {po.project} (₹{po.amount.toLocaleString()})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -177,6 +213,14 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <div>
                 <span className="text-muted-foreground">Vendor:</span>
                 <p className="font-medium">{selectedPO.vendor}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Project:</span>
+                <p className="font-medium">{selectedPO.project}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Amount:</span>
+                <p className="font-medium">₹{selectedPO.amount.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -220,9 +264,9 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             name="taxRate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tax Rate (%)</FormLabel>
+                <FormLabel>GST Rate (%)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter tax rate" {...field} />
+                  <Input placeholder="Enter GST rate" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -252,17 +296,23 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 <span>Base Amount:</span>
                 <span>₹{invoiceCalculation.baseAmount.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Discount:</span>
-                <span>-₹{invoiceCalculation.discountAmount.toLocaleString()}</span>
-              </div>
+              {invoiceCalculation.discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span>Discount:</span>
+                  <span>-₹{invoiceCalculation.discountAmount.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Taxable Amount:</span>
                 <span>₹{invoiceCalculation.taxableAmount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>Tax Amount:</span>
-                <span>₹{invoiceCalculation.taxAmount.toLocaleString()}</span>
+                <span>CGST ({parseFloat(form.watch("taxRate") || "18") / 2}%):</span>
+                <span>₹{invoiceCalculation.cgstAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>SGST ({parseFloat(form.watch("taxRate") || "18") / 2}%):</span>
+                <span>₹{invoiceCalculation.sgstAmount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between font-medium border-t pt-2">
                 <span>Total Amount:</span>

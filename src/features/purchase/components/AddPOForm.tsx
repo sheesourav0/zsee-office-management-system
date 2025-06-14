@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +29,11 @@ const projects = [
 ];
 
 const vendors = [
-  { id: "1", name: "King Longkai" },
-  { id: "2", name: "BMP SYSTEMS" },
-  { id: "3", name: "P.R.S ENTERPRISE" },
-  { id: "4", name: "Agmatic Technologies" },
-  { id: "5", name: "DIVYANSHU AUTOMATION" }
+  { id: "1", name: "Yati Infotech Solution Pvt. Ltd.", gst: "09AABCY2902M1Z3" },
+  { id: "2", name: "BMP SYSTEMS", gst: "12AABCZ1684M1Z2" },
+  { id: "3", name: "P.R.S ENTERPRISE", gst: "18AABCP1234M1Z5" },
+  { id: "4", name: "Agmatic Technologies", gst: "27AABCA1234M1Z6" },
+  { id: "5", name: "DIVYANSHU AUTOMATION", gst: "06AABCD1234M1Z7" }
 ];
 
 const formSchema = z.object({
@@ -46,6 +47,7 @@ const formSchema = z.object({
   deliveryDate: z.date({ required_error: "Delivery date is required" }),
   terms: z.string().optional(),
   specialInstructions: z.string().optional(),
+  gstRate: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -62,8 +64,9 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       description: "",
       quantity: "",
       unitPrice: "",
-      terms: "Net 30 days",
+      terms: "100% payment against PI prior to dispatch",
       specialInstructions: "",
+      gstRate: "18",
     },
   });
 
@@ -75,24 +78,31 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Auto-generate PO number
-      const poNumber = `PO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+      // Auto-generate PO number with proper format
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const randomNum = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+      const poNumber = `ZSEE/${year}-${month}/JUNE/${randomNum}`;
       
       const selectedProject = projects.find(p => p.id === data.projectId);
       const selectedVendor = vendors.find(v => v.id === data.vendorId);
       
       const poData: POData = {
         poNumber,
-        date: new Date().toLocaleDateString(),
+        date: new Date().toLocaleDateString('en-GB'),
         project: selectedProject?.name || "",
         vendor: selectedVendor?.name || "",
         description: data.description,
         quantity: parseFloat(data.quantity),
         unitPrice: parseFloat(data.unitPrice),
         totalAmount: parseFloat(data.quantity) * parseFloat(data.unitPrice),
-        deliveryDate: data.deliveryDate.toLocaleDateString(),
-        terms: data.terms || "Net 30 days",
+        deliveryDate: data.deliveryDate.toLocaleDateString('en-GB'),
+        terms: data.terms || "100% payment against PI prior to dispatch",
         specialInstructions: data.specialInstructions,
+        gstRate: parseFloat(data.gstRate || "18"),
+        cgstRate: parseFloat(data.gstRate || "18") / 2,
+        sgstRate: parseFloat(data.gstRate || "18") / 2,
       };
       
       setLastCreatedPO(poData);
@@ -116,7 +126,7 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     
     try {
       const pdf = await generatePOPDF(lastCreatedPO);
-      downloadPDF(pdf, `${lastCreatedPO.poNumber}.pdf`);
+      downloadPDF(pdf, `${lastCreatedPO.poNumber.replace(/\//g, '-')}.pdf`);
       toast.success("PO PDF downloaded successfully");
     } catch (error) {
       toast.error("Failed to generate PDF");
@@ -127,8 +137,17 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const calculateTotal = () => {
     const quantity = parseFloat(form.watch("quantity") || "0");
     const unitPrice = parseFloat(form.watch("unitPrice") || "0");
-    return quantity * unitPrice;
+    const gstRate = parseFloat(form.watch("gstRate") || "18");
+    const baseAmount = quantity * unitPrice;
+    const gstAmount = (baseAmount * gstRate) / 100;
+    return {
+      baseAmount,
+      gstAmount,
+      totalAmount: baseAmount + gstAmount
+    };
   };
+
+  const totals = calculateTotal();
 
   return (
     <Form {...form}>
@@ -190,11 +209,11 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Item Description</FormLabel>
+              <FormLabel>Particulars of Work</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Describe the items to be purchased" 
-                  className="resize-none" 
+                  placeholder="Describe the items/work to be purchased" 
+                  className="resize-none min-h-[80px]" 
                   {...field} 
                 />
               </FormControl>
@@ -203,7 +222,7 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           )}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <FormField
             control={form.control}
             name="quantity"
@@ -223,7 +242,7 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             name="unitPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unit Price (₹)</FormLabel>
+                <FormLabel>Rate (₹)</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter unit price" {...field} />
                 </FormControl>
@@ -231,14 +250,48 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="gstRate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>GST Rate (%)</FormLabel>
+                <FormControl>
+                  <Input placeholder="18" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
           <div className="flex flex-col">
-            <label className="text-sm font-medium">Total Amount</label>
+            <label className="text-sm font-medium mb-2">Total Amount</label>
             <div className="h-10 px-3 py-2 border rounded-md bg-gray-50 flex items-center">
-              ₹{calculateTotal().toLocaleString()}
+              ₹{totals.totalAmount.toLocaleString()}
             </div>
           </div>
         </div>
+
+        {totals.baseAmount > 0 && (
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium mb-2">Amount Breakdown</h4>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span>Base Amount:</span>
+                <span>₹{totals.baseAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>GST ({form.watch("gstRate") || 18}%):</span>
+                <span>₹{totals.gstAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-medium border-t pt-1">
+                <span>Total Amount:</span>
+                <span>₹{totals.totalAmount.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        )}
         
         <FormField
           control={form.control}
@@ -262,7 +315,7 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             <FormItem>
               <FormLabel>Payment Terms</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Net 30 days" {...field} />
+                <Input placeholder="e.g., 100% payment against PI prior to dispatch" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -277,7 +330,7 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <FormLabel>Special Instructions</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Any special handling or delivery instructions" 
+                  placeholder="Any special handling, delivery instructions, or material requirements" 
                   className="resize-none" 
                   {...field} 
                 />
