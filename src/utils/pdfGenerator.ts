@@ -7,229 +7,347 @@ export interface POData {
   date: string;
   project: string;
   vendor: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  totalAmount: number;
+  vendorDetails: {
+    name: string;
+    address: string;
+    gstin: string;
+    email?: string;
+    phone?: string;
+  };
+  items: Array<{
+    slNo: number;
+    description: string;
+    quantity: number;
+    unit: string;
+    gstRate: number;
+    rate: number;
+    amount: number;
+  }>;
   deliveryDate: string;
   terms: string;
   specialInstructions?: string;
-  gstRate?: number;
-  cgstRate?: number;
-  sgstRate?: number;
-  igstRate?: number;
+  deliveryAddress?: string;
+  contactDetails?: string;
+  dispatchPeriod?: string;
+  transportationCharges?: string;
+  priceBasis?: string;
+  paymentTerms?: string;
+  materialRequiredFor?: string;
+  requisitionedBy?: string;
 }
 
 export interface InvoiceData {
   invoiceNumber: string;
-  poNumber: string;
-  vendor: string;
   invoiceDate: string;
-  dueDate: string;
-  baseAmount: number;
-  taxRate: number;
-  discount: number;
-  taxAmount: number;
-  totalAmount: number;
-  cgstAmount?: number;
-  sgstAmount?: number;
-  igstAmount?: number;
+  pan: string;
+  gstin: string;
+  state: string;
+  code: string;
+  billedToParty: {
+    name: string;
+    address: string;
+    gstin: string;
+    state: string;
+    code: string;
+  };
+  items: Array<{
+    slNo: number;
+    description: string;
+    quantity: number;
+    rate: number;
+    sgstRate: number;
+    sgstAmount: number;
+    cgstRate: number;
+    cgstAmount: number;
+    total: number;
+  }>;
+  totalInvoiceAmount: number;
+  totalInWords: string;
+  bankDetails: {
+    bankName: string;
+    accountNumber: string;
+    branchName: string;
+    ifscCode: string;
+  };
 }
 
 export const generatePOPDF = async (data: POData) => {
-  const pdf = new jsPDF();
+  const pdf = new jsPDF('p', 'mm', 'a4');
   
-  // Company Header with Logo placeholder
-  pdf.setFontSize(18);
+  // Add ZSEE logo placeholder in top right
+  pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('ZSEE SMART SOLUTION INDIA PVT LTD', 20, 25);
+  pdf.text('ZSEE', 180, 20);
   
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('CHETA VILLAGE-I, CHETA, Roing,', 20, 35);
-  pdf.text('Lower Dibang Valley, Arunachal Pradesh, 792110', 20, 42);
-  pdf.text('GSTIN: 12AABCZ1684M1Z2', 20, 49);
-  
-  // Purchase Order Title
+  // Purchase Order Header
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Purchase Order', 105, 70, { align: 'center' });
+  pdf.text('Purchase Order', 105, 35, { align: 'center' });
   
-  // PO Details Box
-  pdf.rect(20, 80, 170, 25);
+  // Create table structure for seller details and PO info
+  let yPos = 50;
+  
+  // Seller Details Section
+  pdf.rect(15, yPos, 90, 60);
   pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`PO No.: ${data.poNumber}`, 25, 88);
-  pdf.text(`Date: ${data.date}`, 25, 95);
-  pdf.text(`Project: ${data.project}`, 110, 88);
-  pdf.text(`Delivery Date: ${data.deliveryDate}`, 110, 95);
-  
-  // Vendor Details
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Vendor Details:', 20, 120);
+  pdf.text('Seller Details', 20, yPos + 8);
+  
   pdf.setFont('helvetica', 'normal');
-  pdf.text(data.vendor, 20, 130);
-  
-  // Items Table Header
-  const tableTop = 150;
-  pdf.rect(20, tableTop, 170, 15);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Sl No.', 25, tableTop + 10);
-  pdf.text('Particulars of Work', 45, tableTop + 10);
-  pdf.text('Quantity', 110, tableTop + 10);
-  pdf.text('Unit', 130, tableTop + 10);
-  pdf.text('Rate (Rs.)', 145, tableTop + 10);
-  pdf.text('Amount', 170, tableTop + 10);
-  
-  // Items Table Content
-  const itemTop = tableTop + 15;
-  pdf.rect(20, itemTop, 170, 20);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('1', 25, itemTop + 10);
-  
-  // Split long descriptions
-  const maxWidth = 60;
-  const lines = pdf.splitTextToSize(data.description, maxWidth);
-  let yPos = itemTop + 8;
-  lines.forEach((line: string) => {
-    pdf.text(line, 45, yPos);
-    yPos += 4;
+  pdf.text(data.vendorDetails.name, 20, yPos + 18);
+  const addressLines = pdf.splitTextToSize(data.vendorDetails.address, 80);
+  let addressY = yPos + 25;
+  addressLines.forEach((line: string) => {
+    pdf.text(line, 20, addressY);
+    addressY += 5;
   });
   
-  pdf.text(data.quantity.toString(), 110, itemTop + 10);
-  pdf.text('Pcs', 130, itemTop + 10);
-  pdf.text(`₹${data.unitPrice.toLocaleString()}`, 145, itemTop + 10);
-  pdf.text(`₹${data.totalAmount.toLocaleString()}`, 170, itemTop + 10);
-  
-  // Tax Calculations
-  const taxTop = itemTop + 25;
-  const gstRate = data.gstRate || 18;
-  const cgstRate = data.cgstRate || 9;
-  const sgstRate = data.sgstRate || 9;
-  
-  const cgstAmount = (data.totalAmount * cgstRate) / 100;
-  const sgstAmount = (data.totalAmount * sgstRate) / 100;
-  const totalWithTax = data.totalAmount + cgstAmount + sgstAmount;
-  
-  pdf.text(`Sub Total: ₹${data.totalAmount.toLocaleString()}`, 140, taxTop);
-  pdf.text(`CGST (${cgstRate}%): ₹${cgstAmount.toLocaleString()}`, 140, taxTop + 8);
-  pdf.text(`SGST (${sgstRate}%): ₹${sgstAmount.toLocaleString()}`, 140, taxTop + 16);
-  
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(`Total Amount: ₹${totalWithTax.toLocaleString()}`, 140, taxTop + 28);
-  
-  // Terms & Conditions
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Terms & Conditions:', 20, taxTop + 45);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Payment Terms: ${data.terms}`, 20, taxTop + 55);
-  
-  if (data.specialInstructions) {
-    pdf.text('Special Instructions:', 20, taxTop + 65);
-    pdf.text(data.specialInstructions, 20, taxTop + 75);
+  pdf.text(`GSTIN: ${data.vendorDetails.gstin}`, 20, addressY + 5);
+  if (data.vendorDetails.email) {
+    pdf.text(`Email: ${data.vendorDetails.email}`, 20, addressY + 10);
+  }
+  if (data.vendorDetails.phone) {
+    pdf.text(`PH No. ${data.vendorDetails.phone}`, 20, addressY + 15);
   }
   
+  // PO Details Section
+  pdf.rect(110, yPos, 85, 60);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('PO No.', 115, yPos + 8);
+  pdf.text('Date', 115, yPos + 18);
+  pdf.text('Qtn No. & Date', 115, yPos + 28);
+  pdf.text('GSTIN', 115, yPos + 38);
+  
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(data.poNumber, 150, yPos + 8);
+  pdf.text(data.date, 150, yPos + 18);
+  pdf.text('Nil dtd. 08.05.2025', 150, yPos + 28);
+  pdf.text('12AABCZ1684M1Z2', 150, yPos + 38);
+  
+  yPos += 70;
+  
+  // Items Table Header
+  pdf.rect(15, yPos, 180, 15);
+  pdf.setFillColor(200, 220, 255);
+  pdf.rect(15, yPos, 180, 15, 'F');
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Sl No.', 20, yPos + 10);
+  pdf.text('Particulars of Work', 35, yPos + 10);
+  pdf.text('Quantity', 90, yPos + 10);
+  pdf.text('Unit', 110, yPos + 10);
+  pdf.text('GST Rate', 125, yPos + 10);
+  pdf.text('Rate (Rs.)', 145, yPos + 10);
+  pdf.text('Amount', 170, yPos + 10);
+  
+  yPos += 15;
+  
+  // Items
+  data.items.forEach((item, index) => {
+    const itemHeight = 20;
+    pdf.rect(15, yPos, 180, itemHeight);
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(item.slNo.toString(), 20, yPos + 12);
+    
+    const descLines = pdf.splitTextToSize(item.description, 50);
+    let descY = yPos + 8;
+    descLines.forEach((line: string) => {
+      pdf.text(line, 35, descY);
+      descY += 4;
+    });
+    
+    pdf.text(item.quantity.toString(), 90, yPos + 12);
+    pdf.text(item.unit, 110, yPos + 12);
+    pdf.text(`${item.gstRate}%`, 125, yPos + 12);
+    pdf.text(`${item.rate.toFixed(2)}`, 145, yPos + 12);
+    pdf.text(`${item.amount.toLocaleString()}`, 170, yPos + 12);
+    
+    yPos += itemHeight;
+  });
+  
+  // Subtotal and Tax Calculations
+  const subtotal = data.items.reduce((sum, item) => sum + item.amount, 0);
+  const totalGst = data.items.reduce((sum, item) => sum + (item.amount * item.gstRate / 100), 0);
+  const grandTotal = subtotal + totalGst;
+  
+  yPos += 10;
+  pdf.text(`Sub Total (i.i. & iv): ${subtotal.toLocaleString()}`, 120, yPos);
+  yPos += 8;
+  pdf.text(`CGST 9%: -`, 120, yPos);
+  yPos += 8;
+  pdf.text(`SGST 9%: -`, 120, yPos);
+  yPos += 8;
+  pdf.text(`IGST 18%: ${totalGst.toLocaleString()}`, 120, yPos);
+  yPos += 8;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`Total Amount (Rs.): ${grandTotal.toLocaleString()}`, 120, yPos);
+  
+  // Terms & Conditions
+  yPos += 20;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Terms & Conditions:', 15, yPos);
+  
+  yPos += 10;
+  pdf.setFont('helvetica', 'normal');
+  const termsData = [
+    ['Delivery Address', data.deliveryAddress || ''],
+    ['Contact Details', data.contactDetails || ''],
+    ['Dispatch Period', data.dispatchPeriod || 'Immediate'],
+    ['Transportation Charges', data.transportationCharges || 'Extra as Actual'],
+    ['Price Basis', data.priceBasis || 'Ex-works'],
+    ['Payment Terms', data.paymentTerms || '100% payment against PI prior to dispatch'],
+    ['Special Instruction', data.specialInstructions || 'N/A'],
+    ['Material Required For', data.materialRequiredFor || ''],
+    ['Requisitioned by', data.requisitionedBy || '']
+  ];
+  
+  termsData.forEach(([label, value]) => {
+    if (value) {
+      pdf.text(`${label}: ${value}`, 15, yPos);
+      yPos += 8;
+    }
+  });
+  
   // Signature
-  pdf.text('Authorized Signatory', 20, 270);
-  pdf.text('ZSEE Smart Solution India Pvt Ltd', 20, 280);
+  yPos += 20;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Authorized Signatory', 15, yPos);
+  pdf.text('ZSEE Smart Solution India Pvt Ltd', 15, yPos + 10);
+  
+  // Footer
+  pdf.setFontSize(8);
+  pdf.text('ZSEE SMART SOLUTION INDIA PVT LTD', 105, 280, { align: 'center' });
+  pdf.text('CIN : U74999KL2018PTC051862  PAN & IEC: AABCZ1684M  GST:12AABCZ1684M1Z2', 105, 285, { align: 'center' });
+  pdf.text('Arunachal Prdesh Office: CHETA VILLAGE-I, CHETA, Roing, Lower Dibang Valley, Arunachal Pradesh, 792110', 105, 290, { align: 'center' });
   
   return pdf;
 };
 
 export const generateInvoicePDF = async (data: InvoiceData) => {
-  const pdf = new jsPDF();
+  const pdf = new jsPDF('p', 'mm', 'a4');
   
-  // Company Header
-  pdf.setFontSize(18);
+  // Add ZSEE logo placeholder in top right
+  pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('ZSEE SMART SOLUTION INDIA PVT LTD', 20, 25);
+  pdf.text('ZSEE', 180, 20);
   
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('CHETA VILLAGE-I, CHETA, Roing,', 20, 35);
-  pdf.text('Lower Dibang Valley, Arunachal Pradesh, 792110', 20, 42);
-  pdf.text('PAN: AABCZ1684M | GSTIN: 12AABCZ1684M1Z2', 20, 49);
-  
-  // Invoice Title
+  // Tax Invoice Header
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Tax Invoice', 105, 70, { align: 'center' });
+  pdf.text('Tax Invoice', 105, 35, { align: 'center' });
   
-  // Invoice Details Table
-  pdf.rect(20, 80, 85, 40);
-  pdf.rect(105, 80, 85, 40);
+  // Invoice details table
+  let yPos = 50;
   
+  // Left side - Invoice details
+  pdf.rect(15, yPos, 90, 60);
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(`Invoice No: ${data.invoiceNumber}`, 25, 90);
-  pdf.text(`Invoice Date: ${data.invoiceDate}`, 25, 98);
-  pdf.text(`PO Reference: ${data.poNumber}`, 25, 106);
-  pdf.text(`Due Date: ${data.dueDate}`, 25, 114);
+  pdf.text(`Invoice No: ${data.invoiceNumber}`, 20, yPos + 10);
+  pdf.text(`Invoice Date: ${data.invoiceDate}`, 20, yPos + 20);
+  pdf.text(`PAN: ${data.pan}`, 20, yPos + 30);
+  pdf.text(`GSTIN: ${data.gstin}`, 20, yPos + 40);
+  pdf.text(`State: ${data.state}`, 20, yPos + 50);
+  pdf.text(`Code: ${data.code}`, 20, yPos + 60);
+  
+  // Right side - Billed to Party
+  pdf.rect(110, yPos, 85, 60);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Billed to Party:', 115, yPos + 10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Name: ${data.billedToParty.name}`, 115, yPos + 20);
+  const addressLines = pdf.splitTextToSize(data.billedToParty.address, 70);
+  let addressY = yPos + 30;
+  addressLines.forEach((line: string) => {
+    pdf.text(`Address: ${line}`, 115, addressY);
+    addressY += 5;
+  });
+  pdf.text(`GSTIN: ${data.billedToParty.gstin}`, 115, addressY + 5);
+  pdf.text(`State: ${data.billedToParty.state}`, 115, addressY + 15);
+  pdf.text(`Code: ${data.billedToParty.code}`, 115, addressY + 25);
+  
+  yPos += 70;
+  
+  // Items Table Header
+  pdf.rect(15, yPos, 180, 15);
+  pdf.setFillColor(200, 220, 255);
+  pdf.rect(15, yPos, 180, 15, 'F');
   
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Billed to Party:', 110, 90);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(data.vendor, 110, 98);
-  pdf.text('Address: [Vendor Address]', 110, 106);
-  pdf.text('GSTIN: [Vendor GSTIN]', 110, 114);
+  pdf.text('Sl. No.', 20, yPos + 10);
+  pdf.text('Product Description', 35, yPos + 10);
+  pdf.text('Qnty.', 80, yPos + 10);
+  pdf.text('Rate', 95, yPos + 10);
+  pdf.text('SGST', 115, yPos + 10);
+  pdf.text('CGST', 140, yPos + 10);
+  pdf.text('Total', 170, yPos + 10);
   
-  // Items Table
-  const tableTop = 135;
-  pdf.rect(20, tableTop, 170, 15);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Sl.', 25, tableTop + 10);
-  pdf.text('Product Description', 40, tableTop + 10);
-  pdf.text('Qty.', 100, tableTop + 10);
-  pdf.text('Rate', 115, tableTop + 10);
-  pdf.text('SGST', 130, tableTop + 10);
-  pdf.text('CGST', 145, tableTop + 10);
-  pdf.text('Total', 170, tableTop + 10);
+  // Sub headers for SGST and CGST
+  pdf.setFontSize(8);
+  pdf.text('Rate | Amount', 110, yPos + 5);
+  pdf.text('Rate | Amount', 135, yPos + 5);
   
-  // Item row
-  const itemTop = tableTop + 15;
-  pdf.rect(20, itemTop, 170, 20);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('1', 25, itemTop + 10);
-  pdf.text('Service/Product Description', 40, itemTop + 10);
-  pdf.text('1', 100, itemTop + 10);
-  pdf.text(`₹${data.baseAmount.toLocaleString()}`, 115, itemTop + 10);
+  yPos += 15;
   
-  // Calculate tax amounts
-  const cgstAmount = data.cgstAmount || (data.baseAmount * (data.taxRate / 2)) / 100;
-  const sgstAmount = data.sgstAmount || (data.baseAmount * (data.taxRate / 2)) / 100;
-  
-  pdf.text(`₹${sgstAmount.toLocaleString()}`, 130, itemTop + 10);
-  pdf.text(`₹${cgstAmount.toLocaleString()}`, 145, itemTop + 10);
-  pdf.text(`₹${data.totalAmount.toLocaleString()}`, 170, itemTop + 10);
+  // Items
+  data.items.forEach((item) => {
+    const itemHeight = 40;
+    pdf.rect(15, yPos, 180, itemHeight);
+    
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(item.slNo.toString(), 20, yPos + 15);
+    
+    const descLines = pdf.splitTextToSize(item.description, 40);
+    let descY = yPos + 10;
+    descLines.forEach((line: string) => {
+      pdf.text(line, 35, descY);
+      descY += 4;
+    });
+    
+    pdf.text(`${item.quantity} lot`, 80, yPos + 15);
+    pdf.text(item.rate.toLocaleString(), 95, yPos + 15);
+    pdf.text(`${item.sgstRate}%`, 110, yPos + 12);
+    pdf.text(item.sgstAmount.toLocaleString(), 110, yPos + 20);
+    pdf.text(`${item.cgstRate}%`, 135, yPos + 12);
+    pdf.text(item.cgstAmount.toLocaleString(), 135, yPos + 20);
+    pdf.text(item.total.toLocaleString(), 170, yPos + 15);
+    
+    yPos += itemHeight;
+  });
   
   // Total section
-  const totalTop = itemTop + 30;
+  yPos += 10;
   pdf.setFont('helvetica', 'bold');
-  pdf.text(`Total Invoice Amount: ₹${data.totalAmount.toLocaleString()}`, 20, totalTop);
-  
-  // Amount in words (placeholder)
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('Total Invoice Amount (in words): [Amount in Words]', 20, totalTop + 10);
+  pdf.text(`Total Invoice Amount (in words): ${data.totalInWords}`, 20, yPos);
+  pdf.text(`Total amount after Tax: ${data.totalInvoiceAmount.toLocaleString()}`, 140, yPos);
   
   // Bank Details
+  yPos += 20;
   pdf.setFont('helvetica', 'bold');
-  pdf.text("Company's Bank Details", 20, totalTop + 25);
+  pdf.text("Company's Bank Details", 20, yPos);
+  
+  yPos += 10;
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Bank Name: HDFC Bank', 20, totalTop + 35);
-  pdf.text('Bank Account Number: 50200078568850', 20, totalTop + 43);
-  pdf.text('Branch Name: Chandmari', 20, totalTop + 51);
-  pdf.text('IFS Code: HDFC0000631', 20, totalTop + 59);
+  pdf.text(`Bank Name: ${data.bankDetails.bankName}`, 20, yPos);
+  pdf.text(`Bank Account Number: ${data.bankDetails.accountNumber}`, 20, yPos + 8);
+  pdf.text(`Branch Name: ${data.bankDetails.branchName}`, 20, yPos + 16);
+  pdf.text(`IFS Code: ${data.bankDetails.ifscCode}`, 20, yPos + 24);
   
   // Declaration
+  yPos += 40;
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Declaration', 20, totalTop + 75);
+  pdf.text('Declaration', 20, yPos);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('We declare that this invoice shows the actual price of the goods described', 20, totalTop + 85);
-  pdf.text('and that all particulars are true and correct.', 20, totalTop + 93);
+  pdf.text('We declare that this invoice shows the actual price of the goods described', 20, yPos + 10);
+  pdf.text('and that all particulars are true and correct.', 20, yPos + 18);
   
-  // Signature
-  pdf.text('Authorised Signatory', 20, 270);
-  pdf.text('For, ZSEE Smart Solution India Private Limited', 20, 280);
+  // Signature section
+  yPos += 40;
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Authorised Signatory', 20, yPos);
+  pdf.text('For, ZSEE Smart Solution India Private Limited', 20, yPos + 10);
   
   return pdf;
 };
