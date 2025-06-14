@@ -5,7 +5,7 @@ import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { vendorSchema, type VendorFormValues } from "./schemas/vendorSchema";
+import { vendorFormSchema, type VendorFormValues } from "./schemas/vendorSchema";
 import BasicInfoSection from "./BasicInfoSection";
 import AddressSection from "./AddressSection";
 import BankDetailsSection from "./BankDetailsSection";
@@ -18,18 +18,19 @@ const AddVendorForm = ({ onSuccess }: AddVendorFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<VendorFormValues>({
-    resolver: zodResolver(vendorSchema),
+    resolver: zodResolver(vendorFormSchema),
     defaultValues: {
-      companyName: "",
+      name: "",
       contactPerson: "",
       email: "",
       phone: "",
-      gstNumber: "",
-      panNumber: "",
+      gst: "",
       address: "",
       city: "",
       state: "",
       pincode: "",
+      category: "",
+      description: "",
       accountHolderName: "",
       bankAccountNumber: "",
       ifscCode: "",
