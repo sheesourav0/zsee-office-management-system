@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import Projects from "@/pages/Projects";
 import DepartmentProjects from "@/pages/DepartmentProjects";
 import Payments from "@/pages/Payments";
+import PurchaseBilling from "@/pages/PurchaseBilling";
 import Transportation from "@/pages/Transportation";
 import Vendors from "@/pages/Vendors";
 import ReportsPage from "@/features/reports/pages/ReportsPage";
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="department-projects" element={<DepartmentProjects />} />
               <Route path="payments" element={<Payments />} />
               <Route path="payments/:id" element={<PaymentDetailView />} />
+              <Route path="purchase-billing" element={<PurchaseBilling />} />
               <Route path="transportation" element={<Transportation />} />
               <Route path="vendors" element={<Vendors />} />
               <Route path="reports" element={<ReportsPage />} />

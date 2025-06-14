@@ -13,7 +13,8 @@ import {
   Settings, 
   LogOut,
   UserPlus,
-  Layers
+  Layers,
+  Receipt
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
     { icon: Folder, label: "Projects", path: "/projects" },
     { icon: Layers, label: "Department Projects", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
+    { icon: Receipt, label: "Purchase & Billing", path: "/purchase-billing" },
     { icon: Truck, label: "Transportation", path: "/transportation" },
     { icon: Users, label: "Vendors", path: "/vendors" },
     { icon: BarChart3, label: "Reports", path: "/reports" },
