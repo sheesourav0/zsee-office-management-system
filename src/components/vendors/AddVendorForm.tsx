@@ -29,6 +29,11 @@ const formSchema = z.object({
   category: z.string({ required_error: "Please select a category" }),
   description: z.string().optional(),
   gst: z.string().min(15, { message: "GST number must be 15 characters" }).max(15),
+  bankAccountNumber: z.string().min(9, { message: "Account number must be at least 9 characters" }),
+  ifscCode: z.string().min(11, { message: "IFSC code must be 11 characters" }).max(11),
+  bankName: z.string().min(2, { message: "Bank name must be at least 2 characters" }),
+  branchName: z.string().min(2, { message: "Branch name must be at least 2 characters" }),
+  accountHolderName: z.string().min(3, { message: "Account holder name must be at least 3 characters" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -50,6 +55,11 @@ const AddVendorForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       category: "",
       description: "",
       gst: "",
+      bankAccountNumber: "",
+      ifscCode: "",
+      bankName: "",
+      branchName: "",
+      accountHolderName: "",
     },
   });
 
@@ -235,6 +245,87 @@ const AddVendorForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Bank Details Section */}
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-medium mb-4">Bank Details</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="accountHolderName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Account Holder Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter account holder name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="bankAccountNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bank Account Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter bank account number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <FormField
+              control={form.control}
+              name="ifscCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>IFSC Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter IFSC code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="bankName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bank Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter bank name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="mt-6">
+            <FormField
+              control={form.control}
+              name="branchName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Branch Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter branch name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         
         <FormField
