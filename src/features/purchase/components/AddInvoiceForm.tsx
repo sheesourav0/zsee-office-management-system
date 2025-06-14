@@ -52,7 +52,15 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const selectedPO = pos.find(po => po.id === form.watch("poId"));
 
   const calculateInvoiceTotal = () => {
-    if (!selectedPO) return 0;
+    if (!selectedPO) {
+      return {
+        baseAmount: 0,
+        discountAmount: 0,
+        taxableAmount: 0,
+        taxAmount: 0,
+        totalAmount: 0
+      };
+    }
     
     const baseAmount = selectedPO.amount;
     const taxRate = parseFloat(form.watch("taxRate") || "0");
