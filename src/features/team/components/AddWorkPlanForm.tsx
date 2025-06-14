@@ -107,7 +107,7 @@ const AddWorkPlanForm = ({ onSuccess }: AddWorkPlanFormProps) => {
 
       <div className="space-y-2">
         <Label htmlFor="priority">Priority *</Label>
-        <Select value={formData.priority} onValueChange={(value: "low" | "medium" | "high") => setFormData({ ...form Data, priority: value })}>
+        <Select value={formData.priority} onValueChange={(value: "low" | "medium" | "high") => setFormData({ ...formData, priority: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select priority" />
           </SelectTrigger>
