@@ -1,7 +1,7 @@
 
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
 import { VendorFormValues } from "./schemas/vendorSchema";
@@ -11,8 +11,21 @@ interface BasicInfoSectionProps {
 }
 
 const BasicInfoSection = ({ form }: BasicInfoSectionProps) => {
+  const categories = [
+    "Material Supplier",
+    "Service Provider",
+    "Equipment Rental",
+    "Transportation",
+    "Construction",
+    "Technology",
+    "Consulting",
+    "Other"
+  ];
+
   return (
-    <>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Basic Information</h3>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
@@ -21,7 +34,7 @@ const BasicInfoSection = ({ form }: BasicInfoSectionProps) => {
             <FormItem>
               <FormLabel>Vendor Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter company name" {...field} />
+                <Input placeholder="Enter vendor name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -51,7 +64,7 @@ const BasicInfoSection = ({ form }: BasicInfoSectionProps) => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Enter email address" type="email" {...field} />
+                <Input type="email" placeholder="Enter email address" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -87,10 +100,11 @@ const BasicInfoSection = ({ form }: BasicInfoSectionProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="supplier">Supplier</SelectItem>
-                  <SelectItem value="contractor">Contractor</SelectItem>
-                  <SelectItem value="consultant">Consultant</SelectItem>
-                  <SelectItem value="service-provider">Service Provider</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -118,15 +132,15 @@ const BasicInfoSection = ({ form }: BasicInfoSectionProps) => {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>Description (Optional)</FormLabel>
             <FormControl>
-              <Textarea placeholder="Enter vendor description" className="resize-none" {...field} />
+              <Textarea placeholder="Enter vendor description" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 };
 

@@ -10,40 +10,38 @@ interface BankDetailsSectionProps {
 
 const BankDetailsSection = ({ form }: BankDetailsSectionProps) => {
   return (
-    <div className="border-t pt-6">
-      <h3 className="text-lg font-medium mb-4">Bank Details</h3>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Bank Details</h3>
+      
+      <FormField
+        control={form.control}
+        name="accountHolderName"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Account Holder Name</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter account holder name" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
-          name="accountHolderName"
+          name="bankAccountNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Account Holder Name</FormLabel>
+              <FormLabel>Account Number</FormLabel>
               <FormControl>
-                <Input placeholder="Enter account holder name" {...field} />
+                <Input placeholder="Enter account number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        <FormField
-          control={form.control}
-          name="bankAccountNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bank Account Number</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter bank account number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <FormField
           control={form.control}
           name="ifscCode"
@@ -57,7 +55,9 @@ const BankDetailsSection = ({ form }: BankDetailsSectionProps) => {
             </FormItem>
           )}
         />
-        
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
           name="bankName"
@@ -71,9 +71,7 @@ const BankDetailsSection = ({ form }: BankDetailsSectionProps) => {
             </FormItem>
           )}
         />
-      </div>
-      
-      <div className="mt-6">
+        
         <FormField
           control={form.control}
           name="branchName"
