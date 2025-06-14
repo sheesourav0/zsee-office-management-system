@@ -1,15 +1,15 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, FileText, Receipt } from "lucide-react";
+import { Plus, FileText, Receipt, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import POManagement from "@/features/purchase/components/POManagement";
 import InvoiceManagement from "@/features/purchase/components/InvoiceManagement";
 import AddPOForm from "@/features/purchase/components/AddPOForm";
 import AddInvoiceForm from "@/features/purchase/components/AddInvoiceForm";
+import TeamMembersManagement from "@/features/team/components/TeamMembersManagement";
 
 const PurchaseBilling = () => {
   const [activeTab, setActiveTab] = useState("po");
@@ -33,12 +33,12 @@ const PurchaseBilling = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Purchase & Billing Department</h1>
-          <p className="text-muted-foreground">Manage Purchase Orders and Invoice Generation</p>
+          <p className="text-muted-foreground">Manage Purchase Orders, Invoice Generation, and Team Members</p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="po" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Purchase Orders
@@ -46,6 +46,10 @@ const PurchaseBilling = () => {
           <TabsTrigger value="invoice" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
             Invoice Management
+          </TabsTrigger>
+          <TabsTrigger value="team" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Team Members
           </TabsTrigger>
         </TabsList>
         
@@ -111,6 +115,10 @@ const PurchaseBilling = () => {
               </Tabs>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="team" className="space-y-4">
+          <TeamMembersManagement />
         </TabsContent>
       </Tabs>
 
