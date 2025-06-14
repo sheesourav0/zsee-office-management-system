@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+import { generateInvoicePDF, downloadPDF, type InvoiceData } from "@/utils/pdfGenerator";
 
 const pos = [
   { id: "1", number: "PO-2024-001", vendor: "Agmatic Technologies", amount: 250000 },
@@ -39,6 +40,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastCreatedInvoice, setLastCreatedInvoice] = useState<InvoiceData | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -92,6 +94,23 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Auto-generate Invoice number
       const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
       
+      if (selectedPO) {
+        const invoiceData: InvoiceData = {
+          invoiceNumber,
+          poNumber: selectedPO.number,
+          vendor: selectedPO.vendor,
+          invoiceDate: data.invoiceDate.toLocaleDateString(),
+          dueDate: data.dueDate.toLocaleDateString(),
+          baseAmount: selectedPO.amount,
+          taxRate: parseFloat(data.taxRate),
+          discount: parseFloat(data.discount),
+          taxAmount: invoiceCalculation.taxAmount,
+          totalAmount: invoiceCalculation.totalAmount,
+        };
+        
+        setLastCreatedInvoice(invoiceData);
+      }
+      
       toast.success(`Invoice ${invoiceNumber} generated successfully`);
       form.reset();
       
@@ -103,6 +122,19 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       console.error(error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!lastCreatedInvoice) return;
+    
+    try {
+      const pdf = await generateInvoicePDF(lastCreatedInvoice);
+      downloadPDF(pdf, `${lastCreatedInvoice.invoiceNumber}.pdf`);
+      toast.success("Invoice PDF downloaded successfully");
+    } catch (error) {
+      toast.error("Failed to generate PDF");
+      console.error(error);
     }
   };
 
@@ -244,6 +276,12 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           <Button variant="outline" type="button" onClick={() => form.reset()}>
             Cancel
           </Button>
+          {lastCreatedInvoice && (
+            <Button variant="outline" type="button" onClick={handleDownloadPDF}>
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+          )}
           <Button type="submit" disabled={isSubmitting || !selectedPO}>
             {isSubmitting ? "Generating..." : "Generate Invoice"}
           </Button>

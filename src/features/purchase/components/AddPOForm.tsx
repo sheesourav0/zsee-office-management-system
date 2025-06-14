@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+import { generatePOPDF, downloadPDF, type POData } from "@/utils/pdfGenerator";
 
 const projects = [
   { id: "1", name: "Amni WTP" },
@@ -51,6 +52,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastCreatedPO, setLastCreatedPO] = useState<POData | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -76,6 +78,25 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Auto-generate PO number
       const poNumber = `PO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
       
+      const selectedProject = projects.find(p => p.id === data.projectId);
+      const selectedVendor = vendors.find(v => v.id === data.vendorId);
+      
+      const poData: POData = {
+        poNumber,
+        date: new Date().toLocaleDateString(),
+        project: selectedProject?.name || "",
+        vendor: selectedVendor?.name || "",
+        description: data.description,
+        quantity: parseFloat(data.quantity),
+        unitPrice: parseFloat(data.unitPrice),
+        totalAmount: parseFloat(data.quantity) * parseFloat(data.unitPrice),
+        deliveryDate: data.deliveryDate.toLocaleDateString(),
+        terms: data.terms || "Net 30 days",
+        specialInstructions: data.specialInstructions,
+      };
+      
+      setLastCreatedPO(poData);
+      
       toast.success(`PO ${poNumber} created successfully`);
       form.reset();
       
@@ -87,6 +108,19 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       console.error(error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!lastCreatedPO) return;
+    
+    try {
+      const pdf = await generatePOPDF(lastCreatedPO);
+      downloadPDF(pdf, `${lastCreatedPO.poNumber}.pdf`);
+      toast.success("PO PDF downloaded successfully");
+    } catch (error) {
+      toast.error("Failed to generate PDF");
+      console.error(error);
     }
   };
 
@@ -257,6 +291,12 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           <Button variant="outline" type="button" onClick={() => form.reset()}>
             Cancel
           </Button>
+          {lastCreatedPO && (
+            <Button variant="outline" type="button" onClick={handleDownloadPDF}>
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+          )}
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Creating PO..." : "Create Purchase Order"}
           </Button>

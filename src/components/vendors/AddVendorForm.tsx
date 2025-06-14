@@ -5,40 +5,42 @@ import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { vendorFormSchema, VendorFormValues } from "./schemas/vendorSchema";
+import { vendorSchema, type VendorFormValues } from "./schemas/vendorSchema";
 import BasicInfoSection from "./BasicInfoSection";
 import AddressSection from "./AddressSection";
 import BankDetailsSection from "./BankDetailsSection";
 
-const AddVendorForm = ({ onSuccess }: { onSuccess?: () => void }) => {
+interface AddVendorFormProps {
+  onSuccess?: () => void;
+}
+
+const AddVendorForm = ({ onSuccess }: AddVendorFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<VendorFormValues>({
-    resolver: zodResolver(vendorFormSchema),
+    resolver: zodResolver(vendorSchema),
     defaultValues: {
-      name: "",
+      companyName: "",
       contactPerson: "",
       email: "",
       phone: "",
+      gstNumber: "",
+      panNumber: "",
       address: "",
       city: "",
       state: "",
       pincode: "",
-      category: "",
-      description: "",
-      gst: "",
+      accountHolderName: "",
       bankAccountNumber: "",
       ifscCode: "",
       bankName: "",
       branchName: "",
-      accountHolderName: "",
     },
   });
 
   const onSubmit = async (data: VendorFormValues) => {
     setIsSubmitting(true);
     try {
-      // In a real app, this would be an API call
       console.log("Vendor data:", data);
       
       // Simulate API call
@@ -60,7 +62,7 @@ const AddVendorForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <BasicInfoSection form={form} />
         <AddressSection form={form} />
         <BankDetailsSection form={form} />
@@ -70,7 +72,7 @@ const AddVendorForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Vendor"}
+            {isSubmitting ? "Adding Vendor..." : "Add Vendor"}
           </Button>
         </div>
       </form>
