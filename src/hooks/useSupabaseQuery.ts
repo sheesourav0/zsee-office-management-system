@@ -1,10 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Tables } from '@/integrations/supabase/types';
+import { Database } from '@/integrations/supabase/types';
 
 // Extract table names from the Database type
-type TableName = keyof Tables;
+type TableName = keyof Database['public']['Tables'];
 
 // Generic hook for Supabase SELECT queries
 export const useSupabaseQuery = <T extends TableName>(
@@ -28,7 +28,7 @@ export const useSupabaseQuery = <T extends TableName>(
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as Tables[T]['Row'][];
+      return data as Database['public']['Tables'][T]['Row'][];
     },
   });
 };
@@ -55,7 +55,7 @@ export const useSupabaseQuerySingle = <T extends TableName>(
       
       const { data, error } = await query.maybeSingle();
       if (error) throw error;
-      return data as Tables[T]['Row'] | null;
+      return data as Database['public']['Tables'][T]['Row'] | null;
     },
   });
 };
@@ -68,7 +68,7 @@ export const useSupabaseInsert = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: Tables[T]['Insert']) => {
+    mutationFn: async (data: Database['public']['Tables'][T]['Insert']) => {
       const { data: result, error } = await supabase
         .from(tableName)
         .insert(data as any)
@@ -76,7 +76,7 @@ export const useSupabaseInsert = <T extends TableName>(
         .single();
       
       if (error) throw error;
-      return result as Tables[T]['Row'];
+      return result as Database['public']['Tables'][T]['Row'];
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [tableName] });
@@ -93,7 +93,7 @@ export const useSupabaseUpdate = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Tables[T]['Update'] }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Database['public']['Tables'][T]['Update'] }) => {
       const { data: result, error } = await supabase
         .from(tableName)
         .update(data as any)
@@ -102,7 +102,7 @@ export const useSupabaseUpdate = <T extends TableName>(
         .single();
       
       if (error) throw error;
-      return result as Tables[T]['Row'];
+      return result as Database['public']['Tables'][T]['Row'];
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [tableName] });
