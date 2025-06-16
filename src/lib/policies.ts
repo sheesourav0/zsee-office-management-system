@@ -6,6 +6,8 @@ export interface Policy {
   name: string;
   description: string;
   permissions: string[];
+  departmentId?: string; // null for global policies
+  userType: 'department-staff' | 'department-manager' | 'global-admin' | 'global-staff';
   createdAt: string;
   updatedAt: string;
 }
@@ -13,19 +15,171 @@ export interface Policy {
 export interface UserPolicyAssignment {
   userId: string;
   policyId: string;
+  departmentId?: string; // For department-specific assignments
   assignedAt: string;
   assignedBy: string;
 }
 
-// Default policies based on existing roles
+export interface Department {
+  id: string;
+  name: string;
+  code: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// User types and their descriptions
+export const userTypes = {
+  'department-staff': {
+    name: 'Department Staff',
+    description: 'Regular employees working within a specific department',
+    departmentSpecific: true
+  },
+  'department-manager': {
+    name: 'Department Manager',
+    description: 'Managers overseeing a specific department',
+    departmentSpecific: true
+  },
+  'global-admin': {
+    name: 'Global Administrator',
+    description: 'System administrators with cross-department access',
+    departmentSpecific: false
+  },
+  'global-staff': {
+    name: 'Global Staff',
+    description: 'Support staff like HR, Accountant with cross-department access',
+    departmentSpecific: false
+  }
+};
+
+// Default departments
+export const defaultDepartments: Department[] = [
+  {
+    id: "phed",
+    name: "Public Health Engineering Department",
+    code: "PHED",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "pwd",
+    name: "Public Works Department",
+    code: "PWD",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "it",
+    name: "Information Technology",
+    code: "IT",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "finance",
+    name: "Finance Department",
+    code: "FIN",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+];
+
+// Default department-based policies
 export const defaultPolicies: Record<string, Policy> = {
-  "admin-policy": {
-    id: "admin-policy",
-    name: "Administrator Policy",
-    description: "Full administrative access with most permissions",
+  // Department Staff Policies
+  "phed-staff-policy": {
+    id: "phed-staff-policy",
+    name: "PHED Staff Policy",
+    description: "Standard permissions for PHED department staff",
+    permissions: [
+      "read:projects",
+      "read:payments",
+      "read:vendors",
+      "read:reports"
+    ],
+    departmentId: "phed",
+    userType: "department-staff",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  "pwd-staff-policy": {
+    id: "pwd-staff-policy",
+    name: "PWD Staff Policy",
+    description: "Standard permissions for PWD department staff",
+    permissions: [
+      "read:projects",
+      "read:payments",
+      "read:vendors",
+      "read:reports"
+    ],
+    departmentId: "pwd",
+    userType: "department-staff",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+
+  // Department Manager Policies
+  "phed-manager-policy": {
+    id: "phed-manager-policy",
+    name: "PHED Manager Policy",
+    description: "Management permissions for PHED department",
     permissions: [
       "read:users",
+      "create:projects",
+      "read:projects",
+      "update:projects",
+      "create:payments",
+      "read:payments",
+      "update:payments",
+      "read:reports",
+      "create:vendors",
+      "read:vendors",
+      "update:vendors",
+    ],
+    departmentId: "phed",
+    userType: "department-manager",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  "pwd-manager-policy": {
+    id: "pwd-manager-policy",
+    name: "PWD Manager Policy",
+    description: "Management permissions for PWD department",
+    permissions: [
+      "read:users",
+      "create:projects",
+      "read:projects",
+      "update:projects",
+      "create:payments",
+      "read:payments",
+      "update:payments",
+      "read:reports",
+      "create:vendors",
+      "read:vendors",
+      "update:vendors",
+    ],
+    departmentId: "pwd",
+    userType: "department-manager",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+
+  // Global Policies
+  "global-admin-policy": {
+    id: "global-admin-policy",
+    name: "Global Administrator Policy",
+    description: "Full system access across all departments",
+    permissions: [
+      "create:users",
+      "read:users",
       "update:users",
+      "delete:users",
+      "manage:roles",
       "create:projects",
       "read:projects",
       "update:projects",
@@ -39,58 +193,95 @@ export const defaultPolicies: Record<string, Policy> = {
       "read:vendors",
       "update:vendors",
       "delete:vendors",
+      "system:settings",
       "import:users",
       "export:users",
     ],
+    userType: "global-admin",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-  "manager-policy": {
-    id: "manager-policy",
-    name: "Manager Policy",
-    description: "Project and team management capabilities",
+  "accountant-policy": {
+    id: "accountant-policy",
+    name: "Accountant Policy",
+    description: "Financial access across all departments",
     permissions: [
-      "read:users",
-      "create:projects",
       "read:projects",
-      "update:projects",
       "create:payments",
       "read:payments",
       "update:payments",
       "read:reports",
-      "create:vendors",
       "read:vendors",
-      "update:vendors",
     ],
+    userType: "global-staff",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-  "viewer-policy": {
-    id: "viewer-policy",
-    name: "Viewer Policy",
-    description: "Read-only access to most system data",
+  "hr-policy": {
+    id: "hr-policy",
+    name: "HR Policy",
+    description: "Human resources access across all departments",
     permissions: [
+      "create:users",
       "read:users",
-      "read:projects",
-      "read:payments",
+      "update:users",
       "read:reports",
-      "read:vendors",
+      "import:users",
+      "export:users",
     ],
+    userType: "global-staff",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
 };
 
-// Helper functions for policy management
+// Helper functions for department management
+export const getDepartmentsFromStorage = (): Department[] => {
+  const stored = localStorage.getItem('departments');
+  if (!stored) {
+    localStorage.setItem('departments', JSON.stringify(defaultDepartments));
+    return defaultDepartments;
+  }
+  return JSON.parse(stored);
+};
+
+export const saveDepartmentToStorage = (department: Department): void => {
+  const departments = getDepartmentsFromStorage();
+  const existingIndex = departments.findIndex(d => d.id === department.id);
+  
+  if (existingIndex >= 0) {
+    departments[existingIndex] = { ...department, updatedAt: new Date().toISOString() };
+  } else {
+    departments.push(department);
+  }
+  
+  localStorage.setItem('departments', JSON.stringify(departments));
+};
+
+// Enhanced policy functions
 export const getPoliciesFromStorage = (): Policy[] => {
   const stored = localStorage.getItem('user_policies');
   if (!stored) {
-    // Initialize with default policies
     const policies = Object.values(defaultPolicies);
     localStorage.setItem('user_policies', JSON.stringify(policies));
     return policies;
   }
   return JSON.parse(stored);
+};
+
+export const getPoliciesByDepartment = (departmentId: string): Policy[] => {
+  const policies = getPoliciesFromStorage();
+  return policies.filter(p => p.departmentId === departmentId);
+};
+
+export const getGlobalPolicies = (): Policy[] => {
+  const policies = getPoliciesFromStorage();
+  return policies.filter(p => !p.departmentId);
+};
+
+export const getPoliciesByUserType = (userType: string): Policy[] => {
+  const policies = getPoliciesFromStorage();
+  return policies.filter(p => p.userType === userType);
 };
 
 export const savePolicyToStorage = (policy: Policy): void => {
@@ -112,7 +303,7 @@ export const deletePolicyFromStorage = (policyId: string): void => {
   localStorage.setItem('user_policies', JSON.stringify(filtered));
 };
 
-// User policy assignments
+// User policy assignments with department context
 export const getUserPolicyAssignments = (): UserPolicyAssignment[] => {
   const stored = localStorage.getItem('user_policy_assignments');
   return stored ? JSON.parse(stored) : [];
@@ -141,38 +332,52 @@ export const removeUserPolicyAssignment = (userId: string, policyId: string): vo
   localStorage.setItem('user_policy_assignments', JSON.stringify(filtered));
 };
 
-export const getUserPolicies = (userId: string): Policy[] => {
+export const getUserPolicies = (userId: string, departmentId?: string): Policy[] => {
   const assignments = getUserPolicyAssignments();
   const policies = getPoliciesFromStorage();
-  const userAssignments = assignments.filter(a => a.userId === userId);
+  
+  let userAssignments = assignments.filter(a => a.userId === userId);
+  
+  // Filter by department if specified
+  if (departmentId) {
+    userAssignments = userAssignments.filter(a => 
+      !a.departmentId || a.departmentId === departmentId
+    );
+  }
   
   return userAssignments.map(assignment => 
     policies.find(p => p.id === assignment.policyId)
   ).filter(Boolean) as Policy[];
 };
 
-export const getUserPermissions = (userId: string): string[] => {
-  const userPolicies = getUserPolicies(userId);
+export const getUserPermissions = (userId: string, departmentId?: string): string[] => {
+  const userPolicies = getUserPolicies(userId, departmentId);
   const allPermissions = new Set<string>();
   
   userPolicies.forEach(policy => {
-    policy.permissions.forEach(permission => {
-      allPermissions.add(permission);
-    });
+    // Only include permissions if policy matches user's department context
+    if (!departmentId || !policy.departmentId || policy.departmentId === departmentId) {
+      policy.permissions.forEach(permission => {
+        allPermissions.add(permission);
+      });
+    }
   });
   
   return Array.from(allPermissions);
 };
 
-// Permission checking functions
-export const userHasPolicyPermission = (userId: string, permissionId: string): boolean => {
-  const userPermissions = getUserPermissions(userId);
+// Enhanced permission checking with department context
+export const userHasPolicyPermission = (userId: string, permissionId: string, departmentId?: string): boolean => {
+  const userPermissions = getUserPermissions(userId, departmentId);
   return userPermissions.includes(permissionId);
 };
 
-export const checkUserPermission = (user: { id: string, role?: UserRole }, permissionId: string): boolean => {
-  // First check policy-based permissions
-  if (userHasPolicyPermission(user.id, permissionId)) {
+export const checkUserPermission = (
+  user: { id: string, role?: UserRole, departmentId?: string }, 
+  permissionId: string
+): boolean => {
+  // Check policy-based permissions with department context
+  if (userHasPolicyPermission(user.id, permissionId, user.departmentId)) {
     return true;
   }
   
@@ -182,4 +387,43 @@ export const checkUserPermission = (user: { id: string, role?: UserRole }, permi
   }
   
   return false;
+};
+
+// Department access validation
+export const canUserAccessDepartment = (userId: string, departmentId: string): boolean => {
+  const assignments = getUserPolicyAssignments().filter(a => a.userId === userId);
+  const policies = getPoliciesFromStorage();
+  
+  const userPolicies = assignments.map(a => 
+    policies.find(p => p.id === a.policyId)
+  ).filter(Boolean) as Policy[];
+  
+  // Check if user has global access or specific department access
+  return userPolicies.some(policy => 
+    !policy.departmentId || policy.departmentId === departmentId
+  );
+};
+
+export const getUserAccessibleDepartments = (userId: string): string[] => {
+  const assignments = getUserPolicyAssignments().filter(a => a.userId === userId);
+  const policies = getPoliciesFromStorage();
+  const departments = getDepartmentsFromStorage();
+  
+  const userPolicies = assignments.map(a => 
+    policies.find(p => p.id === a.policyId)
+  ).filter(Boolean) as Policy[];
+  
+  const accessibleDepartments = new Set<string>();
+  
+  userPolicies.forEach(policy => {
+    if (!policy.departmentId) {
+      // Global policy - add all departments
+      departments.forEach(dept => accessibleDepartments.add(dept.id));
+    } else {
+      // Department-specific policy
+      accessibleDepartments.add(policy.departmentId);
+    }
+  });
+  
+  return Array.from(accessibleDepartments);
 };

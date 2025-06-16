@@ -4,7 +4,7 @@ import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import MainNavigation from "./MainNavigation";
 import { toast } from "sonner";
-import { checkUserPermission } from "@/lib/policies";
+import { checkUserPermission, canUserAccessDepartment } from "@/lib/policies";
 
 const MainLayout = () => {
   const [user, setUser] = useState<any>(null);
@@ -15,7 +15,19 @@ const MainLayout = () => {
     const checkAuth = () => {
       const userData = localStorage.getItem("user");
       if (userData) {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        
+        // Check department access if user has departmentId
+        if (parsedUser.departmentId) {
+          const hasAccess = canUserAccessDepartment(parsedUser.id, parsedUser.departmentId);
+          if (!hasAccess) {
+            toast.error("You don't have access to your assigned department");
+            localStorage.removeItem("user");
+            navigate("/login", { replace: true });
+            return;
+          }
+        }
       } else {
         navigate("/login", { replace: true });
       }
@@ -48,7 +60,7 @@ const MainLayout = () => {
     return "";
   };
 
-  // Check permissions for current route
+  // Check permissions for current route with department context
   const hasRoutePermission = () => {
     const path = location.pathname;
     
@@ -66,7 +78,13 @@ const MainLayout = () => {
     const requiredPermission = routePermissions[path];
     if (!requiredPermission) return true; // No specific permission required
     
-    return checkUserPermission(user, requiredPermission);
+    // Pass department context for permission checking
+    const userWithDepartment = {
+      ...user,
+      departmentId: user.departmentId
+    };
+    
+    return checkUserPermission(userWithDepartment, requiredPermission);
   };
 
   // Redirect if user doesn't have permission for current route
@@ -85,6 +103,13 @@ const MainLayout = () => {
             <h2 className="text-lg font-medium ml-4">
               {getPageTitle()}
             </h2>
+            {user.departmentId && (
+              <div className="ml-auto">
+                <span className="text-sm text-muted-foreground">
+                  Department: {user.departmentName || user.departmentId}
+                </span>
+              </div>
+            )}
           </div>
           <main className="p-6">
             <Outlet />

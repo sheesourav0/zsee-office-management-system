@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Card, 
   CardContent, 
@@ -22,33 +23,39 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Plus, Pencil, Trash, Shield, Users } from "lucide-react";
+import { Plus, Pencil, Trash, Shield, Users, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { permissions, RolePermission } from "@/lib/roles";
 import { 
   Policy, 
+  Department,
   getPoliciesFromStorage, 
   savePolicyToStorage, 
   deletePolicyFromStorage,
-  getUserPolicyAssignments 
+  getUserPolicyAssignments,
+  getDepartmentsFromStorage,
+  userTypes 
 } from "@/lib/policies";
 
 const PolicyManagement = () => {
   const [policies, setPolicies] = useState<Policy[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [currentPolicy, setCurrentPolicy] = useState<Policy | null>(null);
   const [isPolicyDialogOpen, setIsPolicyDialogOpen] = useState(false);
   const [isNewPolicy, setIsNewPolicy] = useState(false);
   const [policyName, setPolicyName] = useState("");
   const [policyDescription, setPolicyDescription] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
+  const [selectedUserType, setSelectedUserType] = useState<string>("");
 
   useEffect(() => {
-    loadPolicies();
+    loadData();
   }, []);
 
-  const loadPolicies = () => {
-    const storedPolicies = getPoliciesFromStorage();
-    setPolicies(storedPolicies);
+  const loadData = () => {
+    setPolicies(getPoliciesFromStorage());
+    setDepartments(getDepartmentsFromStorage());
   };
 
   const handleEditPolicy = (policy: Policy) => {
@@ -56,6 +63,8 @@ const PolicyManagement = () => {
     setPolicyName(policy.name);
     setPolicyDescription(policy.description);
     setSelectedPermissions([...policy.permissions]);
+    setSelectedDepartment(policy.departmentId || "");
+    setSelectedUserType(policy.userType);
     setIsNewPolicy(false);
     setIsPolicyDialogOpen(true);
   };
@@ -65,19 +74,28 @@ const PolicyManagement = () => {
     setPolicyName("");
     setPolicyDescription("");
     setSelectedPermissions([]);
+    setSelectedDepartment("");
+    setSelectedUserType("");
     setIsNewPolicy(true);
     setIsPolicyDialogOpen(true);
   };
 
   const handleSavePolicy = () => {
     try {
-      if (!policyName || !policyDescription) {
+      if (!policyName || !policyDescription || !selectedUserType) {
         toast.error("Please fill in all required fields");
         return;
       }
 
       if (selectedPermissions.length === 0) {
         toast.error("Please select at least one permission");
+        return;
+      }
+
+      // Validate department selection for department-specific user types
+      const userTypeInfo = userTypes[selectedUserType as keyof typeof userTypes];
+      if (userTypeInfo?.departmentSpecific && !selectedDepartment) {
+        toast.error("Please select a department for this user type");
         return;
       }
 
@@ -89,6 +107,8 @@ const PolicyManagement = () => {
           name: policyName,
           description: policyDescription,
           permissions: selectedPermissions,
+          departmentId: userTypeInfo?.departmentSpecific ? selectedDepartment : undefined,
+          userType: selectedUserType as Policy['userType'],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -101,6 +121,8 @@ const PolicyManagement = () => {
           name: policyName,
           description: policyDescription,
           permissions: selectedPermissions,
+          departmentId: userTypeInfo?.departmentSpecific ? selectedDepartment : undefined,
+          userType: selectedUserType as Policy['userType'],
           updatedAt: new Date().toISOString(),
         };
 
@@ -108,7 +130,7 @@ const PolicyManagement = () => {
         toast.success("Policy updated successfully");
       }
 
-      loadPolicies();
+      loadData();
       setIsPolicyDialogOpen(false);
     } catch (error) {
       console.error("Error saving policy:", error);
@@ -127,14 +149,8 @@ const PolicyManagement = () => {
         return;
       }
 
-      // Check if it's a default policy
-      if (policyId.includes('admin-policy') || policyId.includes('manager-policy') || policyId.includes('viewer-policy')) {
-        toast.error("Default policies cannot be deleted");
-        return;
-      }
-
       deletePolicyFromStorage(policyId);
-      loadPolicies();
+      loadData();
       toast.success("Policy deleted successfully");
     } catch (error) {
       console.error("Error deleting policy:", error);
@@ -171,13 +187,28 @@ const PolicyManagement = () => {
     return assignments.filter(a => a.policyId === policyId).length;
   };
 
+  const getDepartmentName = (departmentId?: string) => {
+    if (!departmentId) return "Global";
+    const department = departments.find(d => d.id === departmentId);
+    return department ? department.name : "Unknown Department";
+  };
+
+  const groupedPolicies = policies.reduce((acc, policy) => {
+    const key = policy.departmentId || 'global';
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(policy);
+    return acc;
+  }, {} as Record<string, Policy[]>);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-medium">Policy-Based Permission System</h3>
+          <h3 className="text-lg font-medium">Department-Based Policy Management</h3>
           <p className="text-sm text-muted-foreground">
-            Create and manage policies with specific permissions that can be assigned to users
+            Create and manage policies with department-specific or global permissions
           </p>
         </div>
         <Button onClick={handleAddNewPolicy}>
@@ -186,60 +217,76 @@ const PolicyManagement = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {policies.map((policy) => {
-          const assignedUsers = getAssignedUsersCount(policy.id);
-          return (
-            <Card key={policy.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-base">{policy.name}</CardTitle>
-                    <CardDescription className="text-sm">{policy.description}</CardDescription>
-                  </div>
-                  <div className="flex space-x-1">
-                    <Button variant="ghost" size="sm" onClick={() => handleEditPolicy(policy)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeletePolicy(policy.id)}
-                      disabled={policy.id.includes('admin-policy') || policy.id.includes('manager-policy') || policy.id.includes('viewer-policy')}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="text-sm">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline" className="bg-primary/10 text-primary">
-                    <Shield className="h-3 w-3 mr-1" />
-                    {policy.permissions.length} permissions
-                  </Badge>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                    <Users className="h-3 w-3 mr-1" />
-                    {assignedUsers} users
-                  </Badge>
-                </div>
-                <div className="space-y-1 max-h-24 overflow-y-auto">
-                  {policy.permissions.slice(0, 3).map((permId) => (
-                    <div key={permId} className="text-xs text-muted-foreground">
-                      • {permissions[permId]?.name}
+      {Object.entries(groupedPolicies).map(([groupKey, groupPolicies]) => (
+        <div key={groupKey} className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-muted-foreground" />
+            <h4 className="text-md font-medium">
+              {groupKey === 'global' ? 'Global Policies' : getDepartmentName(groupKey)}
+            </h4>
+            <Badge variant="outline">{groupPolicies.length} policies</Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groupPolicies.map((policy) => {
+              const assignedUsers = getAssignedUsersCount(policy.id);
+              const userTypeInfo = userTypes[policy.userType];
+              
+              return (
+                <Card key={policy.id} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-base">{policy.name}</CardTitle>
+                        <CardDescription className="text-sm">{policy.description}</CardDescription>
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditPolicy(policy)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeletePolicy(policy.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  ))}
-                  {policy.permissions.length > 3 && (
-                    <div className="text-xs text-muted-foreground font-medium">
-                      ... and {policy.permissions.length - 3} more
+                  </CardHeader>
+                  <CardContent className="text-sm">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <Badge variant="outline" className="bg-primary/10 text-primary">
+                        <Shield className="h-3 w-3 mr-1" />
+                        {policy.permissions.length} permissions
+                      </Badge>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        <Users className="h-3 w-3 mr-1" />
+                        {assignedUsers} users
+                      </Badge>
+                      <Badge variant="secondary">
+                        {userTypeInfo?.name}
+                      </Badge>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <div className="space-y-1 max-h-24 overflow-y-auto">
+                      {policy.permissions.slice(0, 3).map((permId) => (
+                        <div key={permId} className="text-xs text-muted-foreground">
+                          • {permissions[permId]?.name}
+                        </div>
+                      ))}
+                      {policy.permissions.length > 3 && (
+                        <div className="text-xs text-muted-foreground font-medium">
+                          ... and {policy.permissions.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       <Dialog open={isPolicyDialogOpen} onOpenChange={setIsPolicyDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -255,7 +302,7 @@ const PolicyManagement = () => {
                   id="policy-name" 
                   value={policyName} 
                   onChange={(e) => setPolicyName(e.target.value)} 
-                  placeholder="e.g. Project Manager Policy"
+                  placeholder="e.g. PHED Manager Policy"
                 />
               </div>
               
@@ -268,6 +315,42 @@ const PolicyManagement = () => {
                   placeholder="Brief description of this policy's purpose and scope"
                   rows={3}
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="mb-2 block">User Type</Label>
+                  <Select value={selectedUserType} onValueChange={setSelectedUserType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select user type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(userTypes).map(([key, type]) => (
+                        <SelectItem key={key} value={key}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedUserType && userTypes[selectedUserType as keyof typeof userTypes]?.departmentSpecific && (
+                  <div>
+                    <Label className="mb-2 block">Department</Label>
+                    <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name} ({dept.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               <div>

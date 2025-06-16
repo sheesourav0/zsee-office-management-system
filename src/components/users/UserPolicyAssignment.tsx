@@ -13,17 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Shield, User } from "lucide-react";
+import { Plus, Trash2, Shield, User, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { User as UserType } from "./UsersList";
 import { 
   Policy, 
+  Department,
   UserPolicyAssignment, 
   getPoliciesFromStorage,
   getUserPolicyAssignments,
   saveUserPolicyAssignment,
   removeUserPolicyAssignment,
-  getUserPolicies 
+  getUserPolicies,
+  getDepartmentsFromStorage,
+  userTypes 
 } from "@/lib/policies";
 
 interface UserPolicyAssignmentProps {
@@ -32,10 +35,12 @@ interface UserPolicyAssignmentProps {
 
 const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => {
   const [policies, setPolicies] = useState<Policy[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [assignments, setAssignments] = useState<UserPolicyAssignment[]>([]);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
 
   useEffect(() => {
     loadData();
@@ -43,6 +48,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
 
   const loadData = () => {
     setPolicies(getPoliciesFromStorage());
+    setDepartments(getDepartmentsFromStorage());
     setAssignments(getUserPolicyAssignments());
   };
 
@@ -54,6 +60,30 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
   const getPolicyName = (policyId: string) => {
     const policy = policies.find(p => p.id === policyId);
     return policy ? policy.name : 'Unknown Policy';
+  };
+
+  const getDepartmentName = (departmentId?: string) => {
+    if (!departmentId) return "Global";
+    const department = departments.find(d => d.id === departmentId);
+    return department ? department.name : "Unknown Department";
+  };
+
+  const getAvailablePolicies = () => {
+    if (!selectedUser) return [];
+    
+    const user = users.find(u => u.id === selectedUser);
+    if (!user) return [];
+
+    // Filter policies based on selected department and user type compatibility
+    return policies.filter(policy => {
+      // If no department selected, show global policies only
+      if (!selectedDepartment) {
+        return !policy.departmentId;
+      }
+      
+      // Show policies for the selected department or global policies
+      return !policy.departmentId || policy.departmentId === selectedDepartment;
+    });
   };
 
   const handleAssignPolicies = () => {
@@ -69,6 +99,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
         const assignment: UserPolicyAssignment = {
           userId: selectedUser,
           policyId: policyId,
+          departmentId: selectedDepartment || undefined,
           assignedAt: new Date().toISOString(),
           assignedBy: currentUser.id || "system",
         };
@@ -79,6 +110,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
       setIsAssignDialogOpen(false);
       setSelectedUser("");
       setSelectedPolicies([]);
+      setSelectedDepartment("");
       toast.success("Policies assigned successfully");
     } catch (error) {
       console.error("Error assigning policies:", error);
@@ -121,14 +153,15 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
   };
 
   const userAssignments = getUserAssignments();
+  const availablePolicies = getAvailablePolicies();
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-medium">User Policy Assignments</h3>
+          <h3 className="text-lg font-medium">Department-Based User Policy Assignments</h3>
           <p className="text-sm text-muted-foreground">
-            Assign policies to users for granular permission control
+            Assign department-specific or global policies to users for granular permission control
           </p>
         </div>
         <Button onClick={() => setIsAssignDialogOpen(true)}>
@@ -143,6 +176,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Assigned Policies</TableHead>
+              <TableHead>Departments</TableHead>
               <TableHead>Total Permissions</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
@@ -151,7 +185,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={6} className="text-center py-4">
                   No users found.
                 </TableCell>
               </TableRow>
@@ -162,6 +196,17 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
                 const totalPermissions = new Set();
                 userPolicies.forEach(policy => {
                   policy.permissions.forEach(perm => totalPermissions.add(perm));
+                });
+
+                // Get unique departments for this user
+                const userDepartments = new Set();
+                userPolicyAssignments.forEach(assignment => {
+                  const policy = policies.find(p => p.id === assignment.policyId);
+                  if (policy?.departmentId) {
+                    userDepartments.add(policy.departmentId);
+                  } else {
+                    userDepartments.add('global');
+                  }
                 });
 
                 return (
@@ -180,20 +225,40 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
                         {userPolicyAssignments.length === 0 ? (
                           <span className="text-sm text-muted-foreground">No policies assigned</span>
                         ) : (
-                          userPolicyAssignments.map((assignment) => (
-                            <Badge key={assignment.policyId} variant="outline" className="text-xs">
-                              {getPolicyName(assignment.policyId)}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-4 w-4 p-0 ml-1 hover:bg-destructive hover:text-destructive-foreground"
-                                onClick={() => handleRemoveAssignment(user.id, assignment.policyId)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))
+                          userPolicyAssignments.map((assignment) => {
+                            const policy = policies.find(p => p.id === assignment.policyId);
+                            const userTypeInfo = policy ? userTypes[policy.userType] : null;
+                            
+                            return (
+                              <Badge key={assignment.policyId} variant="outline" className="text-xs">
+                                {getPolicyName(assignment.policyId)}
+                                {userTypeInfo && (
+                                  <span className="ml-1 text-xs opacity-70">
+                                    ({userTypeInfo.name})
+                                  </span>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-4 w-4 p-0 ml-1 hover:bg-destructive hover:text-destructive-foreground"
+                                  onClick={() => handleRemoveAssignment(user.id, assignment.policyId)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </Badge>
+                            );
+                          })
                         )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {Array.from(userDepartments).map((deptId) => (
+                          <Badge key={deptId} variant="secondary" className="text-xs">
+                            <Building2 className="h-3 w-3 mr-1" />
+                            {getDepartmentName(deptId === 'global' ? undefined : deptId as string)}
+                          </Badge>
+                        ))}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -220,6 +285,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
                         onClick={() => {
                           setSelectedUser(user.id);
                           setSelectedPolicies([]);
+                          setSelectedDepartment("");
                           setIsAssignDialogOpen(true);
                         }}
                       >
@@ -235,9 +301,9 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
       </div>
 
       <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Assign Policies to User</DialogTitle>
+            <DialogTitle>Assign Department-Based Policies to User</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -258,28 +324,63 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
             </div>
 
             <div>
+              <label className="text-sm font-medium mb-2 block">Department Context (Optional)</label>
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select department for department-specific policies" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Global (No specific department)</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name} ({dept.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <label className="text-sm font-medium mb-2 block">Select Policies</label>
               <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-3">
-                {policies.map((policy) => (
-                  <div key={policy.id} className="flex items-start space-x-3">
-                    <Checkbox
-                      id={policy.id}
-                      checked={selectedPolicies.includes(policy.id)}
-                      onCheckedChange={() => togglePolicySelection(policy.id)}
-                    />
-                    <div className="space-y-1 leading-none">
-                      <label htmlFor={policy.id} className="text-sm font-medium">
-                        {policy.name}
-                      </label>
-                      <p className="text-xs text-muted-foreground">{policy.description}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {policy.permissions.length} permissions
-                        </Badge>
+                {availablePolicies.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    {selectedUser ? "No policies available for the selected department context" : "Please select a user first"}
+                  </p>
+                ) : (
+                  availablePolicies.map((policy) => {
+                    const userTypeInfo = userTypes[policy.userType];
+                    return (
+                      <div key={policy.id} className="flex items-start space-x-3">
+                        <Checkbox
+                          id={policy.id}
+                          checked={selectedPolicies.includes(policy.id)}
+                          onCheckedChange={() => togglePolicySelection(policy.id)}
+                        />
+                        <div className="space-y-1 leading-none">
+                          <label htmlFor={policy.id} className="text-sm font-medium">
+                            {policy.name}
+                          </label>
+                          <p className="text-xs text-muted-foreground">{policy.description}</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {policy.permissions.length} permissions
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {userTypeInfo.name}
+                            </Badge>
+                            {policy.departmentId && (
+                              <Badge variant="outline" className="text-xs">
+                                <Building2 className="h-3 w-3 mr-1" />
+                                {getDepartmentName(policy.departmentId)}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
