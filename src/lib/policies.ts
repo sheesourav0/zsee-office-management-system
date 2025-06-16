@@ -1,5 +1,5 @@
 
-import { UserRole, RolePermission, permissions } from './roles';
+import { UserRole, RolePermission, permissions, hasPermission } from './roles';
 
 export interface Policy {
   id: string;
@@ -178,7 +178,6 @@ export const checkUserPermission = (user: { id: string, role?: UserRole }, permi
   
   // Fallback to role-based permissions for backward compatibility
   if (user.role) {
-    const { hasPermission } = require('./roles');
     return hasPermission(user.role, permissionId);
   }
   
