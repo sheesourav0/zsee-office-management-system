@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { PermissionService, UserPermissions } from '@/lib/permissions';
+import { createDemoData } from '@/lib/demo-data';
 
 interface AuthContextType {
   user: User | null;
@@ -65,9 +66,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Clear permissions first to avoid stale data
         setUserPermissions(null);
         
-        // Refresh permissions when auth state changes
-        if (session?.user) {
-          // Use setTimeout to prevent potential auth callback issues
+        // Handle successful sign in
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('User signed in, creating demo data...');
+          // Create demo data in the background
+          setTimeout(async () => {
+            await createDemoData();
+            // Refresh permissions after demo data is created
+            const permissions = await PermissionService.getCurrentUserPermissions();
+            console.log('Post-signin permissions:', permissions);
+            setUserPermissions(permissions);
+          }, 100);
+        } else if (session?.user) {
+          // Refresh permissions for existing sessions
           setTimeout(async () => {
             console.log('Loading permissions after auth change...');
             const permissions = await PermissionService.getCurrentUserPermissions();
