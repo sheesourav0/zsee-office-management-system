@@ -1,15 +1,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { Tables } from '@/integrations/supabase/types';
 
 // Extract table names from the Database type
-type TableName = keyof Database['public']['Tables'];
-type TableRow<T extends TableName> = Database['public']['Tables'][T]['Row'];
-type TableInsert<T extends TableName> = Database['public']['Tables'][T]['Insert'];
-type TableUpdate<T extends TableName> = Database['public']['Tables'][T]['Update'];
+type TableName = keyof Tables;
 
-// Generic hook for Supabase SELECT queries with proper typing
+// Generic hook for Supabase SELECT queries
 export const useSupabaseQuery = <T extends TableName>(
   queryKey: string[],
   tableName: T,
@@ -31,12 +28,12 @@ export const useSupabaseQuery = <T extends TableName>(
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as TableRow<T>[];
+      return data as Tables[T]['Row'][];
     },
   });
 };
 
-// Hook for single record queries with proper typing
+// Hook for single record queries
 export const useSupabaseQuerySingle = <T extends TableName>(
   queryKey: string[],
   tableName: T,
@@ -58,12 +55,12 @@ export const useSupabaseQuerySingle = <T extends TableName>(
       
       const { data, error } = await query.maybeSingle();
       if (error) throw error;
-      return data as TableRow<T> | null;
+      return data as Tables[T]['Row'] | null;
     },
   });
 };
 
-// Hook for Supabase INSERT mutations with proper typing
+// Hook for Supabase INSERT mutations
 export const useSupabaseInsert = <T extends TableName>(
   tableName: T, 
   onSuccessCallback?: () => void
@@ -71,7 +68,7 @@ export const useSupabaseInsert = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: TableInsert<T>) => {
+    mutationFn: async (data: Tables[T]['Insert']) => {
       const { data: result, error } = await supabase
         .from(tableName)
         .insert(data as any)
@@ -79,7 +76,7 @@ export const useSupabaseInsert = <T extends TableName>(
         .single();
       
       if (error) throw error;
-      return result as TableRow<T>;
+      return result as Tables[T]['Row'];
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [tableName] });
@@ -88,7 +85,7 @@ export const useSupabaseInsert = <T extends TableName>(
   });
 };
 
-// Hook for Supabase UPDATE mutations with proper typing
+// Hook for Supabase UPDATE mutations
 export const useSupabaseUpdate = <T extends TableName>(
   tableName: T, 
   onSuccessCallback?: () => void
@@ -96,16 +93,16 @@ export const useSupabaseUpdate = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: TableUpdate<T> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Tables[T]['Update'] }) => {
       const { data: result, error } = await supabase
         .from(tableName)
         .update(data as any)
-        .eq('id', id)
+        .eq('id' as any, id)
         .select()
         .single();
       
       if (error) throw error;
-      return result as TableRow<T>;
+      return result as Tables[T]['Row'];
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [tableName] });
@@ -126,7 +123,7 @@ export const useSupabaseDelete = <T extends TableName>(
       const { error } = await supabase
         .from(tableName)
         .delete()
-        .eq('id', id);
+        .eq('id' as any, id);
       
       if (error) throw error;
     },
