@@ -194,7 +194,10 @@ const Payments = () => {
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.projectOwner.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "All" || project.status === statusFilter.toLowerCase();
+    const matchesStatus = statusFilter === "All" || 
+      (statusFilter === "In Progress" && project.status === "active") ||
+      (statusFilter === "Completed" && project.status === "completed") ||
+      (statusFilter === "On Hold" && project.status === "on-hold");
     return matchesSearch && matchesStatus;
   });
 
@@ -207,118 +210,118 @@ const Payments = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Project & Payment Management</h1>
+          <h1 className="text-3xl font-bold">Projects</h1>
           <p className="text-muted-foreground">
             Comprehensive project management with payment tracking
           </p>
         </div>
         <Button onClick={() => setIsProjectDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add New Project
+          Add Project
         </Button>
       </div>
 
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Project Management</CardTitle>
+              <p className="text-sm text-muted-foreground">Manage all construction projects</p>
+            </div>
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search projects..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8 w-64"
+                />
+              </div>
+              <div className="flex gap-1">
+                {["All", "In Progress", "Completed", "On Hold"].map((status) => (
+                  <Button
+                    key={status}
+                    variant={statusFilter === status ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setStatusFilter(status)}
+                  >
+                    {status}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Project Name</TableHead>
+                  <TableHead>Budget</TableHead>
+                  <TableHead>Spent</TableHead>
+                  <TableHead>Remaining</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payments</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProjects.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      No projects found. Add your first project to get started.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProjects.map((project) => {
+                    const progress = calculateProgress(project);
+                    const spent = project.totalReceived;
+                    const remaining = project.totalPending;
+                    const pendingPayments = project.paymentTerms.filter(term => 
+                      term.percentage * project.totalCost / 100 > project.totalReceived
+                    ).length;
+                    
+                    return (
+                      <TableRow key={project.id}>
+                        <TableCell className="font-medium">{project.name}</TableCell>
+                        <TableCell>₹{project.totalCost.toLocaleString()}</TableCell>
+                        <TableCell className="text-blue-600">₹{spent.toLocaleString()}</TableCell>
+                        <TableCell className="text-red-600">₹{remaining.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={progress} className="h-2 w-20" />
+                            <span className="text-sm">{progress}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(project.status)}</TableCell>
+                        <TableCell>
+                          <span className="text-sm">
+                            {project.paymentTerms.length} 
+                            {pendingPayments > 0 && (
+                              <span className="text-red-600"> ({pendingPayments} pending)</span>
+                            )}
+                          </span>
+                        </TableCell>
+                        <TableCell>{project.startDate || "N/A"}</TableCell>
+                        <TableCell>{project.expectedEndDate || "N/A"}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="projects">Projects Overview</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="payments">Payment Tracking</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="projects" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Project Management</CardTitle>
-                <div className="flex gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search projects..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8 w-64"
-                    />
-                  </div>
-                  <div className="flex gap-1">
-                    {["All", "In Progress", "Completed", "On Hold"].map((status) => (
-                      <Button
-                        key={status}
-                        variant={statusFilter === status ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setStatusFilter(status)}
-                      >
-                        {status}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Project Name</TableHead>
-                      <TableHead>Budget</TableHead>
-                      <TableHead>Spent</TableHead>
-                      <TableHead>Remaining</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Payments</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProjects.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                          No projects found. Add your first project to get started.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredProjects.map((project) => {
-                        const progress = calculateProgress(project);
-                        const spent = project.totalReceived;
-                        const remaining = project.totalPending;
-                        const pendingPayments = project.paymentTerms.filter(term => 
-                          term.percentage * project.totalCost / 100 > project.totalReceived
-                        ).length;
-                        
-                        return (
-                          <TableRow key={project.id}>
-                            <TableCell className="font-medium">{project.name}</TableCell>
-                            <TableCell>₹{project.totalCost.toLocaleString()}</TableCell>
-                            <TableCell className="text-blue-600">₹{spent.toLocaleString()}</TableCell>
-                            <TableCell className="text-red-600">₹{remaining.toLocaleString()}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Progress value={progress} className="h-2 w-20" />
-                                <span className="text-sm">{progress}%</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(project.status)}</TableCell>
-                            <TableCell>
-                              <span className="text-sm">
-                                {project.paymentTerms.length} 
-                                {pendingPayments > 0 && (
-                                  <span className="text-red-600"> ({pendingPayments} pending)</span>
-                                )}
-                              </span>
-                            </TableCell>
-                            <TableCell>{project.startDate || "N/A"}</TableCell>
-                            <TableCell>{project.expectedEndDate || "N/A"}</TableCell>
-                          </TableRow>
-                        );
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
         
         <TabsContent value="payments" className="space-y-4">
           <Card>
