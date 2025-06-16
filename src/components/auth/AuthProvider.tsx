@@ -31,7 +31,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshPermissions = async () => {
     if (user) {
+      console.log('Refreshing permissions for user:', user.id);
       const permissions = await PermissionService.getCurrentUserPermissions();
+      console.log('Loaded permissions:', permissions);
       setUserPermissions(permissions);
     } else {
       setUserPermissions(null);
@@ -39,8 +41,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    console.log('AuthProvider: Setting up auth state listener');
+    
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting initial session:', error);
+      }
+      console.log('Initial session:', session?.user?.email || 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -49,33 +57,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email || 'No user');
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
+        // Clear permissions first to avoid stale data
+        setUserPermissions(null);
+        
         // Refresh permissions when auth state changes
         if (session?.user) {
+          // Use setTimeout to prevent potential auth callback issues
           setTimeout(async () => {
+            console.log('Loading permissions after auth change...');
             const permissions = await PermissionService.getCurrentUserPermissions();
+            console.log('Auth change - loaded permissions:', permissions);
             setUserPermissions(permissions);
-          }, 0);
-        } else {
-          setUserPermissions(null);
+          }, 100);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthProvider: Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Load permissions when user is available
+  // Load permissions when user is available and permissions are not yet loaded
   useEffect(() => {
-    if (user && !userPermissions) {
+    if (user && !userPermissions && !loading) {
+      console.log('Loading permissions for authenticated user:', user.email);
       refreshPermissions();
     }
-  }, [user, userPermissions]);
+  }, [user, userPermissions, loading]);
 
   const signOut = async () => {
+    console.log('Signing out user');
     await supabase.auth.signOut();
     setUserPermissions(null);
   };

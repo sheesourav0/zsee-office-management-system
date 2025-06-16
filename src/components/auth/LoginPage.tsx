@@ -71,42 +71,82 @@ const LoginPage = () => {
     }
   };
 
-  // Demo user login buttons
+  // Updated demo users with better error handling
   const demoUsers = [
-    { name: 'John Admin', email: 'admin@zsee.com', role: 'System Administrator' },
-    { name: 'Sarah PHED Manager', email: 'phed.manager@zsee.com', role: 'Department Manager' },
-    { name: 'Mike Project Manager', email: 'project.manager@zsee.com', role: 'Project Manager' },
-    { name: 'Lisa Accountant', email: 'accountant@zsee.com', role: 'Accountant' },
-    { name: 'David Payment Manager', email: 'payment.manager@zsee.com', role: 'Payment Manager' },
+    { name: 'John Admin', email: 'admin@demo.com', role: 'System Administrator', password: 'demo123456' },
+    { name: 'Sarah PHED Manager', email: 'phed@demo.com', role: 'Department Manager', password: 'demo123456' },
+    { name: 'Mike Project Manager', email: 'project@demo.com', role: 'Project Manager', password: 'demo123456' },
+    { name: 'Lisa Accountant', email: 'accountant@demo.com', role: 'Accountant', password: 'demo123456' },
+    { name: 'David Payment Manager', email: 'payment@demo.com', role: 'Payment Manager', password: 'demo123456' },
   ];
 
-  const handleDemoLogin = async (email: string) => {
+  const handleDemoLogin = async (email: string, password: string, name: string) => {
     setLoading(true);
     try {
-      // First try to sign up with a default password, then sign in
-      await supabase.auth.signUp({
+      console.log('Attempting demo login for:', email);
+      
+      // First try to sign in
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
-        password: 'demo123456',
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+        password,
+      });
+
+      if (signInError && signInError.message.includes('Invalid login credentials')) {
+        // User doesn't exist, create account first
+        console.log('User does not exist, creating account...');
+        
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name },
+            emailRedirectTo: `${window.location.origin}/dashboard`
+          }
+        });
+
+        if (signUpError) {
+          console.error('Sign up error:', signUpError);
+          throw signUpError;
         }
-      });
 
-      // Then sign in
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'demo123456',
-      });
+        // If email confirmation is required, show message
+        if (signUpData.user && !signUpData.session) {
+          toast.success('Demo account created! Check your email to confirm, or try signing in again.');
+          return;
+        }
 
-      if (error && !error.message.includes('Invalid login credentials')) {
-        throw error;
+        // If we got a session directly, use it
+        if (signUpData.session) {
+          console.log('Demo account created and signed in successfully');
+          toast.success('Demo login successful!');
+          navigate('/dashboard');
+          return;
+        }
+
+        // Try signing in again after signup
+        const { data: retrySignIn, error: retryError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (retryError) {
+          throw retryError;
+        }
+        
+        console.log('Demo login successful after account creation');
+        toast.success('Demo login successful!');
+        navigate('/dashboard');
+      } else if (signInError) {
+        throw signInError;
+      } else {
+        // Sign in was successful
+        console.log('Demo login successful');
+        toast.success('Demo login successful!');
+        navigate('/dashboard');
       }
-
-      toast.success('Demo login successful!');
-      navigate('/dashboard');
     } catch (error: any) {
       console.error('Demo login error:', error);
-      toast.error('Demo login failed. Please try manual login.');
+      toast.error(`Demo login failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -215,13 +255,16 @@ const LoginPage = () => {
               </div>
 
               <div className="mt-4 space-y-2">
+                <p className="text-xs text-gray-500 text-center mb-3">
+                  Click any demo button to automatically create and login with that role
+                </p>
                 {demoUsers.map((user) => (
                   <Button
                     key={user.email}
                     variant="outline"
                     size="sm"
                     className="w-full text-left justify-start"
-                    onClick={() => handleDemoLogin(user.email)}
+                    onClick={() => handleDemoLogin(user.email, user.password, user.name)}
                     disabled={loading}
                   >
                     <div>
@@ -230,6 +273,13 @@ const LoginPage = () => {
                     </div>
                   </Button>
                 ))}
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-xs text-blue-700">
+                  <strong>Demo Info:</strong> Each demo account will be created automatically with appropriate permissions. 
+                  Try different roles to see how the interface changes based on user permissions.
+                </p>
               </div>
             </div>
           </CardContent>

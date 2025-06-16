@@ -14,7 +14,12 @@ export class PermissionService {
   static async getCurrentUserPermissions(): Promise<UserPermissions | null> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.log('No authenticated user found');
+        return null;
+      }
+
+      console.log('Getting permissions for user:', user.id, user.email);
 
       // Get user's policy assignments
       const { data: assignments, error } = await supabase
@@ -30,9 +35,40 @@ export class PermissionService {
         return null;
       }
 
+      console.log('User policy assignments:', assignments);
+
       if (!assignments || assignments.length === 0) {
+        console.log('No policy assignments found, creating default profile...');
+        
+        // Check if profile exists
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (!existingProfile) {
+          // Create a basic profile for the user
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              name: user.user_metadata?.name || user.email || 'Unknown User',
+              email: user.email || '',
+              department_id: null,
+              is_active: true
+            });
+
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+          } else {
+            console.log('Created basic profile for user');
+          }
+        }
+
+        // Return basic viewer permissions
         return {
-          permissions: ['read:basic'],
+          permissions: ['read:basic', 'read:projects', 'read:payments'],
           userType: 'viewer'
         };
       }
@@ -60,6 +96,7 @@ export class PermissionService {
         userType
       };
 
+      console.log('Final user permissions:', this.userPermissions);
       return this.userPermissions;
     } catch (error) {
       console.error('Error getting user permissions:', error);
@@ -69,16 +106,20 @@ export class PermissionService {
 
   static async hasPermission(permission: string): Promise<boolean> {
     const userPermissions = await this.getCurrentUserPermissions();
-    return userPermissions?.permissions.includes(permission) || false;
+    const hasPermission = userPermissions?.permissions.includes(permission) || false;
+    console.log(`Checking permission ${permission}: ${hasPermission}`);
+    return hasPermission;
   }
 
   static async hasAnyPermission(permissions: string[]): Promise<boolean> {
     const userPermissions = await this.getCurrentUserPermissions();
     if (!userPermissions) return false;
     
-    return permissions.some(permission => 
+    const hasAny = permissions.some(permission => 
       userPermissions.permissions.includes(permission)
     );
+    console.log(`Checking any permission from ${permissions}: ${hasAny}`);
+    return hasAny;
   }
 
   static async canAccessDepartment(departmentId: string): Promise<boolean> {
@@ -122,7 +163,12 @@ export class PermissionService {
 // Role-based menu items
 export const getMenuItemsForUser = async () => {
   const userPermissions = await PermissionService.getCurrentUserPermissions();
-  if (!userPermissions) return [];
+  if (!userPermissions) {
+    console.log('No user permissions, returning basic menu');
+    return [{ title: 'Dashboard', path: '/dashboard', icon: 'Home' }];
+  }
+
+  console.log('Building menu for permissions:', userPermissions.permissions);
 
   const menuItems: Array<{
     title: string;
@@ -164,5 +210,6 @@ export const getMenuItemsForUser = async () => {
     menuItems.push({ title: 'Team', path: '/team', permission: 'manage:team', icon: 'Users' });
   }
 
+  console.log('Final menu items:', menuItems);
   return menuItems;
 };

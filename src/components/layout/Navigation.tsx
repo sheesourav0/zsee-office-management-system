@@ -34,9 +34,16 @@ const Navigation = () => {
 
   useEffect(() => {
     const loadMenuItems = async () => {
-      if (user && userPermissions) {
+      if (user) {
+        console.log('Loading menu items for user:', user.email);
+        console.log('User permissions available:', !!userPermissions);
+        
         const items = await getMenuItemsForUser();
+        console.log('Loaded menu items:', items);
         setMenuItems(items);
+      } else {
+        console.log('No user, clearing menu items');
+        setMenuItems([]);
       }
     };
 
@@ -48,7 +55,12 @@ const Navigation = () => {
     navigate('/auth');
   };
 
-  if (!user) return null;
+  if (!user) {
+    console.log('Navigation: No user, not rendering navigation');
+    return null;
+  }
+
+  console.log('Navigation: Rendering with', menuItems.length, 'menu items');
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
