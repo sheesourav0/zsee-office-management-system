@@ -5,20 +5,38 @@ import AddUserForm from "@/components/users/AddUserForm";
 import UsersList from "@/components/users/UsersList";
 import RolesManagement from "@/components/users/RolesManagement";
 import ImportUsers from "@/components/users/ImportUsers";
+import PolicyManagement from "@/components/users/PolicyManagement";
+import UserPolicyAssignment from "@/components/users/UserPolicyAssignment";
+import { useState, useEffect } from "react";
 
 const UserManagementPage = () => {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    // Load users for policy assignment
+    const loadUsers = () => {
+      const storedUsers = localStorage.getItem("users");
+      if (storedUsers) {
+        setUsers(JSON.parse(storedUsers));
+      }
+    };
+    loadUsers();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage users, roles and permissions</p>
+        <p className="text-muted-foreground">Manage users, roles, policies and permissions</p>
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">User List</TabsTrigger>
           <TabsTrigger value="add">Add User</TabsTrigger>
           <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
+          <TabsTrigger value="policies">Policy Management</TabsTrigger>
+          <TabsTrigger value="assignments">Policy Assignments</TabsTrigger>
           <TabsTrigger value="import">Import Users</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
@@ -51,6 +69,28 @@ const UserManagementPage = () => {
             </CardHeader>
             <CardContent>
               <RolesManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="policies">
+          <Card>
+            <CardHeader>
+              <CardTitle>Policy Management</CardTitle>
+              <CardDescription>Create and manage policies with specific permissions that can be assigned to users</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PolicyManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="assignments">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Policy Assignments</CardTitle>
+              <CardDescription>Assign policies to users for granular permission control</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UserPolicyAssignment users={users} />
             </CardContent>
           </Card>
         </TabsContent>
