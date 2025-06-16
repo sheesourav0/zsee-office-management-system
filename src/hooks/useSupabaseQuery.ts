@@ -16,7 +16,7 @@ export const useSupabaseQuery = <T extends TableName>(
   return useQuery({
     queryKey,
     queryFn: async () => {
-      let query = supabase.from(tableName).select(selectQuery || '*');
+      let query = supabase.from(tableName as any).select(selectQuery || '*');
       
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -28,7 +28,7 @@ export const useSupabaseQuery = <T extends TableName>(
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as Database['public']['Tables'][T]['Row'][];
+      return data as any[];
     },
   });
 };
@@ -43,7 +43,7 @@ export const useSupabaseQuerySingle = <T extends TableName>(
   return useQuery({
     queryKey,
     queryFn: async () => {
-      let query = supabase.from(tableName).select(selectQuery || '*');
+      let query = supabase.from(tableName as any).select(selectQuery || '*');
       
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -55,7 +55,7 @@ export const useSupabaseQuerySingle = <T extends TableName>(
       
       const { data, error } = await query.maybeSingle();
       if (error) throw error;
-      return data as Database['public']['Tables'][T]['Row'] | null;
+      return data as any;
     },
   });
 };
@@ -68,15 +68,15 @@ export const useSupabaseInsert = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: Database['public']['Tables'][T]['Insert']) => {
+    mutationFn: async (data: any) => {
       const { data: result, error } = await supabase
-        .from(tableName)
-        .insert(data as any)
+        .from(tableName as any)
+        .insert(data)
         .select()
         .single();
       
       if (error) throw error;
-      return result as Database['public']['Tables'][T]['Row'];
+      return result as any;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [tableName] });
@@ -93,16 +93,16 @@ export const useSupabaseUpdate = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Database['public']['Tables'][T]['Update'] }) => {
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const { data: result, error } = await supabase
-        .from(tableName)
-        .update(data as any)
-        .eq('id' as any, id)
+        .from(tableName as any)
+        .update(data)
+        .eq('id', id)
         .select()
         .single();
       
       if (error) throw error;
-      return result as Database['public']['Tables'][T]['Row'];
+      return result as any;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [tableName] });
@@ -121,9 +121,9 @@ export const useSupabaseDelete = <T extends TableName>(
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
       const { error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .delete()
-        .eq('id' as any, id);
+        .eq('id', id);
       
       if (error) throw error;
     },
