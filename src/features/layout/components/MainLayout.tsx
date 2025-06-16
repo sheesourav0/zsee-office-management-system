@@ -4,6 +4,7 @@ import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import MainNavigation from "./MainNavigation";
 import { toast } from "sonner";
+import { checkUserPermission } from "@/lib/policies";
 
 const MainLayout = () => {
   const [user, setUser] = useState<any>(null);
@@ -46,6 +47,33 @@ const MainLayout = () => {
     if (path === "/user-management") return "User Management";
     return "";
   };
+
+  // Check permissions for current route
+  const hasRoutePermission = () => {
+    const path = location.pathname;
+    
+    // Define route permission mappings
+    const routePermissions: Record<string, string> = {
+      "/payments": "read:payments",
+      "/project-billing": "read:projects",
+      "/purchase-billing": "read:payments",
+      "/expenses": "read:payments",
+      "/vendors": "read:vendors",
+      "/user-management": "read:users",
+      "/reports": "read:reports",
+    };
+
+    const requiredPermission = routePermissions[path];
+    if (!requiredPermission) return true; // No specific permission required
+    
+    return checkUserPermission(user, requiredPermission);
+  };
+
+  // Redirect if user doesn't have permission for current route
+  if (!hasRoutePermission()) {
+    toast.error("You don't have permission to access this page");
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <SidebarProvider>

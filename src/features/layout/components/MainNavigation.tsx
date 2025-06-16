@@ -19,6 +19,7 @@ import {
   Calculator
 } from "lucide-react";
 import { toast } from "sonner";
+import { checkUserPermission } from "@/lib/policies";
 
 interface MainNavigationProps {
   user: any;
@@ -36,19 +37,26 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
 
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
-    { icon: Layers, label: "Department Projects", path: "/department-projects" },
-    { icon: FileText, label: "Payments", path: "/payments" },
-    { icon: Calculator, label: "Project Billing", path: "/project-billing" },
-    { icon: Receipt, label: "Purchase and Invoice", path: "/purchase-billing" },
-    { icon: Wallet, label: "Expenses", path: "/expenses" },
-    { icon: Truck, label: "Transportation", path: "/transportation" },
-    { icon: Users, label: "Vendors", path: "/vendors" },
-    { icon: UsersRound, label: "Team Management", path: "/team-management" },
-    { icon: BarChart3, label: "Reports", path: "/reports" },
+    { icon: Layers, label: "Department Projects", path: "/department-projects", permission: "read:projects" },
+    { icon: FileText, label: "Payments", path: "/payments", permission: "read:payments" },
+    { icon: Calculator, label: "Project Billing", path: "/project-billing", permission: "read:projects" },
+    { icon: Receipt, label: "Purchase and Invoice", path: "/purchase-billing", permission: "read:payments" },
+    { icon: Wallet, label: "Expenses", path: "/expenses", permission: "read:payments" },
+    { icon: Truck, label: "Transportation", path: "/transportation", permission: "read:projects" },
+    { icon: Users, label: "Vendors", path: "/vendors", permission: "read:vendors" },
+    { icon: UsersRound, label: "Team Management", path: "/team-management", permission: "read:users" },
+    { icon: BarChart3, label: "Reports", path: "/reports", permission: "read:reports" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
-  const isSuperAdmin = user && (user.role === "superadmin" || user.role === "admin");
+  // Filter navigation items based on user permissions
+  const visibleNavItems = navItems.filter(item => {
+    if (!item.permission) return true; // No permission required
+    return checkUserPermission(user, item.permission);
+  });
+
+  const isSuperAdmin = user && (user.role === "superadmin" || user.role === "admin") || 
+                      checkUserPermission(user, "read:users");
 
   return (
     <Sidebar className="border-r">
@@ -59,7 +67,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <div className="space-y-1">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link to={item.path} key={item.path}>
               <Button
                 variant={location.pathname === item.path ? "secondary" : "ghost"}

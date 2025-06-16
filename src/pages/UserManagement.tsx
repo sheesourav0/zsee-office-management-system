@@ -1,26 +1,42 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddUserForm from "@/components/users/AddUserForm";
 import UsersList from "@/components/users/UsersList";
 import RolesManagement from "@/components/users/RolesManagement";
 import ImportUsers from "@/components/users/ImportUsers";
+import PolicyManagement from "@/components/users/PolicyManagement";
+import UserPolicyAssignment from "@/components/users/UserPolicyAssignment";
 import { toast } from "sonner";
+import { User } from "@/components/users/UsersList";
 
 const UserManagement = () => {
+  const [users, setUsers] = useState<User[]>([]);
+
+  // Load users data for policy assignment
+  const loadUsers = () => {
+    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    setUsers(storedUsers);
+  };
+
+  React.useEffect(() => {
+    loadUsers();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage users, roles and permissions</p>
+        <p className="text-muted-foreground">Manage users, roles, policies and permissions</p>
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">User List</TabsTrigger>
           <TabsTrigger value="add">Add User</TabsTrigger>
           <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
+          <TabsTrigger value="policies">Policy Management</TabsTrigger>
+          <TabsTrigger value="assignments">Policy Assignments</TabsTrigger>
           <TabsTrigger value="import">Import Users</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
@@ -53,6 +69,28 @@ const UserManagement = () => {
             </CardHeader>
             <CardContent>
               <RolesManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="policies">
+          <Card>
+            <CardHeader>
+              <CardTitle>Policy-Based Permission System</CardTitle>
+              <CardDescription>Create and manage policies that contain groups of permissions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PolicyManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="assignments">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Policy Assignments</CardTitle>
+              <CardDescription>Assign policies to users for granular permission control</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UserPolicyAssignment users={users} />
             </CardContent>
           </Card>
         </TabsContent>
