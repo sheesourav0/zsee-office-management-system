@@ -16,7 +16,8 @@ import {
   Layers,
   Receipt,
   UsersRound,
-  Wallet
+  Wallet,
+  Calculator
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
     { icon: Folder, label: "Projects", path: "/projects" },
     { icon: Layers, label: "Department Projects", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
+    { icon: Calculator, label: "Project Billing", path: "/project-billing" },
     { icon: Receipt, label: "Purchase & Billing", path: "/purchase-billing" },
     { icon: Wallet, label: "Expenses", path: "/expenses" },
     { icon: Truck, label: "Transportation", path: "/transportation" },
