@@ -25,7 +25,7 @@ const formSchema = z.object({
   billedToParty: z.object({
     name: z.string().min(1, { message: "Party name is required" }),
     address: z.string().min(10, { message: "Address is required" }),
-    gstin: z.string().optional(),
+    gstin: z.string().min(1, { message: "GSTIN is required" }),
     state: z.string().min(1, { message: "State is required" }),
     code: z.string().min(1, { message: "Code is required" }),
   }),
@@ -115,7 +115,13 @@ const AddInvoiceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         gstin: "12AABCZ1684M1Z2",
         state: "Arunachal Pradesh",
         code: "12",
-        billedToParty: data.billedToParty,
+        billedToParty: {
+          name: data.billedToParty.name,
+          address: data.billedToParty.address,
+          gstin: data.billedToParty.gstin,
+          state: data.billedToParty.state,
+          code: data.billedToParty.code,
+        },
         items: data.items.map((item, index) => {
           const calc = calculateItemTotal(item);
           return {

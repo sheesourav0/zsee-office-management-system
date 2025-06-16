@@ -371,7 +371,7 @@ const AddPOForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 
                 <FormField
                   control={form.control}
-                  name={`items.${index}.gst`}
+                  name={`items.${index}.gstRate`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>GST (%)</FormLabel>
