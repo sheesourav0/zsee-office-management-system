@@ -1,10 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AddUserForm from "@/components/users/AddUserForm";
-import UsersList from "@/components/users/UsersList";
+import DatabaseAddUserForm from "@/components/users/DatabaseAddUserForm";
+import DatabaseUsersList from "@/components/users/DatabaseUsersList";
+import DatabasePolicyManagement from "@/components/users/DatabasePolicyManagement";
 import ImportUsers from "@/components/users/ImportUsers";
-import PolicyManagement from "@/components/users/PolicyManagement";
 import UserPolicyAssignment from "@/components/users/UserPolicyAssignment";
 import { useState, useEffect } from "react";
 
@@ -12,21 +12,15 @@ const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Load users for policy assignment
-    const loadUsers = () => {
-      const storedUsers = localStorage.getItem("users");
-      if (storedUsers) {
-        setUsers(JSON.parse(storedUsers));
-      }
-    };
-    loadUsers();
+    // This is now handled by the database components
+    setUsers([]);
   }, []);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage users, department-based policies and permissions</p>
+        <p className="text-muted-foreground">Manage users, department-based policies and permissions with Supabase</p>
       </div>
 
       <Tabs defaultValue="users">
@@ -41,10 +35,10 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Users</CardTitle>
-              <CardDescription>View and manage all users in the system with department-based access</CardDescription>
+              <CardDescription>View and manage all users in the system with database integration</CardDescription>
             </CardHeader>
             <CardContent>
-              <UsersList />
+              <DatabaseUsersList />
             </CardContent>
           </Card>
         </TabsContent>
@@ -52,21 +46,21 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Add New User</CardTitle>
-              <CardDescription>Create a new user and assign department-based policies</CardDescription>
+              <CardDescription>Create a new user with Supabase authentication and department assignment</CardDescription>
             </CardHeader>
             <CardContent>
-              <AddUserForm />
+              <DatabaseAddUserForm />
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="policies">
           <Card>
             <CardHeader>
-              <CardTitle>Department-Based Policy Management</CardTitle>
-              <CardDescription>Create and manage policies with department-specific or global permissions that replace traditional roles</CardDescription>
+              <CardTitle>Database Policy Management</CardTitle>
+              <CardDescription>Create and manage policies stored in Supabase with department-specific permissions</CardDescription>
             </CardHeader>
             <CardContent>
-              <PolicyManagement />
+              <DatabasePolicyManagement />
             </CardContent>
           </Card>
         </TabsContent>
@@ -74,7 +68,7 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>User Policy Assignments</CardTitle>
-              <CardDescription>Assign department-based policies to users for complete permission control</CardDescription>
+              <CardDescription>Assign database-stored policies to users for complete permission control</CardDescription>
             </CardHeader>
             <CardContent>
               <UserPolicyAssignment users={users} />
