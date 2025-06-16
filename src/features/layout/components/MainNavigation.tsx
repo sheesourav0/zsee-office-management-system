@@ -1,10 +1,10 @@
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Home, 
-  Folder, 
   FileText, 
   Truck, 
   Users, 
@@ -36,7 +36,6 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
 
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
-    { icon: Folder, label: "Projects", path: "/projects" },
     { icon: Layers, label: "Department Projects", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
     { icon: Calculator, label: "Project Billing", path: "/project-billing" },

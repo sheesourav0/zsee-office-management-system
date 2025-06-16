@@ -236,7 +236,7 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link to="/project-billing">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
@@ -250,14 +250,6 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle className="text-lg">Payment Management</CardTitle>
               <CardDescription>Track and manage all payments</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-        <Link to="/projects">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-lg">Project Overview</CardTitle>
-              <CardDescription>View all construction projects</CardDescription>
             </CardHeader>
           </Card>
         </Link>
