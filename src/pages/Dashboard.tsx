@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,18 +72,38 @@ const Dashboard = () => {
 
   // Convert projects to recent payments format for table
   const getRecentPayments = () => {
-    return projects.map((project, index) => ({
-      id: project.id,
-      projectName: project.name,
-      companyName: project.projectOwnerDetails || project.projectOwner,
-      amount: project.totalCost,
-      payableAmount: project.totalPending,
-      paymentStatus: project.totalPending === 0 ? "paid" : 
-                   project.totalReceived > 0 ? "partial" : "unpaid",
-      transportStatus: project.status === "completed" ? "delivered" : 
-                      project.status === "active" ? "in-transit" : "pending",
-      date: new Date(project.createdAt).toISOString().split('T')[0]
-    }));
+    return projects.map((project, index) => {
+      // Ensure paymentStatus matches the expected union type
+      let paymentStatus: "paid" | "partial" | "unpaid" | "hold";
+      if (project.totalPending === 0) {
+        paymentStatus = "paid";
+      } else if (project.totalReceived > 0) {
+        paymentStatus = "partial";
+      } else {
+        paymentStatus = "unpaid";
+      }
+
+      // Ensure transportStatus matches the expected union type
+      let transportStatus: "pending" | "in-transit" | "delivered" | "not-applicable";
+      if (project.status === "completed") {
+        transportStatus = "delivered";
+      } else if (project.status === "active") {
+        transportStatus = "in-transit";
+      } else {
+        transportStatus = "pending";
+      }
+
+      return {
+        id: project.id,
+        projectName: project.name,
+        companyName: project.projectOwnerDetails || project.projectOwner,
+        amount: project.totalCost,
+        payableAmount: project.totalPending,
+        paymentStatus,
+        transportStatus,
+        date: new Date(project.createdAt).toISOString().split('T')[0]
+      };
+    });
   };
 
   const recentPayments = getRecentPayments();
