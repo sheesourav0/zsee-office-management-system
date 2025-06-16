@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +11,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Trash2 } from "lucide-react";
-import { Department, PaymentTerm, WorkPlanStep, BillingProject } from "../types/billingTypes";
+import { Department, PaymentTerm, WorkPlanStep, BillingProject, ProjectMilestone, ProjectPhase } from "../types/billingTypes";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -22,6 +21,8 @@ const projectSchema = z.object({
   projectOwnerDetails: z.string().optional(),
   startDate: z.string().optional(),
   expectedEndDate: z.string().optional(),
+  projectManager: z.string().min(1, "Project manager is required"),
+  baselineDuration: z.number().min(1, "Duration must be at least 1 day"),
 });
 
 interface AddProjectFormProps {
@@ -35,6 +36,8 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
     { id: "1", description: "After materials supply", percentage: 60, milestone: "Materials Supply" }
   ]);
   const [workPlan, setWorkPlan] = useState<WorkPlanStep[]>([]);
+  const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
+  const [projectPhases, setProjectPhases] = useState<ProjectPhase[]>([]);
 
   const form = useForm<z.infer<typeof projectSchema>>({
     resolver: zodResolver(projectSchema),
@@ -44,6 +47,8 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
       totalCost: 0,
       projectOwner: "PHED",
       projectOwnerDetails: "",
+      projectManager: "",
+      baselineDuration: 30,
     },
   });
 
@@ -87,6 +92,12 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
           departmentName: department.name,
           targetDate: "",
           status: "pending",
+          startDate: "",
+          endDate: "",
+          duration: 7, // Default 7 days
+          progress: 0,
+          priority: "medium",
+          estimatedHours: 40,
         };
         setWorkPlan([...workPlan, newWorkPlanStep]);
       }
@@ -116,9 +127,55 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
     ));
   };
 
-  const updateWorkPlanStep = (id: string, field: keyof WorkPlanStep, value: string) => {
+  const updateWorkPlanStep = (id: string, field: keyof WorkPlanStep, value: string | number) => {
     setWorkPlan(workPlan.map(step => 
       step.id === id ? { ...step, [field]: value } : step
+    ));
+  };
+
+  const addMilestone = () => {
+    const newMilestone: ProjectMilestone = {
+      id: Date.now().toString(),
+      name: "",
+      description: "",
+      targetDate: "",
+      status: "pending",
+      isPaymentMilestone: false,
+    };
+    setMilestones([...milestones, newMilestone]);
+  };
+
+  const removeMilestone = (id: string) => {
+    setMilestones(milestones.filter(m => m.id !== id));
+  };
+
+  const updateMilestone = (id: string, field: keyof ProjectMilestone, value: string | boolean) => {
+    setMilestones(milestones.map(milestone => 
+      milestone.id === id ? { ...milestone, [field]: value } : milestone
+    ));
+  };
+
+  const addProjectPhase = () => {
+    const newPhase: ProjectPhase = {
+      id: Date.now().toString(),
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      status: "not-started",
+      progress: 0,
+      workPlanSteps: [],
+    };
+    setProjectPhases([...projectPhases, newPhase]);
+  };
+
+  const removeProjectPhase = (id: string) => {
+    setProjectPhases(projectPhases.filter(p => p.id !== id));
+  };
+
+  const updateProjectPhase = (id: string, field: keyof ProjectPhase, value: string | number | string[]) => {
+    setProjectPhases(projectPhases.map(phase => 
+      phase.id === id ? { ...phase, [field]: value } : phase
     ));
   };
 
@@ -146,6 +203,14 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
       updatedAt: new Date().toISOString(),
       startDate: values.startDate,
       expectedEndDate: values.expectedEndDate,
+      milestones,
+      projectPhases,
+      riskFactors: [],
+      resources: [],
+      overallProgress: 0,
+      baselineDuration: values.baselineDuration,
+      projectManager: values.projectManager,
+      projectTeam: [],
     };
 
     const existingProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
@@ -325,24 +390,58 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
           </CardContent>
         </Card>
 
+        {/* Enhanced Work Plan with Gantt fields */}
         {workPlan.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Work Plan & Target Dates</CardTitle>
+              <CardTitle>Work Plan & Timeline</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {workPlan.map((step) => (
-                <div key={step.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div key={step.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded">
                   <div>
                     <label className="text-sm font-medium">{step.departmentName}</label>
                     <Input value={step.departmentName} disabled />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Target Date</label>
+                    <label className="text-sm font-medium">Start Date</label>
                     <Input
                       type="date"
-                      value={step.targetDate}
-                      onChange={(e) => updateWorkPlanStep(step.id, 'targetDate', e.target.value)}
+                      value={step.startDate}
+                      onChange={(e) => updateWorkPlanStep(step.id, 'startDate', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">End Date</label>
+                    <Input
+                      type="date"
+                      value={step.endDate}
+                      onChange={(e) => updateWorkPlanStep(step.id, 'endDate', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Priority</label>
+                    <Select 
+                      value={step.priority} 
+                      onValueChange={(value) => updateWorkPlanStep(step.id, 'priority', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Est. Hours</label>
+                    <Input
+                      type="number"
+                      value={step.estimatedHours}
+                      onChange={(e) => updateWorkPlanStep(step.id, 'estimatedHours', parseFloat(e.target.value) || 0)}
                     />
                   </div>
                 </div>
@@ -350,6 +449,103 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
             </CardContent>
           </Card>
         )}
+
+        {/* Project Milestones */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Project Milestones
+              <Button type="button" variant="outline" size="sm" onClick={addMilestone}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Milestone
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {milestones.map((milestone) => (
+              <div key={milestone.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <div>
+                  <label className="text-sm font-medium">Milestone Name</label>
+                  <Input
+                    placeholder="Milestone name"
+                    value={milestone.name}
+                    onChange={(e) => updateMilestone(milestone.id, 'name', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Input
+                    placeholder="Description"
+                    value={milestone.description}
+                    onChange={(e) => updateMilestone(milestone.id, 'description', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Target Date</label>
+                  <Input
+                    type="date"
+                    value={milestone.targetDate}
+                    onChange={(e) => updateMilestone(milestone.id, 'targetDate', e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`payment-${milestone.id}`}
+                    checked={milestone.isPaymentMilestone}
+                    onCheckedChange={(checked) => updateMilestone(milestone.id, 'isPaymentMilestone', checked as boolean)}
+                  />
+                  <label htmlFor={`payment-${milestone.id}`} className="text-sm">
+                    Payment Milestone
+                  </label>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeMilestone(milestone.id)}
+                  disabled={milestones.length === 1}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="projectManager"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Project Manager</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter project manager name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="baselineDuration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estimated Duration (Days)</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Enter duration in days" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="flex justify-end gap-2">
           <Button type="submit">Create Project</Button>

@@ -1,13 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2, BarChart3 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BillingProject } from "../types/billingTypes";
+import ProjectGanttChart from "./ProjectGanttChart";
 
 interface ProjectManagementProps {
   refreshTrigger: number;
@@ -17,6 +17,8 @@ const ProjectManagement = ({ refreshTrigger }: ProjectManagementProps) => {
   const [projects, setProjects] = useState<BillingProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<BillingProject | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isGanttDialogOpen, setIsGanttDialogOpen] = useState(false);
+  const [ganttProject, setGanttProject] = useState<BillingProject | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -50,6 +52,11 @@ const ProjectManagement = ({ refreshTrigger }: ProjectManagementProps) => {
   const viewProject = (project: BillingProject) => {
     setSelectedProject(project);
     setIsViewDialogOpen(true);
+  };
+
+  const showGanttChart = (project: BillingProject) => {
+    setGanttProject(project);
+    setIsGanttDialogOpen(true);
   };
 
   const deleteProject = (projectId: string) => {
@@ -104,13 +111,23 @@ const ProjectManagement = ({ refreshTrigger }: ProjectManagementProps) => {
                         variant="outline"
                         size="sm"
                         onClick={() => viewProject(project)}
+                        title="View Details"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => showGanttChart(project)}
+                        title="View Gantt Chart"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => deleteProject(project.id)}
+                        title="Delete Project"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -123,6 +140,7 @@ const ProjectManagement = ({ refreshTrigger }: ProjectManagementProps) => {
         </Table>
       </div>
 
+      {/* Existing View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -191,6 +209,16 @@ const ProjectManagement = ({ refreshTrigger }: ProjectManagementProps) => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Gantt Chart Dialog */}
+      <Dialog open={isGanttDialogOpen} onOpenChange={setIsGanttDialogOpen}>
+        <DialogContent className="sm:max-w-[95vw] max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Project Timeline - Gantt Chart</DialogTitle>
+          </DialogHeader>
+          {ganttProject && <ProjectGanttChart project={ganttProject} />}
         </DialogContent>
       </Dialog>
     </>
