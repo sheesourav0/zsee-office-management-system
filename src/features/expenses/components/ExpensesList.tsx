@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +72,7 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
 
   const getTotalReceived = () => {
     return filteredExpenses
-      .filter(expense => expense.transactionType === 'received')
+      .filter(expense => expense.transactionType === 'received' || expense.transactionType === 'total_received')
       .reduce((sum, expense) => sum + expense.amount, 0);
   };
 
@@ -172,12 +171,13 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
                 <TableCell>{expense.category}</TableCell>
                 {type === 'project' && <TableCell>{expense.projectName || '-'}</TableCell>}
                 <TableCell>
-                  <Badge variant={expense.transactionType === 'received' ? 'default' : 'destructive'}>
-                    {expense.transactionType === 'received' ? 'Received' : 'Spent'}
+                  <Badge variant={expense.transactionType === 'spent' ? 'destructive' : 'default'}>
+                    {expense.transactionType === 'received' ? 'Received' : 
+                     expense.transactionType === 'total_received' ? 'Total Received' : 'Spent'}
                   </Badge>
                 </TableCell>
-                <TableCell className={expense.transactionType === 'received' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                  {expense.transactionType === 'received' ? '+' : '-'}₹{expense.amount.toLocaleString()}
+                <TableCell className={expense.transactionType === 'spent' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+                  {expense.transactionType === 'spent' ? '-' : '+'}₹{expense.amount.toLocaleString()}
                 </TableCell>
                 <TableCell>{expense.paymentMethod}</TableCell>
                 <TableCell>
