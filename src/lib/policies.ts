@@ -6,7 +6,7 @@ export interface Policy {
   description: string;
   permissions: string[];
   departmentId?: string; // null for global policies
-  userType: 'department-staff' | 'department-manager' | 'global-admin' | 'global-staff';
+  userType: 'department-staff' | 'department-manager' | 'department-supervisor' | 'global-admin' | 'accountant' | 'hr-manager' | 'viewer';
   createdAt: string;
   updatedAt: string;
 }
