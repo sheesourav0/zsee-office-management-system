@@ -4,126 +4,104 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/ui/date-picker";
 import { CircleDollarSign, CreditCard, Clock, AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import PaymentStatusCard from "@/components/dashboard/PaymentStatusCard";
 import RecentPaymentsTable from "@/components/dashboard/RecentPaymentsTable";
 import ProjectStatusCard from "@/components/dashboard/ProjectStatusCard";
-
-// Simulated data - in a real app, this would come from an API
-const generateMockData = () => {
-  const recentPayments = [
-    {
-      id: "1",
-      projectName: "Piyong IoT(Namsal)",
-      companyName: "King Longkai",
-      amount: 300000,
-      payableAmount: 300000,
-      paymentStatus: "unpaid",
-      transportStatus: "pending",
-      date: "2023-04-15"
-    },
-    {
-      id: "2",
-      projectName: "Sample Testing",
-      companyName: "BMP SYSTEMS",
-      amount: 81410,
-      payableAmount: 81410,
-      paymentStatus: "paid",
-      transportStatus: "delivered",
-      date: "2023-04-12"
-    },
-    {
-      id: "3",
-      projectName: "YACHULI",
-      companyName: "P.R.S ENTERPRISE",
-      amount: 76591,
-      payableAmount: 76591,
-      paymentStatus: "paid",
-      transportStatus: "delivered",
-      date: "2023-04-10"
-    },
-    {
-      id: "4",
-      projectName: "YACHULI",
-      companyName: "SKY MARKETING",
-      amount: 248355,
-      payableAmount: 248355,
-      paymentStatus: "unpaid",
-      transportStatus: "not-applicable",
-      date: "2023-04-08"
-    },
-    {
-      id: "5",
-      projectName: "Amni WTP",
-      companyName: "Agmatic Technologies",
-      amount: 2542324,
-      payableAmount: 1406679,
-      paymentStatus: "partial",
-      transportStatus: "in-transit",
-      date: "2023-04-05"
-    }
-  ];
-
-  const projectStatus = [
-    {
-      name: "Amni WTP",
-      completionPercentage: 65,
-      totalPayments: 7500000,
-      pendingPayments: 2625000
-    },
-    {
-      name: "YACHULI",
-      completionPercentage: 80,
-      totalPayments: 3500000,
-      pendingPayments: 700000
-    },
-    {
-      name: "Sample Testing",
-      completionPercentage: 100,
-      totalPayments: 450000,
-      pendingPayments: 0
-    },
-    {
-      name: "Piyong IoT",
-      completionPercentage: 30,
-      totalPayments: 1200000,
-      pendingPayments: 840000
-    }
-  ];
-
-  return { recentPayments, projectStatus };
-};
+import { BillingProject, ProjectPayment } from "@/features/billing/types/billingTypes";
 
 const Dashboard = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [timeframe, setTimeframe] = useState("10d");
-  const [data, setData] = useState<any>(generateMockData());
+  const [projects, setProjects] = useState<BillingProject[]>([]);
+  const [payments, setPayments] = useState<ProjectPayment[]>([]);
 
   useEffect(() => {
-    // In a real app, this would fetch data from API based on the timeframe
-    setData(generateMockData());
+    loadData();
   }, [timeframe, startDate, endDate]);
 
-  // Calculate payment statistics
-  const totalPayments = data.recentPayments.reduce((sum: number, payment: any) => sum + payment.amount, 0);
-  const paidAmount = data.recentPayments
-    .filter((p: any) => p.paymentStatus === "paid")
-    .reduce((sum: number, payment: any) => sum + payment.amount, 0);
-  const partialAmount = data.recentPayments
-    .filter((p: any) => p.paymentStatus === "partial")
-    .reduce((sum: number, payment: any) => sum + payment.payableAmount, 0);
-  const unpaidAmount = data.recentPayments
-    .filter((p: any) => p.paymentStatus === "unpaid")
-    .reduce((sum: number, payment: any) => sum + payment.amount, 0);
+  const loadData = () => {
+    // Load actual data from Project Billing system
+    const storedProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
+    const storedPayments = JSON.parse(localStorage.getItem('billing_payments') || '[]');
+    setProjects(storedProjects);
+    setPayments(storedPayments);
+  };
 
-  const paidPercent = Math.round((paidAmount / totalPayments) * 100);
-  const partialPercent = Math.round((partialAmount / totalPayments) * 100);
-  const unpaidPercent = Math.round((unpaidAmount / totalPayments) * 100);
+  // Calculate comprehensive payment statistics from actual project data
+  const calculatePaymentStats = () => {
+    const totalAmount = projects.reduce((sum, project) => sum + project.totalCost, 0);
+    const totalReceived = projects.reduce((sum, project) => sum + project.totalReceived, 0);
+    const totalPending = projects.reduce((sum, project) => sum + project.totalPending, 0);
+    
+    // Calculate partial payments (projects with some payment but not fully paid)
+    const partialAmount = projects
+      .filter(project => project.totalReceived > 0 && project.totalPending > 0)
+      .reduce((sum, project) => sum + project.totalReceived, 0);
+    
+    // Calculate unpaid (projects with no payments)
+    const unpaidAmount = projects
+      .filter(project => project.totalReceived === 0)
+      .reduce((sum, project) => sum + project.totalCost, 0);
+    
+    // Calculate fully paid
+    const paidAmount = projects
+      .filter(project => project.totalPending === 0 && project.totalReceived > 0)
+      .reduce((sum, project) => sum + project.totalReceived, 0);
+
+    // Calculate due soon (projects with high completion but pending payments)
+    const dueSoonAmount = projects
+      .filter(project => {
+        const progress = project.totalCost > 0 ? (project.totalReceived / project.totalCost) * 100 : 0;
+        return progress >= 50 && project.totalPending > 0;
+      })
+      .reduce((sum, project) => sum + project.totalPending, 0);
+
+    return {
+      totalAmount,
+      paidAmount,
+      partialAmount,
+      unpaidAmount,
+      dueSoonAmount,
+      totalReceived,
+      totalPending
+    };
+  };
+
+  const stats = calculatePaymentStats();
+
+  // Convert projects to recent payments format for table
+  const getRecentPayments = () => {
+    return projects.map((project, index) => ({
+      id: project.id,
+      projectName: project.name,
+      companyName: project.projectOwnerDetails || project.projectOwner,
+      amount: project.totalCost,
+      payableAmount: project.totalPending,
+      paymentStatus: project.totalPending === 0 ? "paid" : 
+                   project.totalReceived > 0 ? "partial" : "unpaid",
+      transportStatus: project.status === "completed" ? "delivered" : 
+                      project.status === "active" ? "in-transit" : "pending",
+      date: new Date(project.createdAt).toISOString().split('T')[0]
+    }));
+  };
+
+  const recentPayments = getRecentPayments();
+
+  // Calculate percentages
+  const paidPercent = stats.totalAmount > 0 ? Math.round((stats.paidAmount / stats.totalAmount) * 100) : 0;
+  const partialPercent = stats.totalAmount > 0 ? Math.round((stats.partialAmount / stats.totalAmount) * 100) : 0;
+  const unpaidPercent = stats.totalAmount > 0 ? Math.round((stats.unpaidAmount / stats.totalAmount) * 100) : 0;
+  const dueSoonPercent = stats.totalAmount > 0 ? Math.round((stats.dueSoonAmount / stats.totalAmount) * 100) : 0;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Project Management Dashboard</h1>
+          <p className="text-muted-foreground">Comprehensive overview of all projects, payments, and activities</p>
+        </div>
         <div className="flex items-center gap-2">
           <Tabs defaultValue="10d" value={timeframe} onValueChange={setTimeframe} className="w-[400px]">
             <TabsList className="grid grid-cols-4">
@@ -143,65 +121,127 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <PaymentStatusCard 
-          title="Total Paid" 
-          amount={paidAmount} 
-          total={totalPayments}
-          percent={paidPercent}
-          variant="paid" 
-          icon={<CircleDollarSign className="h-4 w-4" />} 
-        />
-        <PaymentStatusCard 
-          title="Partially Paid" 
-          amount={partialAmount} 
-          total={totalPayments}
-          percent={partialPercent}
-          variant="partial" 
-          icon={<CreditCard className="h-4 w-4" />} 
-        />
-        <PaymentStatusCard 
-          title="Unpaid" 
-          amount={unpaidAmount} 
-          total={totalPayments}
-          percent={unpaidPercent}
-          variant="unpaid" 
-          icon={<Clock className="h-4 w-4" />} 
-        />
-        <PaymentStatusCard 
-          title="Payments Due Soon" 
-          amount={450000} 
-          total={1000000}
-          percent={45}
-          variant="pending" 
-          icon={<AlertCircle className="h-4 w-4" />} 
-        />
+        <Link to="/project-billing?tab=payments">
+          <PaymentStatusCard 
+            title="Total Paid" 
+            amount={stats.paidAmount} 
+            total={stats.totalAmount}
+            percent={paidPercent}
+            variant="paid" 
+            icon={<CircleDollarSign className="h-4 w-4" />} 
+          />
+        </Link>
+        <Link to="/project-billing?tab=payments">
+          <PaymentStatusCard 
+            title="Partially Paid" 
+            amount={stats.partialAmount} 
+            total={stats.totalAmount}
+            percent={partialPercent}
+            variant="partial" 
+            icon={<CreditCard className="h-4 w-4" />} 
+          />
+        </Link>
+        <Link to="/project-billing?tab=payments">
+          <PaymentStatusCard 
+            title="Unpaid" 
+            amount={stats.unpaidAmount} 
+            total={stats.totalAmount}
+            percent={unpaidPercent}
+            variant="unpaid" 
+            icon={<Clock className="h-4 w-4" />} 
+          />
+        </Link>
+        <Link to="/project-billing?tab=payments">
+          <PaymentStatusCard 
+            title="Payments Due Soon" 
+            amount={stats.dueSoonAmount} 
+            total={stats.totalAmount}
+            percent={dueSoonPercent}
+            variant="pending" 
+            icon={<AlertCircle className="h-4 w-4" />} 
+          />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Payments</CardTitle>
-            <CardDescription>Overview of the latest payment activities</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Recent Project Activities</CardTitle>
+              <CardDescription>Overview of the latest project payment activities</CardDescription>
+            </div>
+            <Link to="/payments" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              View All Payments →
+            </Link>
           </CardHeader>
           <CardContent>
-            <RecentPaymentsTable payments={data.recentPayments} />
+            <RecentPaymentsTable payments={recentPayments.slice(0, 5)} />
           </CardContent>
         </Card>
       </div>
 
       <div>
-        <h2 className="text-xl font-bold mb-4">Project Status</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {data.projectStatus.map((project: any, index: number) => (
-            <ProjectStatusCard 
-              key={index}
-              name={project.name}
-              completionPercentage={project.completionPercentage}
-              totalPayments={project.totalPayments}
-              pendingPayments={project.pendingPayments}
-            />
-          ))}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Project Status Overview</h2>
+          <Link to="/project-billing" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Manage Projects →
+          </Link>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {projects.slice(0, 4).map((project) => {
+            const completionPercentage = project.totalCost > 0 ? 
+              Math.round(((project.totalCost - project.totalPending) / project.totalCost) * 100) : 0;
+            
+            return (
+              <Link key={project.id} to={`/project-billing?project=${project.id}`}>
+                <ProjectStatusCard 
+                  name={project.name}
+                  completionPercentage={completionPercentage}
+                  totalPayments={project.totalCost}
+                  pendingPayments={project.totalPending}
+                />
+              </Link>
+            );
+          })}
+        </div>
+        {projects.length === 0 && (
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground mb-4">No projects found. Start by creating your first project.</p>
+            <Link to="/project-billing">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Create Project
+              </button>
+            </Link>
+          </Card>
+        )}
+      </div>
+
+      {/* Quick Action Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link to="/project-billing">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="text-lg">Project Billing</CardTitle>
+              <CardDescription>Manage projects, payments, and billing</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
+        <Link to="/payments">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="text-lg">Payment Management</CardTitle>
+              <CardDescription>Track and manage all payments</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
+        <Link to="/projects">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="text-lg">Project Overview</CardTitle>
+              <CardDescription>View all construction projects</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
       </div>
     </div>
   );

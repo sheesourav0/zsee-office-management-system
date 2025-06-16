@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, FileText, Calculator, Settings, CreditCard } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 import ProjectManagement from "@/features/billing/components/ProjectManagement";
 import PaymentTracking from "@/features/billing/components/PaymentTracking";
 import InvoiceGeneration from "@/features/billing/components/InvoiceGeneration";
@@ -13,10 +14,26 @@ import AddProjectForm from "@/features/billing/components/AddProjectForm";
 import DepartmentSettings from "@/features/billing/components/DepartmentSettings";
 
 const ProjectBilling = () => {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("projects");
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [isDepartmentSettingsOpen, setIsDepartmentSettingsOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Handle URL parameters for navigation from Dashboard
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const projectId = searchParams.get('project');
+    
+    if (tab) {
+      setActiveTab(tab);
+    }
+    
+    if (projectId) {
+      // If a specific project is selected, show it in projects tab
+      setActiveTab('projects');
+    }
+  }, [searchParams]);
 
   const handleAddProjectSuccess = () => {
     setIsProjectDialogOpen(false);
