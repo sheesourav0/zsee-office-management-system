@@ -18,7 +18,7 @@ export const useSupabaseQuery = <T extends TableName>(
 ) => {
   return useQuery({
     queryKey,
-    queryFn: async (): Promise<TableRow<T>[]> => {
+    queryFn: async () => {
       let query = supabase.from(tableName).select(selectQuery || '*');
       
       if (filters) {
@@ -31,7 +31,7 @@ export const useSupabaseQuery = <T extends TableName>(
       
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as TableRow<T>[];
+      return data as TableRow<T>[];
     },
   });
 };
@@ -45,7 +45,7 @@ export const useSupabaseQuerySingle = <T extends TableName>(
 ) => {
   return useQuery({
     queryKey,
-    queryFn: async (): Promise<TableRow<T> | null> => {
+    queryFn: async () => {
       let query = supabase.from(tableName).select(selectQuery || '*');
       
       if (filters) {
@@ -56,9 +56,9 @@ export const useSupabaseQuerySingle = <T extends TableName>(
         });
       }
       
-      const { data, error } = await query.single();
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "not found"
-      return (data || null) as TableRow<T> | null;
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      return data as TableRow<T> | null;
     },
   });
 };
@@ -71,10 +71,10 @@ export const useSupabaseInsert = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: TableInsert<T>): Promise<TableRow<T>> => {
+    mutationFn: async (data: TableInsert<T>) => {
       const { data: result, error } = await supabase
         .from(tableName)
-        .insert(data)
+        .insert(data as any)
         .select()
         .single();
       
@@ -96,10 +96,10 @@ export const useSupabaseUpdate = <T extends TableName>(
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: TableUpdate<T> }): Promise<TableRow<T>> => {
+    mutationFn: async ({ id, data }: { id: string; data: TableUpdate<T> }) => {
       const { data: result, error } = await supabase
         .from(tableName)
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .select()
         .single();
