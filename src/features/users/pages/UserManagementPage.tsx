@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddUserForm from "@/components/users/AddUserForm";
 import UsersList from "@/components/users/UsersList";
-import RolesManagement from "@/components/users/RolesManagement";
 import ImportUsers from "@/components/users/ImportUsers";
 import PolicyManagement from "@/components/users/PolicyManagement";
 import UserPolicyAssignment from "@/components/users/UserPolicyAssignment";
@@ -27,14 +26,13 @@ const UserManagementPage = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage users, roles, policies and permissions</p>
+        <p className="text-muted-foreground">Manage users, department-based policies and permissions</p>
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users">User List</TabsTrigger>
           <TabsTrigger value="add">Add User</TabsTrigger>
-          <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
           <TabsTrigger value="policies">Policy Management</TabsTrigger>
           <TabsTrigger value="assignments">Policy Assignments</TabsTrigger>
           <TabsTrigger value="import">Import Users</TabsTrigger>
@@ -43,7 +41,7 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Users</CardTitle>
-              <CardDescription>View and manage all users in the system</CardDescription>
+              <CardDescription>View and manage all users in the system with department-based access</CardDescription>
             </CardHeader>
             <CardContent>
               <UsersList />
@@ -54,29 +52,18 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Add New User</CardTitle>
-              <CardDescription>Create a new user with specified role and permissions</CardDescription>
+              <CardDescription>Create a new user and assign department-based policies</CardDescription>
             </CardHeader>
             <CardContent>
               <AddUserForm />
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="roles">
-          <Card>
-            <CardHeader>
-              <CardTitle>Roles & Permissions</CardTitle>
-              <CardDescription>Create and manage roles with specific permissions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RolesManagement />
-            </CardContent>
-          </Card>
-        </TabsContent>
         <TabsContent value="policies">
           <Card>
             <CardHeader>
-              <CardTitle>Policy Management</CardTitle>
-              <CardDescription>Create and manage policies with specific permissions that can be assigned to users</CardDescription>
+              <CardTitle>Department-Based Policy Management</CardTitle>
+              <CardDescription>Create and manage policies with department-specific or global permissions that replace traditional roles</CardDescription>
             </CardHeader>
             <CardContent>
               <PolicyManagement />
@@ -87,7 +74,7 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>User Policy Assignments</CardTitle>
-              <CardDescription>Assign policies to users for granular permission control</CardDescription>
+              <CardDescription>Assign department-based policies to users for complete permission control</CardDescription>
             </CardHeader>
             <CardContent>
               <UserPolicyAssignment users={users} />
@@ -98,7 +85,7 @@ const UserManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Import Users</CardTitle>
-              <CardDescription>Import multiple users from Excel spreadsheet</CardDescription>
+              <CardDescription>Import multiple users from Excel spreadsheet with department assignments</CardDescription>
             </CardHeader>
             <CardContent>
               <ImportUsers />

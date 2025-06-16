@@ -199,7 +199,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
                 });
 
                 // Get unique departments for this user
-                const userDepartments = new Set();
+                const userDepartments = new Set<string>();
                 userPolicyAssignments.forEach(assignment => {
                   const policy = policies.find(p => p.id === assignment.policyId);
                   if (policy?.departmentId) {
@@ -256,7 +256,7 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
                         {Array.from(userDepartments).map((deptId) => (
                           <Badge key={deptId} variant="secondary" className="text-xs">
                             <Building2 className="h-3 w-3 mr-1" />
-                            {getDepartmentName(deptId === 'global' ? undefined : deptId as string)}
+                            {getDepartmentName(deptId === 'global' ? undefined : deptId)}
                           </Badge>
                         ))}
                       </div>
