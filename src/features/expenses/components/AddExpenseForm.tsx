@@ -69,7 +69,14 @@ const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormPr
       
       const newExpense: ExpenseItem = {
         id: Date.now().toString(),
-        ...data,
+        type: data.type,
+        category: data.category,
+        projectId: data.projectId,
+        projectName: data.projectName,
+        description: data.description,
+        amount: data.amount,
+        transactionType: data.transactionType,
+        paymentMethod: data.paymentMethod,
         date: data.date.toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
