@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -37,7 +36,7 @@ const MainLayout = () => {
     if (path === "/department-projects") return "Department Projects";
     if (path === "/payments") return "Payments";
     if (path === "/project-billing") return "Project Billing";
-    if (path === "/purchase-billing") return "Purchase & Billing";
+    if (path === "/purchase-billing") return "Purchase and Invoice";
     if (path === "/expenses") return "Expenses";
     if (path === "/transportation") return "Transportation";
     if (path === "/vendors") return "Vendors";
