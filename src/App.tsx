@@ -13,6 +13,7 @@ import Payments from "@/pages/Payments";
 import PurchaseBilling from "@/pages/PurchaseBilling";
 import Transportation from "@/pages/Transportation";
 import Vendors from "@/pages/Vendors";
+import Expenses from "@/pages/Expenses";
 import ReportsPage from "@/features/reports/pages/ReportsPage";
 import Settings from "@/pages/Settings";
 import UserManagementPage from "@/features/users/pages/UserManagementPage";
@@ -41,6 +42,7 @@ const App = () => {
               <Route path="purchase-billing" element={<PurchaseBilling />} />
               <Route path="transportation" element={<Transportation />} />
               <Route path="vendors" element={<Vendors />} />
+              <Route path="expenses" element={<Expenses />} />
               <Route path="team-management" element={<TeamManagement />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<Settings />} />

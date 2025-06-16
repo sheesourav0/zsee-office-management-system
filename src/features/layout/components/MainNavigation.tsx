@@ -15,7 +15,8 @@ import {
   UserPlus,
   Layers,
   Receipt,
-  UsersRound
+  UsersRound,
+  Wallet
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
     { icon: Layers, label: "Department Projects", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
     { icon: Receipt, label: "Purchase & Billing", path: "/purchase-billing" },
+    { icon: Wallet, label: "Expenses", path: "/expenses" },
     { icon: Truck, label: "Transportation", path: "/transportation" },
     { icon: Users, label: "Vendors", path: "/vendors" },
     { icon: UsersRound, label: "Team Management", path: "/team-management" },
