@@ -91,7 +91,7 @@ const DatabaseUserPolicyAssignment = () => {
   const assignPolicyMutation = useAssignPolicy();
   const removePolicyMutation = useRemovePolicyAssignment();
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { open: isOpen, onOpen, onClose } = useDisclosure();
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
@@ -239,7 +239,6 @@ const DatabaseUserPolicyAssignment = () => {
       </Box>
 
       <Modal isOpen={isOpen} onClose={onClose} size="3xl">
-        <ModalOverlay />
         <ModalContent>
           <ModalHeader>Assign Database-Stored Policies to User</ModalHeader>
           <ModalCloseButton />
@@ -298,10 +297,8 @@ const DatabaseUserPolicyAssignment = () => {
                         return (
                           <Flex key={policy.id} align="flex-start" gap={3}>
                             <Checkbox
-                              id={policy.id}
-                              isChecked={selectedPolicies.includes(policy.id)}
-                              onChange={() => togglePolicySelection(policy.id)}
-                              mt={1}
+                              checked={selectedPolicies.includes(policy.id)}
+                              onCheckedChange={() => togglePolicySelection(policy.id)}
                             />
                             <VStack gap={1} align="flex-start" flex={1}>
                               <Text fontSize="sm" fontWeight="medium">
@@ -339,8 +336,8 @@ const DatabaseUserPolicyAssignment = () => {
             </ChakraButton>
             <Button 
               onClick={handleAssignPolicies} 
-              isLoading={assignPolicyMutation.isPending}
-              isDisabled={!selectedUser || selectedPolicies.length === 0}
+              loading={assignPolicyMutation.isPending}
+              disabled={!selectedUser || selectedPolicies.length === 0}
             >
               {assignPolicyMutation.isPending ? 'Assigning...' : 'Assign Policies'}
             </Button>

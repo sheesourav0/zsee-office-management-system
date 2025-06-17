@@ -1,25 +1,22 @@
 
 import { 
-  Table as ChakraTable, 
-  Thead, 
-  Tbody, 
-  Tfoot, 
-  Tr, 
-  Th, 
-  Td, 
-  TableContainer,
-  TableProps 
+  Table as ChakraTable
 } from '@chakra-ui/react';
 import { forwardRef } from 'react';
+
+interface TableProps {
+  children: React.ReactNode;
+  [key: string]: any;
+}
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ children, ...props }, ref) => {
     return (
-      <TableContainer>
-        <ChakraTable ref={ref} variant="simple" {...props}>
+      <ChakraTable.ScrollArea>
+        <ChakraTable.Root ref={ref} variant="simple" {...props}>
           {children}
-        </ChakraTable>
-      </TableContainer>
+        </ChakraTable.Root>
+      </ChakraTable.ScrollArea>
     );
   }
 );
@@ -27,9 +24,9 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(
 export const TableHeader = forwardRef<HTMLTableSectionElement, any>(
   ({ children, ...props }, ref) => {
     return (
-      <Thead ref={ref} {...props}>
+      <ChakraTable.Header ref={ref} {...props}>
         {children}
-      </Thead>
+      </ChakraTable.Header>
     );
   }
 );
@@ -37,9 +34,9 @@ export const TableHeader = forwardRef<HTMLTableSectionElement, any>(
 export const TableBody = forwardRef<HTMLTableSectionElement, any>(
   ({ children, ...props }, ref) => {
     return (
-      <Tbody ref={ref} {...props}>
+      <ChakraTable.Body ref={ref} {...props}>
         {children}
-      </Tbody>
+      </ChakraTable.Body>
     );
   }
 );
@@ -47,9 +44,9 @@ export const TableBody = forwardRef<HTMLTableSectionElement, any>(
 export const TableFooter = forwardRef<HTMLTableSectionElement, any>(
   ({ children, ...props }, ref) => {
     return (
-      <Tfoot ref={ref} {...props}>
+      <ChakraTable.Footer ref={ref} {...props}>
         {children}
-      </Tfoot>
+      </ChakraTable.Footer>
     );
   }
 );
@@ -57,9 +54,9 @@ export const TableFooter = forwardRef<HTMLTableSectionElement, any>(
 export const TableRow = forwardRef<HTMLTableRowElement, any>(
   ({ children, ...props }, ref) => {
     return (
-      <Tr ref={ref} {...props}>
+      <ChakraTable.Row ref={ref} {...props}>
         {children}
-      </Tr>
+      </ChakraTable.Row>
     );
   }
 );
@@ -67,9 +64,9 @@ export const TableRow = forwardRef<HTMLTableRowElement, any>(
 export const TableHead = forwardRef<HTMLTableCellElement, any>(
   ({ children, ...props }, ref) => {
     return (
-      <Th ref={ref} {...props}>
+      <ChakraTable.ColumnHeader ref={ref} {...props}>
         {children}
-      </Th>
+      </ChakraTable.ColumnHeader>
     );
   }
 );
@@ -77,9 +74,9 @@ export const TableHead = forwardRef<HTMLTableCellElement, any>(
 export const TableCell = forwardRef<HTMLTableCellElement, any>(
   ({ children, ...props }, ref) => {
     return (
-      <Td ref={ref} {...props}>
+      <ChakraTable.Cell ref={ref} {...props}>
         {children}
-      </Td>
+      </ChakraTable.Cell>
     );
   }
 );

@@ -1,13 +1,20 @@
 
-import { FormControl, FormLabel, FormErrorMessage, FormHelperText } from '@chakra-ui/react';
+import { Field } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
-export const FormItem = forwardRef<HTMLDivElement, any>(
-  ({ children, ...props }, ref) => {
+interface FormItemProps {
+  children: React.ReactNode;
+  invalid?: boolean;
+  isInvalid?: boolean;
+  [key: string]: any;
+}
+
+export const FormItem = forwardRef<HTMLDivElement, FormItemProps>(
+  ({ children, invalid, isInvalid, ...props }, ref) => {
     return (
-      <FormControl ref={ref} {...props}>
+      <Field.Root ref={ref} invalid={invalid || isInvalid} {...props}>
         {children}
-      </FormControl>
+      </Field.Root>
     );
   }
 );
@@ -16,8 +23,13 @@ export const FormField = ({ children, ...props }: any) => {
   return children(props);
 };
 
-export const FormControl_ = FormControl;
-export const FormLabel_ = FormLabel;
-export const FormMessage = FormErrorMessage;
+export const FormControl = FormItem;
+export const FormLabel = ({ children, ...props }: any) => (
+  <Field.Label {...props}>{children}</Field.Label>
+);
+export const FormMessage = ({ children, ...props }: any) => (
+  <Field.ErrorText {...props}>{children}</Field.ErrorText>
+);
+export const FormErrorMessage = FormMessage;
 
 FormItem.displayName = 'FormItem';

@@ -5,15 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
   VStack,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Select,
   Button as ChakraButton,
 } from "@chakra-ui/react";
 import { Input } from "@/components/chakra/Input";
 import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { FormControl, FormLabel, FormErrorMessage } from "@/components/chakra/Form";
+import { Select } from "@/components/chakra/Select";
 import { UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { departmentService } from "@/lib/supabase-services";
@@ -112,7 +110,7 @@ const DatabaseAddUserForm = () => {
             <Button 
               type="submit" 
               width="full" 
-              isLoading={createUserMutation.isPending}
+              loading={createUserMutation.isPending}
             >
               {createUserMutation.isPending ? "Creating..." : "Create User"}
             </Button>

@@ -1,28 +1,30 @@
 
-import { Button as ChakraButton, ButtonProps } from '@chakra-ui/react';
+import { Button as ChakraButton } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
-interface CustomButtonProps extends Omit<ButtonProps, 'variant'> {
+interface CustomButtonProps {
   variant?: 'solid' | 'outline' | 'ghost' | 'subtle';
   size?: 'sm' | 'md' | 'lg';
   leftIcon?: React.ReactElement;
   isLoading?: boolean;
   loading?: boolean;
+  children: React.ReactNode;
+  [key: string]: any;
 }
 
 export const Button = forwardRef<HTMLButtonElement, CustomButtonProps>(
   ({ variant = 'solid', size = 'md', children, leftIcon, isLoading, loading, ...props }, ref) => {
     return (
-      <ChakraButton
+      <ChakraButton.Root
         ref={ref}
         variant={variant}
         size={size}
-        leftIcon={leftIcon}
-        isLoading={isLoading || loading}
+        loading={isLoading || loading}
         {...props}
       >
+        {leftIcon && <ChakraButton.Icon>{leftIcon}</ChakraButton.Icon>}
         {children}
-      </ChakraButton>
+      </ChakraButton.Root>
     );
   }
 );

@@ -1,17 +1,27 @@
 
-import { Select as ChakraSelect, SelectProps } from '@chakra-ui/react';
+import { NativeSelectRoot, NativeSelectField } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
+interface SelectProps {
+  children: React.ReactNode;
+  placeholder?: string;
+  value?: string;
+  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  [key: string]: any;
+}
+
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  (props, ref) => {
+  ({ children, placeholder, ...props }, ref) => {
     return (
-      <ChakraSelect
-        ref={ref}
-        borderColor="gray.300"
-        _hover={{ borderColor: 'gray.400' }}
-        _focus={{ borderColor: 'primary.500', boxShadow: '0 0 0 1px var(--chakra-colors-primary-500)' }}
-        {...props}
-      />
+      <NativeSelectRoot>
+        <NativeSelectField
+          ref={ref}
+          placeholder={placeholder}
+          {...props}
+        >
+          {children}
+        </NativeSelectField>
+      </NativeSelectRoot>
     );
   }
 );
