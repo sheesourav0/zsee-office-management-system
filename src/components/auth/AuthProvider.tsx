@@ -42,14 +42,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshPermissions = async () => {
     if (user) {
       console.log('Refreshing permissions for user:', user.id);
-      // Mock permissions for demo
+      // Mock permissions for demo - using the structure expected by RoleDashboard
       const mockPermissions = {
-        canViewDashboard: true,
-        canManageUsers: user.email.includes('admin'),
-        canManageProjects: true,
-        canManagePayments: true,
-        canViewReports: true,
-        departments: user.email.includes('phed') ? ['phed'] : user.email.includes('pwd') ? ['pwd'] : ['all']
+        permissions: [
+          'read:basic', 
+          'read:projects', 
+          'read:payments', 
+          'read:users', 
+          'read:vendors', 
+          'read:reports',
+          ...(user.email.includes('admin') ? [
+            'write:projects', 'write:payments', 'write:users', 'write:vendors', 
+            'manage:team', 'approve:payments', 'system:settings', 'read:all-departments'
+          ] : []),
+          ...(user.email.includes('phed') || user.email.includes('pwd') || user.email.includes('project') ? [
+            'write:projects', 'write:payments', 'manage:team'
+          ] : []),
+          ...(user.email.includes('accountant') || user.email.includes('payment') ? [
+            'approve:payments', 'write:payments'
+          ] : [])
+        ],
+        departmentId: user.email.includes('phed') ? 'phed' : user.email.includes('pwd') ? 'pwd' : undefined,
+        userType: user.email.includes('admin') ? 'global-admin' : 
+                 user.email.includes('phed') || user.email.includes('pwd') ? 'department-manager' :
+                 user.email.includes('project') ? 'department-supervisor' :
+                 user.email.includes('accountant') || user.email.includes('payment') ? 'accountant' : 'viewer'
       };
       console.log('Loaded permissions:', mockPermissions);
       setUserPermissions(mockPermissions);
@@ -75,14 +92,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(sessionData);
           setUser(userData);
           
-          // Set mock permissions immediately
+          // Set mock permissions immediately with correct structure
           const mockPermissions = {
-            canViewDashboard: true,
-            canManageUsers: userData.email.includes('admin'),
-            canManageProjects: true,
-            canManagePayments: true,
-            canViewReports: true,
-            departments: userData.email.includes('phed') ? ['phed'] : userData.email.includes('pwd') ? ['pwd'] : ['all']
+            permissions: [
+              'read:basic', 
+              'read:projects', 
+              'read:payments', 
+              'read:users', 
+              'read:vendors', 
+              'read:reports',
+              ...(userData.email.includes('admin') ? [
+                'write:projects', 'write:payments', 'write:users', 'write:vendors', 
+                'manage:team', 'approve:payments', 'system:settings', 'read:all-departments'
+              ] : []),
+              ...(userData.email.includes('phed') || userData.email.includes('pwd') || userData.email.includes('project') ? [
+                'write:projects', 'write:payments', 'manage:team'
+              ] : []),
+              ...(userData.email.includes('accountant') || userData.email.includes('payment') ? [
+                'approve:payments', 'write:payments'
+              ] : [])
+            ],
+            departmentId: userData.email.includes('phed') ? 'phed' : userData.email.includes('pwd') ? 'pwd' : undefined,
+            userType: userData.email.includes('admin') ? 'global-admin' : 
+                     userData.email.includes('phed') || userData.email.includes('pwd') ? 'department-manager' :
+                     userData.email.includes('project') ? 'department-supervisor' :
+                     userData.email.includes('accountant') || userData.email.includes('payment') ? 'accountant' : 'viewer'
           };
           setUserPermissions(mockPermissions);
         } else {
