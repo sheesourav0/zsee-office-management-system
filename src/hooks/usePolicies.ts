@@ -42,9 +42,10 @@ export const useUpdatePolicy = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (policyData: UpdatePolicy) => {
+    mutationFn: async (policyData: UpdatePolicy & { id: string }) => {
       const validatedData = UpdatePolicySchema.parse(policyData);
-      return policyService.update(policyData.id, validatedData);
+      const { id, ...updateData } = validatedData;
+      return policyService.update(policyData.id, updateData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['policies'] });

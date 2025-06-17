@@ -34,13 +34,13 @@ export const useCreateUser = () => {
         { name: validatedData.name }
       );
       
-      if (!authResponse.data?.user) {
+      if (!authResponse.user) {
         throw new Error("Failed to create auth user");
       }
       
       // Create profile
       const profileData = {
-        id: authResponse.data.user.id,
+        id: authResponse.user.id,
         name: validatedData.name,
         email: validatedData.email,
         department_id: validatedData.department_id || null,
