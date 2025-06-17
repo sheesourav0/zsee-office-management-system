@@ -75,18 +75,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(sessionData);
           setUser(userData);
           
-          // Set mock permissions
-          setTimeout(() => {
-            const mockPermissions = {
-              canViewDashboard: true,
-              canManageUsers: userData.email.includes('admin'),
-              canManageProjects: true,
-              canManagePayments: true,
-              canViewReports: true,
-              departments: userData.email.includes('phed') ? ['phed'] : userData.email.includes('pwd') ? ['pwd'] : ['all']
-            };
-            setUserPermissions(mockPermissions);
-          }, 100);
+          // Set mock permissions immediately
+          const mockPermissions = {
+            canViewDashboard: true,
+            canManageUsers: userData.email.includes('admin'),
+            canManageProjects: true,
+            canManagePayments: true,
+            canViewReports: true,
+            departments: userData.email.includes('phed') ? ['phed'] : userData.email.includes('pwd') ? ['pwd'] : ['all']
+          };
+          setUserPermissions(mockPermissions);
         } else {
           console.log('No demo session found');
         }
@@ -100,14 +98,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkDemoSession();
   }, []);
 
-  // Load permissions when user is available and permissions are not yet loaded
-  useEffect(() => {
-    if (user && !userPermissions && !loading) {
-      console.log('Loading permissions for authenticated user:', user.email);
-      refreshPermissions();
-    }
-  }, [user, userPermissions, loading]);
-
   const signOut = async () => {
     console.log('Signing out user');
     localStorage.removeItem('demo_session');
@@ -115,6 +105,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setSession(null);
     setUserPermissions(null);
+    
+    // Redirect to login
+    window.location.href = '/auth';
   };
 
   const value = {

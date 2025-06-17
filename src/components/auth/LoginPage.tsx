@@ -35,9 +35,6 @@ const LoginPage = () => {
     try {
       console.log(`Demo login attempt for: ${email}`);
       
-      // Simulate login delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
       // Create a mock user session
       const mockUser = {
         id: Math.random().toString(36).substr(2, 9),
@@ -54,8 +51,11 @@ const LoginPage = () => {
         access_token: 'demo_token_' + Date.now()
       }));
       
+      console.log('Demo login successful, navigating to dashboard...');
       toast.success(`Logged in as ${email}`);
-      navigate('/dashboard');
+      
+      // Force a page refresh to ensure the auth state is properly updated
+      window.location.href = '/dashboard';
       
     } catch (err: any) {
       console.error('Demo login error:', err);
