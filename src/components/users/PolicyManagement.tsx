@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
 import { Label } from "@/components/chakra/Label";
@@ -9,10 +9,11 @@ import { z } from "zod";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
 import { Badge } from "@/components/chakra/Badge";
 import { Checkbox } from "@/components/chakra/Checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
-import { Select } from "@/components/chakra/Select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/chakra/Dialog";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/chakra/Select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/chakra/Card";
 import { toast } from "@/hooks/use-toast";
+import { Plus, Pencil, Trash, Shield, Users, Building2 } from "lucide-react";
 import { permissions, RolePermission } from "@/lib/roles";
 import { Policy, Department, getPoliciesFromStorage, savePolicyToStorage, deletePolicyFromStorage, getUserPolicyAssignments, getDepartmentsFromStorage, userTypes } from "@/lib/policies";
 

@@ -175,15 +175,15 @@ const EditUserDialog = ({
                         <FormLabel>User Role</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <Select.Trigger />
+                            <SelectTrigger />
                           </FormControl>
-                          <Select.Content>
+                          <SelectContent>
                             {roles.map((role: any) => (
-                              <Select.Item key={role.id} value={role.id}>
+                              <SelectItem key={role.id} value={role.id}>
                                 {role.name}
-                              </Select.Item>
+                              </SelectItem>
                             ))}
-                          </Select.Content>
+                          </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
