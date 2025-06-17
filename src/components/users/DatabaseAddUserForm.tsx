@@ -69,6 +69,11 @@ const DatabaseAddUserForm = () => {
     }));
   };
 
+  // Filter departments to only include those with valid IDs
+  const validDepartments = departments.filter(dept => 
+    dept && dept.id && dept.id.trim() !== ""
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -124,7 +129,7 @@ const DatabaseAddUserForm = () => {
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
-                  {departments.map((dept) => (
+                  {validDepartments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.code} - {dept.name}
                     </SelectItem>
