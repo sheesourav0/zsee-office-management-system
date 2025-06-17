@@ -3,7 +3,7 @@ import { Box, VStack, Heading, Text, SimpleGrid, Icon } from "@chakra-ui/react";
 import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { FileText, Download } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const ReportsPage = () => {
   const reportTypes = [
