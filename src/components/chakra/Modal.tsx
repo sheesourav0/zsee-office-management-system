@@ -28,8 +28,8 @@ interface ModalChildProps {
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
   ({ open, onOpenChange, children, className, ...props }, ref) => {
     return (
-      <ChakraDialogRoot open={open} onOpenChange={({ open }) => onOpenChange(open)} className={className} {...props}>
-        <ChakraDialogContent ref={ref}>
+      <ChakraDialogRoot open={open} onOpenChange={({ open }) => onOpenChange(open)} {...props}>
+        <ChakraDialogContent ref={ref} className={className}>
           {children}
         </ChakraDialogContent>
       </ChakraDialogRoot>

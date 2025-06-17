@@ -29,10 +29,8 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
       email: "",
       phone: "",
       address: "",
-      website: "",
       category: "",
       description: "",
-      paymentTerms: "",
       bankName: "",
       accountHolderName: "",
       bankAccountNumber: "",
@@ -128,19 +126,6 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter website" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={onCancel}>
                     Cancel
@@ -182,19 +167,6 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Enter description" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="paymentTerms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Terms</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Enter payment terms" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Box, Flex, Text, VStack, HStack } from '@chakra-ui/react';
 import { Button } from '@/components/chakra/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/chakra/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/chakra/Table';
 import { Edit, Trash2, UserPlus } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 const DatabaseUsersList = () => {
   const [users, setUsers] = useState([
