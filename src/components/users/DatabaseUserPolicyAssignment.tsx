@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Box, 
@@ -158,7 +157,7 @@ const DatabaseUserPolicyAssignment = () => {
   }
 
   return (
-    <VStack spacing={6} align="stretch">
+    <VStack gap={6} align="stretch">
       <Flex justify="space-between" align="center">
         <Box>
           <Heading size="md" mb={2}>Database User Policy Assignments</Heading>
@@ -246,7 +245,7 @@ const DatabaseUserPolicyAssignment = () => {
           <ModalCloseButton />
           
           <ModalBody>
-            <VStack spacing={4} align="stretch">
+            <VStack gap={4} align="stretch">
               <Box>
                 <Text fontSize="sm" fontWeight="medium" mb={2}>Select User</Text>
                 <Select 
@@ -288,14 +287,13 @@ const DatabaseUserPolicyAssignment = () => {
                   maxH="64" 
                   overflowY="auto"
                 >
-                  <VStack spacing={3} align="stretch">
+                  <VStack gap={3} align="stretch">
                     {availablePolicies.length === 0 ? (
                       <Text fontSize="sm" color="gray.500">
                         {selectedUser ? "No policies available for the selected department context" : "Please select a user first"}
                       </Text>
                     ) : (
                       availablePolicies.map((policy) => {
-                        const userTypeInfo = userTypes[policy.user_type as keyof typeof userTypes];
                         const policyPermissions = Array.isArray(policy.permissions) ? policy.permissions : [];
                         return (
                           <Flex key={policy.id} align="flex-start" gap={3}>
@@ -305,17 +303,17 @@ const DatabaseUserPolicyAssignment = () => {
                               onChange={() => togglePolicySelection(policy.id)}
                               mt={1}
                             />
-                            <VStack spacing={1} align="flex-start" flex={1}>
+                            <VStack gap={1} align="flex-start" flex={1}>
                               <Text fontSize="sm" fontWeight="medium">
                                 {policy.name}
                               </Text>
                               <Text fontSize="xs" color="gray.500">{policy.description}</Text>
-                              <HStack spacing={1} mt={1}>
+                              <HStack gap={1} mt={1}>
                                 <Badge variant="outline" fontSize="xs">
                                   {policyPermissions.length} permissions
                                 </Badge>
                                 <Badge colorScheme="blue" fontSize="xs">
-                                  {userTypeInfo?.name}
+                                  {policy.user_type}
                                 </Badge>
                                 {policy.department_id && (
                                   <Badge variant="outline" fontSize="xs">

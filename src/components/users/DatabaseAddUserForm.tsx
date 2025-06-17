@@ -64,7 +64,7 @@ const DatabaseAddUserForm = () => {
       </CardHeader>
       <CardContent>
         <Box as="form" onSubmit={form.handleSubmit(onSubmit)}>
-          <VStack spacing={6}>
+          <VStack gap={6}>
             <FormControl isInvalid={!!form.formState.errors.name}>
               <FormLabel>Full Name</FormLabel>
               <Input placeholder="John Doe" {...form.register("name")} />

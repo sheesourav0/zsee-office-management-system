@@ -1,12 +1,13 @@
 
-import { Alert as ChakraAlert, AlertIcon, AlertProps } from '@chakra-ui/react';
+import { Alert as ChakraAlert, AlertProps } from '@chakra-ui/react';
+import { InfoIcon } from '@chakra-ui/icons';
 import { forwardRef } from 'react';
 
-export const Alert = forwardRef<HTMLDivElement, AlertProps>(
+export const Alert = forwardRef<HTMLDivElement, AlertProps & { children: React.ReactNode }>(
   ({ children, ...props }, ref) => {
     return (
       <ChakraAlert ref={ref} {...props}>
-        <AlertIcon />
+        <InfoIcon />
         {children}
       </ChakraAlert>
     );
