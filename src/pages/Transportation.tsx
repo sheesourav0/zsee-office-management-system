@@ -1,15 +1,15 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/radix/Card";
-import { Button } from "@/components/radix/Button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/radix/Tabs";
+import { Box, Flex, Heading, Text, Tabs, TabList, TabPanels, Tab, TabPanel, Icon } from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Plus, Package, Truck } from "lucide-react";
 import { toast } from "sonner";
 import MaterialLogistics from "@/features/transportation/components/MaterialLogistics";
 import VehicleTransportation from "@/features/transportation/components/VehicleTransportation";
 
 const Transportation = () => {
-  const [activeTab, setActiveTab] = useState("material");
+  const [activeTab, setActiveTab] = useState(0);
 
   const handleAddMaterialShipment = () => {
     toast.info("Add material shipment functionality will be implemented here");
@@ -20,67 +20,77 @@ const Transportation = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Transportation Management</h1>
-          <p className="text-muted-foreground">Manage material logistics and vehicle transportation</p>
-        </div>
-      </div>
+    <Box spacing={6}>
+      <Flex 
+        direction={{ base: "column", md: "row" }} 
+        align={{ md: "center" }} 
+        justify={{ md: "space-between" }} 
+        gap={4}
+        mb={6}
+      >
+        <Box>
+          <Heading size="lg" mb={2}>Transportation Management</Heading>
+          <Text color="gray.600">Manage material logistics and vehicle transportation</Text>
+        </Box>
+      </Flex>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="material" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            Material Logistics
-          </TabsTrigger>
-          <TabsTrigger value="vehicle" className="flex items-center gap-2">
-            <Truck className="h-4 w-4" />
-            Vehicle Transportation
-          </TabsTrigger>
-        </TabsList>
+      <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
+        <TabList>
+          <Tab>
+            <Flex align="center" gap={2}>
+              <Icon as={Package} boxSize={4} />
+              Material Logistics
+            </Flex>
+          </Tab>
+          <Tab>
+            <Flex align="center" gap={2}>
+              <Icon as={Truck} boxSize={4} />
+              Vehicle Transportation
+            </Flex>
+          </Tab>
+        </TabList>
         
-        <TabsContent value="material" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Material Logistics</CardTitle>
-                  <CardDescription>Track and manage material shipments and deliveries</CardDescription>
-                </div>
-                <Button onClick={handleAddMaterialShipment}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Shipment
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <MaterialLogistics />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="vehicle" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Vehicle Transportation</CardTitle>
-                  <CardDescription>Manage vehicle requests and assignments</CardDescription>
-                </div>
-                <Button onClick={handleAddVehicleRequest}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Vehicle Request
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <VehicleTransportation />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <TabPanels>
+          <TabPanel p={0} pt={4}>
+            <Card>
+              <CardHeader>
+                <Flex justify="space-between" align="center">
+                  <Box>
+                    <CardTitle>Material Logistics</CardTitle>
+                    <CardDescription>Track and manage material shipments and deliveries</CardDescription>
+                  </Box>
+                  <Button leftIcon={<Plus />} onClick={handleAddMaterialShipment}>
+                    Add Shipment
+                  </Button>
+                </Flex>
+              </CardHeader>
+              <CardContent>
+                <MaterialLogistics />
+              </CardContent>
+            </Card>
+          </TabPanel>
+          
+          <TabPanel p={0} pt={4}>
+            <Card>
+              <CardHeader>
+                <Flex justify="space-between" align="center">
+                  <Box>
+                    <CardTitle>Vehicle Transportation</CardTitle>
+                    <CardDescription>Manage vehicle requests and assignments</CardDescription>
+                  </Box>
+                  <Button leftIcon={<Plus />} onClick={handleAddVehicleRequest}>
+                    Add Vehicle Request
+                  </Button>
+                </Flex>
+              </CardHeader>
+              <CardContent>
+                <VehicleTransportation />
+              </CardContent>
+            </Card>
+          </TabPanel>
+        </TabPanels>
       </Tabs>
-    </div>
+    </Box>
   );
 };
 

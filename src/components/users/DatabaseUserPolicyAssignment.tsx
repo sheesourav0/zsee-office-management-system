@@ -1,5 +1,26 @@
+
 import { useState } from "react";
-import { Button } from "@/components/radix/Button";
+import { 
+  Box, 
+  Flex, 
+  Heading, 
+  Text, 
+  Button as ChakraButton,
+  Icon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Select,
+  Checkbox,
+  VStack,
+  HStack,
+  useDisclosure
+} from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
 import {
   Table,
   TableBody,
@@ -7,11 +28,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/radix/Table";
-import { Badge } from "@/components/radix/Badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/radix/Dialog";
-import { Checkbox } from "@/components/radix/Checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/radix/Select";
+} from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
 import { Plus, Trash2, Shield, User, Building2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { departmentService } from "@/lib/supabase-services";
@@ -74,7 +92,7 @@ const DatabaseUserPolicyAssignment = () => {
   const assignPolicyMutation = useAssignPolicy();
   const removePolicyMutation = useRemovePolicyAssignment();
 
-  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
@@ -110,7 +128,7 @@ const DatabaseUserPolicyAssignment = () => {
         });
       }
 
-      setIsAssignDialogOpen(false);
+      onClose();
       setSelectedUser("");
       setSelectedPolicies([]);
       setSelectedDepartment("");
@@ -136,25 +154,24 @@ const DatabaseUserPolicyAssignment = () => {
   const availablePolicies = getAvailablePolicies();
 
   if (usersLoading || policiesLoading) {
-    return <div className="flex items-center justify-center p-8">Loading...</div>;
+    return <Flex align="center" justify="center" p={8}><Text>Loading...</Text></Flex>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Database User Policy Assignments</h3>
-          <p className="text-sm text-muted-foreground">
+    <VStack spacing={6} align="stretch">
+      <Flex justify="space-between" align="center">
+        <Box>
+          <Heading size="md" mb={2}>Database User Policy Assignments</Heading>
+          <Text color="gray.600" fontSize="sm">
             Assign department-specific or global policies to users for granular permission control
-          </p>
-        </div>
-        <Button onClick={() => setIsAssignDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+          </Text>
+        </Box>
+        <Button leftIcon={<Plus />} onClick={onOpen}>
           Assign Policies
         </Button>
-      </div>
+      </Flex>
 
-      <div className="border rounded-md">
+      <Box border="1px" borderColor="gray.200" borderRadius="md">
         <Table>
           <TableHeader>
             <TableRow>
@@ -162,13 +179,13 @@ const DatabaseUserPolicyAssignment = () => {
               <TableHead>Department</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Join Date</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead w="100px">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={5} textAlign="center" py={4}>
                   No users found.
                 </TableCell>
               </TableRow>
@@ -176,13 +193,13 @@ const DatabaseUserPolicyAssignment = () => {
               users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <div className="font-medium">{user.name}</div>
-                        <div className="text-sm text-muted-foreground">{user.email}</div>
-                      </div>
-                    </div>
+                    <Flex align="center" gap={2}>
+                      <Icon as={User} color="gray.500" />
+                      <Box>
+                        <Text fontWeight="medium">{user.name}</Text>
+                        <Text fontSize="sm" color="gray.500">{user.email}</Text>
+                      </Box>
+                    </Flex>
                   </TableCell>
                   <TableCell>
                     {user.departments ? (
@@ -190,11 +207,11 @@ const DatabaseUserPolicyAssignment = () => {
                         {user.departments.code} - {user.departments.name}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground">No Department</span>
+                      <Text color="gray.500">No Department</Text>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.is_active ? "default" : "secondary"}>
+                    <Badge colorScheme={user.is_active ? "green" : "gray"}>
                       {user.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
@@ -202,126 +219,137 @@ const DatabaseUserPolicyAssignment = () => {
                     {user.join_date ? new Date(user.join_date).toLocaleDateString() : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <Button 
+                    <ChakraButton 
                       variant="ghost" 
                       size="sm"
                       onClick={() => {
                         setSelectedUser(user.id);
                         setSelectedPolicies([]);
                         setSelectedDepartment("");
-                        setIsAssignDialogOpen(true);
+                        onOpen();
                       }}
                     >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                      <Icon as={Plus} />
+                    </ChakraButton>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </div>
+      </Box>
 
-      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Assign Database-Stored Policies to User</DialogTitle>
-          </DialogHeader>
+      <Modal isOpen={isOpen} onClose={onClose} size="3xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Assign Database-Stored Policies to User</ModalHeader>
+          <ModalCloseButton />
           
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Select User</label>
-              <Select value={selectedUser} onValueChange={setSelectedUser}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a user" />
-                </SelectTrigger>
-                <SelectContent>
+          <ModalBody>
+            <VStack spacing={4} align="stretch">
+              <Box>
+                <Text fontSize="sm" fontWeight="medium" mb={2}>Select User</Text>
+                <Select 
+                  placeholder="Choose a user" 
+                  value={selectedUser} 
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                >
                   {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
+                    <option key={user.id} value={user.id}>
                       {user.name} ({user.email})
-                    </SelectItem>
+                    </option>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
+                </Select>
+              </Box>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Department Context (Optional)</label>
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select department for department-specific policies" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no-department">Global (No specific department)</SelectItem>
+              <Box>
+                <Text fontSize="sm" fontWeight="medium" mb={2}>Department Context (Optional)</Text>
+                <Select 
+                  placeholder="Select department for department-specific policies"
+                  value={selectedDepartment} 
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                >
+                  <option value="no-department">Global (No specific department)</option>
                   {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
+                    <option key={dept.id} value={dept.id}>
                       {dept.name} ({dept.code})
-                    </SelectItem>
+                    </option>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
+                </Select>
+              </Box>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Select Policies</label>
-              <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-3">
-                {availablePolicies.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    {selectedUser ? "No policies available for the selected department context" : "Please select a user first"}
-                  </p>
-                ) : (
-                  availablePolicies.map((policy) => {
-                    const userTypeInfo = userTypes[policy.user_type as keyof typeof userTypes];
-                    const policyPermissions = Array.isArray(policy.permissions) ? policy.permissions : [];
-                    return (
-                      <div key={policy.id} className="flex items-start space-x-3">
-                        <Checkbox
-                          id={policy.id}
-                          checked={selectedPolicies.includes(policy.id)}
-                          onCheckedChange={() => togglePolicySelection(policy.id)}
-                        />
-                        <div className="space-y-1 leading-none">
-                          <label htmlFor={policy.id} className="text-sm font-medium">
-                            {policy.name}
-                          </label>
-                          <p className="text-xs text-muted-foreground">{policy.description}</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {policyPermissions.length} permissions
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {userTypeInfo?.name}
-                            </Badge>
-                            {policy.department_id && (
-                              <Badge variant="outline" className="text-xs">
-                                <Building2 className="h-3 w-3 mr-1" />
-                                {getDepartmentName(policy.department_id)}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
+              <Box>
+                <Text fontSize="sm" fontWeight="medium" mb={2}>Select Policies</Text>
+                <Box 
+                  border="1px" 
+                  borderColor="gray.200" 
+                  borderRadius="md" 
+                  p={4} 
+                  maxH="64" 
+                  overflowY="auto"
+                >
+                  <VStack spacing={3} align="stretch">
+                    {availablePolicies.length === 0 ? (
+                      <Text fontSize="sm" color="gray.500">
+                        {selectedUser ? "No policies available for the selected department context" : "Please select a user first"}
+                      </Text>
+                    ) : (
+                      availablePolicies.map((policy) => {
+                        const userTypeInfo = userTypes[policy.user_type as keyof typeof userTypes];
+                        const policyPermissions = Array.isArray(policy.permissions) ? policy.permissions : [];
+                        return (
+                          <Flex key={policy.id} align="flex-start" gap={3}>
+                            <Checkbox
+                              id={policy.id}
+                              isChecked={selectedPolicies.includes(policy.id)}
+                              onChange={() => togglePolicySelection(policy.id)}
+                              mt={1}
+                            />
+                            <VStack spacing={1} align="flex-start" flex={1}>
+                              <Text fontSize="sm" fontWeight="medium">
+                                {policy.name}
+                              </Text>
+                              <Text fontSize="xs" color="gray.500">{policy.description}</Text>
+                              <HStack spacing={1} mt={1}>
+                                <Badge variant="outline" fontSize="xs">
+                                  {policyPermissions.length} permissions
+                                </Badge>
+                                <Badge colorScheme="blue" fontSize="xs">
+                                  {userTypeInfo?.name}
+                                </Badge>
+                                {policy.department_id && (
+                                  <Badge variant="outline" fontSize="xs">
+                                    <Icon as={Building2} mr={1} />
+                                    {getDepartmentName(policy.department_id)}
+                                  </Badge>
+                                )}
+                              </HStack>
+                            </VStack>
+                          </Flex>
+                        );
+                      })
+                    )}
+                  </VStack>
+                </Box>
+              </Box>
+            </VStack>
+          </ModalBody>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+          <ModalFooter>
+            <ChakraButton variant="outline" mr={3} onClick={onClose}>
               Cancel
-            </Button>
+            </ChakraButton>
             <Button 
               onClick={handleAssignPolicies} 
-              disabled={assignPolicyMutation.isPending || !selectedUser || selectedPolicies.length === 0}
+              isLoading={assignPolicyMutation.isPending}
+              isDisabled={!selectedUser || selectedPolicies.length === 0}
             >
               {assignPolicyMutation.isPending ? 'Assigning...' : 'Assign Policies'}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </VStack>
   );
 };
 
