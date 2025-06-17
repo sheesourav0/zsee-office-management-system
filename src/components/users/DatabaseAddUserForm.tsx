@@ -3,23 +3,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Form,
+  Box,
+  VStack,
   FormControl,
-  FormField,
-  FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/radix/Form";
-import { Input } from "@/components/radix/Input";
-import { Button } from "@/components/radix/Button";
-import {
+  FormErrorMessage,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/radix/Select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/radix/Card";
+  Button as ChakraButton,
+} from "@chakra-ui/react";
+import { Input } from "@/components/chakra/Input";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { departmentService } from "@/lib/supabase-services";
@@ -54,14 +48,14 @@ const DatabaseAddUserForm = () => {
   };
 
   if (loadingDepartments) {
-    return <div className="flex items-center justify-center p-8">Loading departments...</div>;
+    return <Box textAlign="center" p={8}>Loading departments...</Box>;
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5" />
+        <CardTitle display="flex" alignItems="center" gap={2}>
+          <UserPlus size={20} />
           Add New User
         </CardTitle>
         <CardDescription>
@@ -69,90 +63,61 @@ const DatabaseAddUserForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Box as="form" onSubmit={form.handleSubmit(onSubmit)}>
+          <VStack spacing={6}>
+            <FormControl isInvalid={!!form.formState.errors.name}>
+              <FormLabel>Full Name</FormLabel>
+              <Input placeholder="John Doe" {...form.register("name")} />
+              <FormErrorMessage>
+                {form.formState.errors.name?.message}
+              </FormErrorMessage>
+            </FormControl>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="user@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormControl isInvalid={!!form.formState.errors.email}>
+              <FormLabel>Email</FormLabel>
+              <Input type="email" placeholder="user@example.com" {...form.register("email")} />
+              <FormErrorMessage>
+                {form.formState.errors.email?.message}
+              </FormErrorMessage>
+            </FormControl>
 
-            <FormField
-              control={form.control}
-              name="department_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Department (Optional)</FormLabel>
-                  <Select 
-                    onValueChange={(value) => field.onChange(value === "no-department" ? undefined : value)} 
-                    value={field.value || "no-department"}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a department" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="no-department">No Department</SelectItem>
-                      {departments
-                        .filter(dept => dept?.id && typeof dept.id === 'string' && dept.id.trim() !== '')
-                        .map((dept) => (
-                          <SelectItem key={dept.id} value={dept.id}>
-                            {dept.name} ({dept.code})
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormControl isInvalid={!!form.formState.errors.department_id}>
+              <FormLabel>Department (Optional)</FormLabel>
+              <Select 
+                placeholder="Select a department"
+                {...form.register("department_id")}
+              >
+                <option value="">No Department</option>
+                {departments
+                  .filter(dept => dept?.id && typeof dept.id === 'string' && dept.id.trim() !== '')
+                  .map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name} ({dept.code})
+                    </option>
+                  ))}
+              </Select>
+              <FormErrorMessage>
+                {form.formState.errors.department_id?.message}
+              </FormErrorMessage>
+            </FormControl>
 
-            <FormField
-              control={form.control}
-              name="join_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Join Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormControl isInvalid={!!form.formState.errors.join_date}>
+              <FormLabel>Join Date</FormLabel>
+              <Input type="date" {...form.register("join_date")} />
+              <FormErrorMessage>
+                {form.formState.errors.join_date?.message}
+              </FormErrorMessage>
+            </FormControl>
 
             <Button 
               type="submit" 
-              className="w-full" 
-              disabled={createUserMutation.isPending}
+              width="full" 
+              isLoading={createUserMutation.isPending}
             >
               {createUserMutation.isPending ? "Creating..." : "Create User"}
             </Button>
-          </form>
-        </Form>
+          </VStack>
+        </Box>
       </CardContent>
     </Card>
   );

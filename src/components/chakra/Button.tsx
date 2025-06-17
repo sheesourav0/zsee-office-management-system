@@ -2,8 +2,8 @@
 import { Button as ChakraButton, ButtonProps } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
-interface CustomButtonProps extends ButtonProps {
-  variant?: 'solid' | 'outline' | 'ghost' | 'link';
+interface CustomButtonProps extends Omit<ButtonProps, 'variant'> {
+  variant?: 'solid' | 'outline' | 'ghost' | 'subtle';
   size?: 'sm' | 'md' | 'lg';
 }
 

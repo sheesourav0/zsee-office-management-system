@@ -1,13 +1,21 @@
 
-import { Card as ChakraCard, CardBody, CardHeader, CardFooter, CardProps, BoxProps } from '@chakra-ui/react';
+import { Box, BoxProps } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(
+export const Card = forwardRef<HTMLDivElement, BoxProps>(
   ({ children, ...props }, ref) => {
     return (
-      <ChakraCard ref={ref} {...props}>
+      <Box 
+        ref={ref} 
+        bg="white"
+        borderRadius="lg"
+        border="1px solid"
+        borderColor="gray.200"
+        boxShadow="sm"
+        {...props}
+      >
         {children}
-      </ChakraCard>
+      </Box>
     );
   }
 );
@@ -15,9 +23,9 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 export const CardContent = forwardRef<HTMLDivElement, BoxProps>(
   ({ children, ...props }, ref) => {
     return (
-      <CardBody ref={ref} {...props}>
+      <Box ref={ref} p={6} {...props}>
         {children}
-      </CardBody>
+      </Box>
     );
   }
 );
@@ -25,9 +33,9 @@ export const CardContent = forwardRef<HTMLDivElement, BoxProps>(
 export const CardHeader = forwardRef<HTMLDivElement, BoxProps>(
   ({ children, ...props }, ref) => {
     return (
-      <CardHeader ref={ref} {...props}>
+      <Box ref={ref} p={6} pb={4} {...props}>
         {children}
-      </CardHeader>
+      </Box>
     );
   }
 );
@@ -35,9 +43,9 @@ export const CardHeader = forwardRef<HTMLDivElement, BoxProps>(
 export const CardFooter = forwardRef<HTMLDivElement, BoxProps>(
   ({ children, ...props }, ref) => {
     return (
-      <CardFooter ref={ref} {...props}>
+      <Box ref={ref} p={6} pt={4} {...props}>
         {children}
-      </CardFooter>
+      </Box>
     );
   }
 );
@@ -45,9 +53,9 @@ export const CardFooter = forwardRef<HTMLDivElement, BoxProps>(
 export const CardTitle = forwardRef<HTMLHeadingElement, BoxProps>(
   ({ children, ...props }, ref) => {
     return (
-      <h3 ref={ref} style={{ fontSize: '1.5rem', fontWeight: '600', lineHeight: '1.2' }} {...props}>
+      <Box as="h3" ref={ref} fontSize="lg" fontWeight="600" lineHeight="1.2" {...props}>
         {children}
-      </h3>
+      </Box>
     );
   }
 );
@@ -55,9 +63,9 @@ export const CardTitle = forwardRef<HTMLHeadingElement, BoxProps>(
 export const CardDescription = forwardRef<HTMLParagraphElement, BoxProps>(
   ({ children, ...props }, ref) => {
     return (
-      <p ref={ref} style={{ fontSize: '0.875rem', color: 'gray.500' }} {...props}>
+      <Box as="p" ref={ref} fontSize="sm" color="gray.500" {...props}>
         {children}
-      </p>
+      </Box>
     );
   }
 );

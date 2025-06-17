@@ -1,9 +1,17 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/radix/Button";
-import { Input } from "@/components/radix/Input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/radix/Table";
-import { Badge } from "@/components/radix/Badge";
+import { 
+  Box, 
+  Flex, 
+  Input, 
+  Button as ChakraButton, 
+  Text,
+  VStack,
+  HStack
+} from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
 import { Search, Edit, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { profileService, departmentService } from "@/lib/supabase-services";
@@ -80,28 +88,27 @@ const DatabaseUsersList = () => {
   );
 
   if (loading) {
-    return <div className="flex items-center justify-center p-8">Loading users...</div>;
+    return <Flex align="center" justify="center" p={8}><Text>Loading users...</Text></Flex>;
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+    <VStack spacing={4} align="stretch">
+      <HStack spacing={4}>
+        <Box position="relative" flex={1}>
+          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#A0AEC0', width: '16px', height: '16px' }} />
           <Input
             placeholder="Search users by name, email, or department..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            pl="40px"
           />
-        </div>
-        <Button onClick={loadData}>
-          <UserPlus className="mr-2 h-4 w-4" />
+        </Box>
+        <Button leftIcon={<UserPlus />} onClick={loadData}>
           Refresh
         </Button>
-      </div>
+      </HStack>
 
-      <div className="rounded-md border">
+      <Box border="1px" borderColor="gray.200" borderRadius="md">
         <Table>
           <TableHeader>
             <TableRow>
@@ -116,14 +123,14 @@ const DatabaseUsersList = () => {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  No users found. {searchTerm && "Try adjusting your search terms."}
+                <TableCell colSpan={6} textAlign="center" py={8}>
+                  <Text>No users found. {searchTerm && "Try adjusting your search terms."}</Text>
                 </TableCell>
               </TableRow>
             ) : (
               filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell fontWeight="medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     {user.departments ? (
@@ -131,7 +138,7 @@ const DatabaseUsersList = () => {
                         {user.departments.code} - {user.departments.name}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground">No Department</span>
+                      <Text color="gray.500">No Department</Text>
                     )}
                   </TableCell>
                   <TableCell>
@@ -139,38 +146,38 @@ const DatabaseUsersList = () => {
                   </TableCell>
                   <TableCell>
                     <Badge 
-                      variant={user.is_active ? "default" : "secondary"}
-                      className="cursor-pointer"
+                      colorScheme={user.is_active ? "green" : "gray"}
+                      cursor="pointer"
                       onClick={() => handleToggleStatus(user.id, user.is_active)}
                     >
                       {user.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
+                    <HStack spacing={2}>
+                      <ChakraButton variant="outline" size="sm">
+                        <Edit size={16} />
+                      </ChakraButton>
+                      <ChakraButton 
                         variant="outline" 
                         size="sm"
                         onClick={() => handleDeleteUser(user.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                        <Trash2 size={16} />
+                      </ChakraButton>
+                    </HStack>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </div>
+      </Box>
 
-      <div className="text-sm text-muted-foreground">
+      <Text fontSize="sm" color="gray.500">
         Total users: {filteredUsers.length}
-      </div>
-    </div>
+      </Text>
+    </VStack>
   );
 };
 

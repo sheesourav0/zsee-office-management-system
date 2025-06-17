@@ -7,7 +7,6 @@ import {
   Tr, 
   Th, 
   Td, 
-  TableCaption,
   TableContainer,
   TableProps 
 } from '@chakra-ui/react';
@@ -85,16 +84,6 @@ export const TableCell = forwardRef<HTMLTableCellElement, any>(
   }
 );
 
-export const TableCaption = forwardRef<HTMLTableCaptionElement, any>(
-  ({ children, ...props }, ref) => {
-    return (
-      <TableCaption ref={ref} {...props}>
-        {children}
-      </TableCaption>
-    );
-  }
-);
-
 Table.displayName = 'Table';
 TableHeader.displayName = 'TableHeader';
 TableBody.displayName = 'TableBody';
@@ -102,4 +91,3 @@ TableFooter.displayName = 'TableFooter';
 TableRow.displayName = 'TableRow';
 TableHead.displayName = 'TableHead';
 TableCell.displayName = 'TableCell';
-TableCaption.displayName = 'TableCaption';
