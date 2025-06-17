@@ -105,7 +105,10 @@ const DatabaseAddUserForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Department (Optional)</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select 
+                    onValueChange={(value) => field.onChange(value === "no-department" ? undefined : value)} 
+                    value={field.value || "no-department"}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a department" />
@@ -114,7 +117,7 @@ const DatabaseAddUserForm = () => {
                     <SelectContent>
                       <SelectItem value="no-department">No Department</SelectItem>
                       {departments
-                        .filter(dept => dept?.id && typeof dept.id === 'string' && dept.id.trim())
+                        .filter(dept => dept?.id && typeof dept.id === 'string' && dept.id.trim() !== '')
                         .map((dept) => (
                           <SelectItem key={dept.id} value={dept.id}>
                             {dept.name} ({dept.code})

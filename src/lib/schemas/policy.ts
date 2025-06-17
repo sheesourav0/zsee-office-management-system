@@ -18,7 +18,22 @@ export const CreatePolicySchema = z.object({
   ]),
 });
 
-export const UpdatePolicySchema = CreatePolicySchema.partial().omit({ id: true });
+export const UpdatePolicySchema = z.object({
+  id: z.string().min(1, "Policy ID is required"),
+  name: z.string().min(2, "Policy name must be at least 2 characters"),
+  description: z.string().min(5, "Description must be at least 5 characters"),
+  permissions: z.array(z.string()).min(1, "At least one permission is required"),
+  department_id: z.string().nullable(),
+  user_type: z.enum([
+    'department-staff',
+    'department-manager', 
+    'department-supervisor',
+    'global-admin',
+    'accountant',
+    'hr-manager',
+    'viewer'
+  ]),
+});
 
 export const AssignPolicySchema = z.object({
   user_id: z.string().uuid("Invalid user ID"),

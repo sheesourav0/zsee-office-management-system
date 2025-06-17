@@ -28,19 +28,19 @@ export const useCreateUser = () => {
       
       // Create auth user first
       const tempPassword = Math.random().toString(36).slice(-12);
-      const { data: authData } = await authService.signUp(
+      const authResponse = await authService.signUp(
         validatedData.email,
         tempPassword,
         { name: validatedData.name }
       );
       
-      if (!authData.user) {
+      if (!authResponse.data?.user) {
         throw new Error("Failed to create auth user");
       }
       
       // Create profile
       const profileData = {
-        id: authData.user.id,
+        id: authResponse.data.user.id,
         name: validatedData.name,
         email: validatedData.email,
         department_id: validatedData.department_id || null,
