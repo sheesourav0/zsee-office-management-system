@@ -69,10 +69,20 @@ const DatabaseAddUserForm = () => {
     }));
   };
 
-  // Filter departments to only include those with valid IDs
+  // Filter departments to only include those with valid IDs and ensure no empty strings
   const validDepartments = departments.filter(dept => 
-    dept && dept.id && dept.id.trim() !== ""
+    dept && 
+    dept.id && 
+    typeof dept.id === 'string' && 
+    dept.id.trim() !== "" &&
+    dept.name &&
+    dept.code
   );
+
+  // Ensure we never pass an empty string to the Select component
+  const selectValue = formData.department_id && formData.department_id.trim() !== "" 
+    ? formData.department_id 
+    : undefined;
 
   return (
     <Card>
@@ -122,7 +132,7 @@ const DatabaseAddUserForm = () => {
             <div className="space-y-2">
               <Label htmlFor="department">Department</Label>
               <Select 
-                value={formData.department_id || undefined} 
+                value={selectValue} 
                 onValueChange={(value) => handleInputChange('department_id', value || "")}
               >
                 <SelectTrigger>
