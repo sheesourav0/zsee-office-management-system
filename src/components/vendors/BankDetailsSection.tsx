@@ -1,6 +1,6 @@
 
-import { Input } from "@/components/ui/input";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/chakra/Input";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/chakra/Form";
 import { UseFormReturn } from "react-hook-form";
 import { VendorFormValues } from "./schemas/vendorSchema";
 

@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
-import { Select } from "@/components/chakra/Select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/chakra/Select";
 import { Input } from "@/components/chakra/Input";
 import { Badge } from "@/components/chakra/Badge";
 import { FileText, Download, Eye } from "lucide-react";

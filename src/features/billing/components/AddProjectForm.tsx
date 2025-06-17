@@ -1,15 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Textarea } from "@/components/chakra/Textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/chakra/Select";
+import { Checkbox } from "@/components/chakra/Checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/chakra/Form";
 import { Plus, Trash2 } from "lucide-react";
 import { Department, PaymentTerm, WorkPlanStep, BillingProject, ProjectMilestone, ProjectPhase } from "../types/billingTypes";
 

@@ -1,8 +1,8 @@
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/chakra/Input";
+import { Textarea } from "@/components/chakra/Textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/chakra/Select";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/chakra/Form";
 import { UseFormReturn } from "react-hook-form";
 import { VendorFormValues } from "./schemas/vendorSchema";
 
