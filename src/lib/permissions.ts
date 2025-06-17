@@ -7,12 +7,86 @@ export interface UserPermissions {
   userType: string;
 }
 
+// Demo user permissions mapping
+const getDemoUserPermissions = (email: string): UserPermissions => {
+  console.log('Getting demo permissions for:', email);
+  
+  if (email.includes('admin')) {
+    return {
+      permissions: [
+        'read:basic', 'read:projects', 'read:payments', 'read:users', 'read:vendors', 
+        'read:reports', 'read:all-departments', 'write:projects', 'write:payments', 
+        'write:users', 'write:vendors', 'manage:team', 'approve:payments', 'system:settings'
+      ],
+      userType: 'global-admin'
+    };
+  }
+  
+  if (email.includes('phed')) {
+    return {
+      permissions: [
+        'read:basic', 'read:projects', 'read:payments', 'read:users', 'read:vendors', 
+        'read:reports', 'write:projects', 'write:payments', 'manage:team'
+      ],
+      departmentId: 'phed',
+      userType: 'department-manager'
+    };
+  }
+  
+  if (email.includes('pwd')) {
+    return {
+      permissions: [
+        'read:basic', 'read:projects', 'read:payments', 'read:users', 'read:vendors', 
+        'read:reports', 'write:projects', 'write:payments', 'manage:team'
+      ],
+      departmentId: 'pwd',
+      userType: 'department-manager'
+    };
+  }
+  
+  if (email.includes('project')) {
+    return {
+      permissions: [
+        'read:basic', 'read:projects', 'read:payments', 'read:vendors', 
+        'read:reports', 'write:projects', 'write:payments'
+      ],
+      userType: 'department-supervisor'
+    };
+  }
+  
+  if (email.includes('accountant') || email.includes('payment')) {
+    return {
+      permissions: [
+        'read:basic', 'read:projects', 'read:payments', 'read:vendors', 
+        'read:reports', 'approve:payments', 'write:payments'
+      ],
+      userType: 'accountant'
+    };
+  }
+  
+  // Default viewer permissions
+  return {
+    permissions: ['read:basic', 'read:projects', 'read:payments'],
+    userType: 'viewer'
+  };
+};
+
 // Permission checking service
 export class PermissionService {
   private static userPermissions: UserPermissions | null = null;
 
   static async getCurrentUserPermissions(): Promise<UserPermissions | null> {
     try {
+      // First check for demo user
+      const demoUser = localStorage.getItem('demo_user');
+      if (demoUser) {
+        const user = JSON.parse(demoUser);
+        console.log('Using demo user permissions for:', user.email);
+        this.userPermissions = getDemoUserPermissions(user.email);
+        return this.userPermissions;
+      }
+
+      // Fallback to Supabase auth
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.log('No authenticated user found');
