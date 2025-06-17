@@ -1,10 +1,10 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { toast } from "@/hooks/use-toast";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -15,14 +15,12 @@ const LoginForm = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLoading) return; // Prevent multiple submissions
+    if (isLoading) return;
     
     setIsLoading(true);
     
     try {
-      // Simulate authentication with Admin/Admin credentials
       if (email === "Admin" && password === "Admin") {
-        // Store user in localStorage
         localStorage.setItem("user", JSON.stringify({ 
           name: "Admin User", 
           email: "admin@example.com", 
@@ -31,7 +29,6 @@ const LoginForm = () => {
         
         toast.success("Login successful!");
         
-        // Navigate after a slight delay to ensure localStorage is updated
         setTimeout(() => {
           navigate("/dashboard", { replace: true });
         }, 100);
@@ -85,7 +82,7 @@ const LoginForm = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={isLoading}
+            loading={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}
           </Button>

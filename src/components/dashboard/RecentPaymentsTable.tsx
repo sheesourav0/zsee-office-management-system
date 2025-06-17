@@ -1,7 +1,7 @@
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Table } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
+import { Button } from "@/components/chakra/Button";
 import { Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -54,38 +54,38 @@ const RecentPaymentsTable = ({ payments }: RecentPaymentsTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Project</TableHead>
-            <TableHead>Company</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead className="text-right">Payable</TableHead>
-            <TableHead>Payment Status</TableHead>
-            <TableHead>Transport Status</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Company</th>
+            <th className="text-right">Amount</th>
+            <th className="text-right">Payable</th>
+            <th>Payment Status</th>
+            <th>Transport Status</th>
+            <th>Date</th>
+            <th className="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
           {payments.map((payment) => (
-            <TableRow key={payment.id}>
-              <TableCell className="font-medium">{payment.projectName}</TableCell>
-              <TableCell>{payment.companyName}</TableCell>
-              <TableCell className="text-right">₹{payment.amount.toLocaleString()}</TableCell>
-              <TableCell className="text-right">₹{payment.payableAmount.toLocaleString()}</TableCell>
-              <TableCell>{getPaymentStatusBadge(payment.paymentStatus)}</TableCell>
-              <TableCell>{getTransportStatusBadge(payment.transportStatus)}</TableCell>
-              <TableCell>{payment.date}</TableCell>
-              <TableCell className="text-right">
+            <tr key={payment.id}>
+              <td className="font-medium">{payment.projectName}</td>
+              <td>{payment.companyName}</td>
+              <td className="text-right">₹{payment.amount.toLocaleString()}</td>
+              <td className="text-right">₹{payment.payableAmount.toLocaleString()}</td>
+              <td>{getPaymentStatusBadge(payment.paymentStatus)}</td>
+              <td>{getTransportStatusBadge(payment.transportStatus)}</td>
+              <td>{payment.date}</td>
+              <td className="text-right">
                 <Link to={`/payments/${payment.id}`}>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="sm">
                     <Eye className="h-4 w-4" />
                   </Button>
                 </Link>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ))}
-        </TableBody>
+        </tbody>
       </Table>
     </div>
   );

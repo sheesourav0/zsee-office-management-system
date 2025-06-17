@@ -1,20 +1,19 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Textarea } from "@/components/chakra/Textarea";
 import { 
-  Form, 
+  FormItem, 
   FormControl, 
   FormField, 
-  FormItem, 
   FormLabel, 
   FormMessage 
-} from "@/components/ui/form"; 
+} from "@/components/chakra/Form"; 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Department name must be at least 2 characters" }),
@@ -43,10 +42,8 @@ const AddDepartmentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
-      // In a real app, this would be an API call
       console.log("Department data:", data);
       
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success("Department added successfully");
@@ -64,46 +61,16 @@ const AddDepartmentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Department Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter department name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Department Code</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter department code" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
-          name="manager"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Department Manager</FormLabel>
+              <FormLabel>Department Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter manager name" {...field} />
+                <Input placeholder="Enter department name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -112,42 +79,70 @@ const AddDepartmentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         
         <FormField
           control={form.control}
-          name="description"
+          name="code"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Department Description</FormLabel>
+              <FormLabel>Department Code</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter department description" className="resize-none" {...field} />
+                <Input placeholder="Enter department code" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter department location" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button" onClick={() => form.reset()}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Department"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      </div>
+      
+      <FormField
+        control={form.control}
+        name="manager"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Department Manager</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter manager name" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Department Description</FormLabel>
+            <FormControl>
+              <Textarea placeholder="Enter department description" className="resize-none" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="location"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Location</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter department location" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <div className="flex justify-end space-x-4">
+        <Button variant="outline" type="button" onClick={() => form.reset()}>
+          Cancel
+        </Button>
+        <Button type="submit" loading={isSubmitting}>
+          {isSubmitting ? "Adding..." : "Add Department"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

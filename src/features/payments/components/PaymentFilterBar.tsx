@@ -1,10 +1,11 @@
+
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Label } from "@/components/chakra/Label";
+import { Select } from "@/components/chakra/Select";
+import { DatePicker } from "@/components/chakra/DatePicker";
+import { Badge } from "@/components/chakra/Badge";
 import { X } from "lucide-react";
 
 interface FilterBarProps {
@@ -80,17 +81,14 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
           <Label htmlFor="project">Project</Label>
           <Select 
             value={filters.project} 
-            onValueChange={(value) => handleFilterChange("project", value)}
+            onChange={(e) => handleFilterChange("project", e.target.value)}
+            id="project"
           >
-            <SelectTrigger id="project">
-              <SelectValue placeholder="All Projects" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Sample Testing">Sample Testing</SelectItem>
-              <SelectItem value="YACHULI">YACHULI</SelectItem>
-              <SelectItem value="Amni WTP">Amni WTP</SelectItem>
-              <SelectItem value="Machuika">Machuika</SelectItem>
-            </SelectContent>
+            <option value="">All Projects</option>
+            <option value="Sample Testing">Sample Testing</option>
+            <option value="YACHULI">YACHULI</option>
+            <option value="Amni WTP">Amni WTP</option>
+            <option value="Machuika">Machuika</option>
           </Select>
         </div>
 
@@ -98,17 +96,14 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
           <Label htmlFor="vendor">Vendor</Label>
           <Select 
             value={filters.vendor} 
-            onValueChange={(value) => handleFilterChange("vendor", value)}
+            onChange={(e) => handleFilterChange("vendor", e.target.value)}
+            id="vendor"
           >
-            <SelectTrigger id="vendor">
-              <SelectValue placeholder="All Vendors" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="King Longkai">King Longkai</SelectItem>
-              <SelectItem value="A-TEL TECH">A-TEL TECH</SelectItem>
-              <SelectItem value="BMP SYSTEMS">BMP SYSTEMS</SelectItem>
-              <SelectItem value="P.R.S ENTERPRISE">P.R.S ENTERPRISE</SelectItem>
-            </SelectContent>
+            <option value="">All Vendors</option>
+            <option value="King Longkai">King Longkai</option>
+            <option value="A-TEL TECH">A-TEL TECH</option>
+            <option value="BMP SYSTEMS">BMP SYSTEMS</option>
+            <option value="P.R.S ENTERPRISE">P.R.S ENTERPRISE</option>
           </Select>
         </div>
 
@@ -116,17 +111,14 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
           <Label htmlFor="status">Payment Status</Label>
           <Select 
             value={filters.paymentStatus} 
-            onValueChange={(value) => handleFilterChange("paymentStatus", value)}
+            onChange={(e) => handleFilterChange("paymentStatus", e.target.value)}
+            id="status"
           >
-            <SelectTrigger id="status">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="partial">Partially Paid</SelectItem>
-              <SelectItem value="unpaid">Unpaid</SelectItem>
-              <SelectItem value="hold">On Hold</SelectItem>
-            </SelectContent>
+            <option value="">All Statuses</option>
+            <option value="paid">Paid</option>
+            <option value="partial">Partially Paid</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="hold">On Hold</option>
           </Select>
         </div>
 
@@ -152,7 +144,7 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2">
           {activeFilters.map(key => (
-            <Badge key={key} variant="secondary" className="flex items-center gap-1">
+            <Badge key={key} variant="subtle" className="flex items-center gap-1">
               {getFilterLabel(key)}: {getFilterValue(key)}
               <X 
                 className="h-3 w-3 cursor-pointer" 

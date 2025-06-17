@@ -1,78 +1,41 @@
 
-import { Box, BoxProps } from '@chakra-ui/react';
+import { Card as ChakraCard } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
-export const Card = forwardRef<HTMLDivElement, BoxProps>(
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  [key: string]: any;
+}
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => {
     return (
-      <Box 
-        ref={ref} 
-        bg="white"
-        borderRadius="lg"
-        border="1px solid"
-        borderColor="gray.200"
-        boxShadow="sm"
-        {...props}
-      >
+      <ChakraCard.Root ref={ref} {...props}>
         {children}
-      </Box>
+      </ChakraCard.Root>
     );
   }
 );
 
-export const CardContent = forwardRef<HTMLDivElement, BoxProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <Box ref={ref} p={6} {...props}>
-        {children}
-      </Box>
-    );
-  }
+export const CardHeader = ({ children, ...props }: CardProps) => (
+  <ChakraCard.Header {...props}>{children}</ChakraCard.Header>
 );
 
-export const CardHeader = forwardRef<HTMLDivElement, BoxProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <Box ref={ref} p={6} pb={4} {...props}>
-        {children}
-      </Box>
-    );
-  }
+export const CardContent = ({ children, ...props }: CardProps) => (
+  <ChakraCard.Body {...props}>{children}</ChakraCard.Body>
 );
 
-export const CardFooter = forwardRef<HTMLDivElement, BoxProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <Box ref={ref} p={6} pt={4} {...props}>
-        {children}
-      </Box>
-    );
-  }
+export const CardFooter = ({ children, ...props }: CardProps) => (
+  <ChakraCard.Footer {...props}>{children}</ChakraCard.Footer>
 );
 
-export const CardTitle = forwardRef<HTMLHeadingElement, BoxProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <Box as="h3" ref={ref} fontSize="lg" fontWeight="600" lineHeight="1.2" {...props}>
-        {children}
-      </Box>
-    );
-  }
+export const CardTitle = ({ children, ...props }: CardProps) => (
+  <ChakraCard.Title {...props}>{children}</ChakraCard.Title>
 );
 
-export const CardDescription = forwardRef<HTMLParagraphElement, BoxProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <Box as="p" ref={ref} fontSize="sm" color="gray.500" {...props}>
-        {children}
-      </Box>
-    );
-  }
+export const CardDescription = ({ children, ...props }: CardProps) => (
+  <ChakraCard.Description {...props}>{children}</ChakraCard.Description>
 );
 
 Card.displayName = 'Card';
-CardContent.displayName = 'CardContent';
-CardHeader.displayName = 'CardHeader';
-CardFooter.displayName = 'CardFooter';
-CardTitle.displayName = 'CardTitle';
-CardDescription.displayName = 'CardDescription';

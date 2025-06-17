@@ -1,14 +1,13 @@
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/chakra/Badge";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Separator } from "@/components/chakra/Separator";
+import { Tabs } from "@/components/chakra/Tabs";
 import { FileText, Truck, FileCheck, FileUp, ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import TransportationStatus from "../transportation/TransportationStatus";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const PaymentDetailView = () => {
   const { id } = useParams();
@@ -93,7 +92,7 @@ const PaymentDetailView = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link to="/payments">
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -103,191 +102,212 @@ const PaymentDetailView = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="details">Payment Details</TabsTrigger>
-          <TabsTrigger value="transportation">Transportation</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="grid w-full grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg">
+          <Button 
+            variant={activeTab === "details" ? "solid" : "ghost"}
+            onClick={() => setActiveTab("details")}
+          >
+            Payment Details
+          </Button>
+          <Button 
+            variant={activeTab === "transportation" ? "solid" : "ghost"}
+            onClick={() => setActiveTab("transportation")}
+          >
+            Transportation
+          </Button>
+          <Button 
+            variant={activeTab === "documents" ? "solid" : "ghost"}
+            onClick={() => setActiveTab("documents")}
+          >
+            Documents
+          </Button>
+        </div>
         
-        <TabsContent value="details" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Information</CardTitle>
-              <CardDescription>Details about the payment and vendor</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Project</h3>
-                    <p>{payment.projectName}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Vendor</h3>
-                    <p>{payment.companyName}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">PO Reference</h3>
-                    <p>{payment.poReference || "N/A"}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">PO Date</h3>
-                    <p>{payment.poDate || "N/A"}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Account Number</h3>
-                    <p>{payment.accountNo}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">IFSC Code</h3>
-                    <p>{payment.ifscCode}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Branch/Bank</h3>
-                    <p>{payment.branchBank}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Priority</h3>
-                    <p>{payment.priority || "Normal"}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="font-medium">Payment Status</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-muted-foreground text-sm">Total Amount</div>
-                      <div className="text-xl font-bold">₹{payment.totalAmount.toLocaleString()}</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-muted-foreground text-sm">Paid Amount</div>
-                      <div className="text-xl font-bold">₹{payment.paid.toLocaleString()}</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-muted-foreground text-sm">Payable Amount</div>
-                      <div className="text-xl font-bold">₹{payment.payableAmount.toLocaleString()}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Current Status:</span>
-                  {getPaymentStatusBadge(payment.paymentStatus)}
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button onClick={handlePaymentUpdate}>Update Payment</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="transportation" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transportation Details</CardTitle>
-              <CardDescription>Track the shipping status of materials</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Current Status:</span>
-                  {getTransportStatusBadge(payment.transportationStatus)}
-                </div>
-                
-                <TransportationStatus status={payment.transportInfo.currentStatus} updates={payment.transportInfo.updates} />
-                
+        {activeTab === "details" && (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Information</CardTitle>
+                <CardDescription>Details about the payment and vendor</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Carrier</h3>
-                      <p>{payment.transportInfo.carrier || "Not assigned"}</p>
+                      <h3 className="text-sm font-medium text-muted-foreground">Project</h3>
+                      <p>{payment.projectName}</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Tracking Number</h3>
-                      <p>{payment.transportInfo.trackingNumber || "Not available"}</p>
+                      <h3 className="text-sm font-medium text-muted-foreground">Vendor</h3>
+                      <p>{payment.companyName}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">PO Reference</h3>
+                      <p>{payment.poReference || "N/A"}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">PO Date</h3>
+                      <p>{payment.poDate || "N/A"}</p>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Estimated Delivery</h3>
-                      <p>{payment.transportInfo.estimatedDelivery || "Not available"}</p>
+                      <h3 className="text-sm font-medium text-muted-foreground">Account Number</h3>
+                      <p>{payment.accountNo}</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Current Status</h3>
-                      <p>{payment.transportInfo.currentStatus}</p>
+                      <h3 className="text-sm font-medium text-muted-foreground">IFSC Code</h3>
+                      <p>{payment.ifscCode}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">Branch/Bank</h3>
+                      <p>{payment.branchBank}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">Priority</h3>
+                      <p>{payment.priority || "Normal"}</p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button onClick={handleTransportUpdate}>Update Transportation</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="documents" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documents</CardTitle>
-              <CardDescription>Invoices, Purchase Orders, and Chalans</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {payment.documents.length > 0 ? (
-                  <div className="space-y-2">
-                    {payment.documents.map((doc, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 border rounded-md">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">{doc.name}</p>
-                            <p className="text-xs text-muted-foreground">Uploaded on {doc.uploadedAt}</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">View</Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No documents uploaded yet
-                  </div>
-                )}
                 
-                <Button onClick={handleFileUpload} className="w-full">
-                  <FileUp className="mr-2 h-4 w-4" />
-                  Upload New Document
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h3 className="font-medium">Payment Status</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-muted-foreground text-sm">Total Amount</div>
+                        <div className="text-xl font-bold">₹{payment.totalAmount.toLocaleString()}</div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-muted-foreground text-sm">Paid Amount</div>
+                        <div className="text-xl font-bold">₹{payment.paid.toLocaleString()}</div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-muted-foreground text-sm">Payable Amount</div>
+                        <div className="text-xl font-bold">₹{payment.payableAmount.toLocaleString()}</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Current Status:</span>
+                    {getPaymentStatusBadge(payment.paymentStatus)}
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button onClick={handlePaymentUpdate}>Update Payment</Button>
+              </CardFooter>
+            </Card>
+          </div>
+        )}
+        
+        {activeTab === "transportation" && (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Transportation Details</CardTitle>
+                <CardDescription>Track the shipping status of materials</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Current Status:</span>
+                    {getTransportStatusBadge(payment.transportationStatus)}
+                  </div>
+                  
+                  <TransportationStatus status={payment.transportInfo.currentStatus} updates={payment.transportInfo.updates} />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground">Carrier</h3>
+                        <p>{payment.transportInfo.carrier || "Not assigned"}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground">Tracking Number</h3>
+                        <p>{payment.transportInfo.trackingNumber || "Not available"}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground">Estimated Delivery</h3>
+                        <p>{payment.transportInfo.estimatedDelivery || "Not available"}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground">Current Status</h3>
+                        <p>{payment.transportInfo.currentStatus}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button onClick={handleTransportUpdate}>Update Transportation</Button>
+              </CardFooter>
+            </Card>
+          </div>
+        )}
+        
+        {activeTab === "documents" && (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Documents</CardTitle>
+                <CardDescription>Invoices, Purchase Orders, and Chalans</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {payment.documents.length > 0 ? (
+                    <div className="space-y-2">
+                      {payment.documents.map((doc, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 border rounded-md">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-primary" />
+                            <div>
+                              <p className="font-medium">{doc.name}</p>
+                              <p className="text-xs text-muted-foreground">Uploaded on {doc.uploadedAt}</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm">View</Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                      No documents uploaded yet
+                    </div>
+                  )}
+                  
+                  <Button onClick={handleFileUpload} className="w-full">
+                    <FileUp className="mr-2 h-4 w-4" />
+                    Upload New Document
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </Tabs>
     </div>
   );

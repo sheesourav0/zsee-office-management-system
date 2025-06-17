@@ -1,21 +1,20 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Select } from "@/components/chakra/Select";
+import { Textarea } from "@/components/chakra/Textarea";
+import { DatePicker } from "@/components/chakra/DatePicker";
 import { 
-  Form, 
+  FormItem, 
   FormControl, 
   FormField, 
-  FormItem, 
   FormLabel, 
   FormMessage 
-} from "@/components/ui/form"; 
+} from "@/components/chakra/Form"; 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const projects = [
   { id: "1", name: "Amrit WTP" },
@@ -98,198 +97,178 @@ const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="projectId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select project" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="vendorId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Vendor</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select vendor" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {vendors.map((vendor) => (
-                      <SelectItem key={vendor.id} value={vendor.id}>
-                        {vendor.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total Amount (₹)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter total amount" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="payableAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payable Amount (₹)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter payable amount" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
-          name="description"
+          name="projectId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Project</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Enter payment description" 
-                  className="resize-none" 
-                  {...field} 
-                />
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <option value="">Select project</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FormField
-            control={form.control}
-            name="paymentStatus"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payment Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {paymentStatuses.map((status) => (
-                      <SelectItem key={status.id} value={status.id}>
-                        {status.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="transportStatus"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Transport Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="not-applicable">Not Applicable</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in-transit">In Transit</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Payment Date</FormLabel>
-                <DatePicker
-                  date={field.value}
-                  setDate={field.onChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
         <FormField
           control={form.control}
-          name="invoice"
+          name="vendorId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Invoice Number</FormLabel>
+              <FormLabel>Vendor</FormLabel>
               <FormControl>
-                <Input placeholder="Enter invoice number (optional)" {...field} />
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <option value="">Select vendor</option>
+                  {vendors.map((vendor) => (
+                    <option key={vendor.id} value={vendor.id}>
+                      {vendor.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Total Amount (₹)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter total amount" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button" onClick={() => form.reset()}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Payment"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        <FormField
+          control={form.control}
+          name="payableAmount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Payable Amount (₹)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter payable amount" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Enter payment description" 
+                className="resize-none" 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <FormField
+          control={form.control}
+          name="paymentStatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Payment Status</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  {paymentStatuses.map((status) => (
+                    <option key={status.id} value={status.id}>
+                      {status.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="transportStatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Transport Status</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <option value="not-applicable">Not Applicable</option>
+                  <option value="pending">Pending</option>
+                  <option value="in-transit">In Transit</option>
+                  <option value="delivered">Delivered</option>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Payment Date</FormLabel>
+              <DatePicker
+                date={field.value}
+                setDate={field.onChange}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      
+      <FormField
+        control={form.control}
+        name="invoice"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Invoice Number</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter invoice number (optional)" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <div className="flex justify-end space-x-4">
+        <Button variant="outline" type="button" onClick={() => form.reset()}>
+          Cancel
+        </Button>
+        <Button type="submit" loading={isSubmitting}>
+          {isSubmitting ? "Adding..." : "Add Payment"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

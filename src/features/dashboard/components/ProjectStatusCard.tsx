@@ -1,6 +1,6 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Progress } from "@/components/chakra/Progress";
 
 interface ProjectStatusCardProps {
   name: string;

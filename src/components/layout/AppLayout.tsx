@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Outlet, Navigate, useLocation, Link, useNavigate } from "react-router-dom";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Box, VStack, HStack, Flex, Text } from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Avatar, AvatarFallback } from "@/components/chakra/Avatar";
 import { 
   Home, 
   Folder, 
@@ -14,14 +14,16 @@ import {
   Settings, 
   LogOut,
   UserPlus,
-  Layers
+  Layers,
+  Menu
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const MainNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -50,70 +52,124 @@ const MainNav = () => {
   const isSuperAdmin = user && (user.role === "superadmin" || user.role === "admin");
 
   return (
-    <Sidebar className="border-r">
-      <SidebarHeader className="border-b p-4">
-        <div className="flex items-center justify-center">
-          <h1 className="text-xl font-bold text-primary">ZSEE Management</h1>
-        </div>
-      </SidebarHeader>
-      <SidebarContent className="p-2">
-        <div className="space-y-1">
-          {navItems.map((item) => (
-            <Link to={item.path} key={item.path}>
-              <Button
-                variant={location.pathname === item.path ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.label}
-              </Button>
-            </Link>
-          ))}
+    <Flex h="100vh">
+      {/* Sidebar */}
+      <Box
+        w={sidebarOpen ? "250px" : "60px"}
+        bg="white"
+        borderRight="1px solid"
+        borderColor="gray.200"
+        transition="width 0.2s"
+      >
+        <VStack gap={0} h="full">
+          {/* Header */}
+          <Box p={4} borderBottom="1px solid" borderColor="gray.200" w="full">
+            <Flex align="center" justify="center">
+              {sidebarOpen && (
+                <Text fontSize="xl" fontWeight="bold" color="blue.600">
+                  ZSEE Management
+                </Text>
+              )}
+            </Flex>
+          </Box>
           
-          {isSuperAdmin && (
-            <Link to="/user-management">
-              <Button
-                variant={location.pathname === "/user-management" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                User Management
-              </Button>
-            </Link>
-          )}
-        </div>
-      </SidebarContent>
-      <SidebarFooter className="border-t p-4">
-        {user && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 p-2">
-              <Avatar>
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground">{user.email}</span>
-                {user.role && (
-                  <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5 mt-1">
-                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                  </span>
+          {/* Navigation */}
+          <Box p={2} flex={1} w="full">
+            <VStack gap={1}>
+              {navItems.map((item) => (
+                <Link to={item.path} key={item.path} style={{ width: '100%' }}>
+                  <Button
+                    variant={location.pathname === item.path ? "solid" : "ghost"}
+                    w="full"
+                    justifyContent={sidebarOpen ? "flex-start" : "center"}
+                    leftIcon={sidebarOpen ? <item.icon size={16} /> : undefined}
+                  >
+                    {!sidebarOpen && <item.icon size={16} />}
+                    {sidebarOpen && item.label}
+                  </Button>
+                </Link>
+              ))}
+              
+              {isSuperAdmin && (
+                <Link to="/user-management" style={{ width: '100%' }}>
+                  <Button
+                    variant={location.pathname === "/user-management" ? "solid" : "ghost"}
+                    w="full"
+                    justifyContent={sidebarOpen ? "flex-start" : "center"}
+                    leftIcon={sidebarOpen ? <UserPlus size={16} /> : undefined}
+                  >
+                    {!sidebarOpen && <UserPlus size={16} />}
+                    {sidebarOpen && "User Management"}
+                  </Button>
+                </Link>
+              )}
+            </VStack>
+          </Box>
+          
+          {/* Footer */}
+          {user && (
+            <Box p={4} borderTop="1px solid" borderColor="gray.200" w="full">
+              <VStack gap={2}>
+                {sidebarOpen && (
+                  <HStack gap={2} p={2} w="full">
+                    <Avatar>
+                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <Box flex={1}>
+                      <Text fontSize="sm" fontWeight="medium">{user.name}</Text>
+                      <Text fontSize="xs" color="gray.500">{user.email}</Text>
+                      {user.role && (
+                        <Text fontSize="xs" bg="blue.100" color="blue.700" rounded="full" px={2} py={0.5} mt={1}>
+                          {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </Text>
+                      )}
+                    </Box>
+                  </HStack>
                 )}
-              </div>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="w-full justify-start">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </div>
-        )}
-      </SidebarFooter>
-    </Sidebar>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleLogout} 
+                  w="full"
+                  leftIcon={sidebarOpen ? <LogOut size={16} /> : undefined}
+                >
+                  {!sidebarOpen && <LogOut size={16} />}
+                  {sidebarOpen && "Logout"}
+                </Button>
+              </VStack>
+            </Box>
+          )}
+        </VStack>
+      </Box>
+
+      {/* Main Content */}
+      <Box flex={1} overflow="auto">
+        <Box h={16} borderBottom="1px solid" borderColor="gray.200" px={6} display="flex" alignItems="center">
+          <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <Menu size={16} />
+          </Button>
+          <Text fontSize="lg" fontWeight="medium" ml={4}>
+            {location.pathname === "/dashboard" && "Dashboard"}
+            {location.pathname === "/projects" && "Projects"}
+            {location.pathname === "/department-projects" && "Department Projects"}
+            {location.pathname === "/payments" && "Payments"}
+            {location.pathname === "/transportation" && "Transportation"}
+            {location.pathname === "/vendors" && "Vendors"}
+            {location.pathname === "/reports" && "Reports"}
+            {location.pathname === "/settings" && "Settings"}
+            {location.pathname === "/user-management" && "User Management"}
+          </Text>
+        </Box>
+        <Box p={6}>
+          <Outlet />
+        </Box>
+      </Box>
+    </Flex>
   );
 };
 
 const AppLayout = () => {
   const [user, setUser] = useState<any>(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -136,38 +192,7 @@ const AppLayout = () => {
     return <Navigate to="/login" replace />;
   }
 
-  const getPageTitle = () => {
-    const path = location.pathname;
-    if (path === "/dashboard") return "Dashboard";
-    if (path === "/projects") return "Projects";
-    if (path === "/department-projects") return "Department Projects";
-    if (path === "/payments") return "Payments";
-    if (path === "/transportation") return "Transportation";
-    if (path === "/vendors") return "Vendors";
-    if (path === "/reports") return "Reports";
-    if (path === "/settings") return "Settings";
-    if (path === "/user-management") return "User Management";
-    return "";
-  };
-
-  return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full overflow-hidden">
-        <MainNav />
-        <div className="flex-1 overflow-auto">
-          <div className="h-16 border-b flex items-center px-6">
-            <SidebarTrigger />
-            <h2 className="text-lg font-medium ml-4">
-              {getPageTitle()}
-            </h2>
-          </div>
-          <main className="p-6">
-            <Outlet />
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
-  );
+  return <MainNav />;
 };
 
 export default AppLayout;
