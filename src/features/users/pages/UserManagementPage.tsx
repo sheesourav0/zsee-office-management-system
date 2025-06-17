@@ -5,17 +5,9 @@ import DatabaseAddUserForm from "@/components/users/DatabaseAddUserForm";
 import DatabaseUsersList from "@/components/users/DatabaseUsersList";
 import DatabasePolicyManagement from "@/components/users/DatabasePolicyManagement";
 import ImportUsers from "@/components/users/ImportUsers";
-import UserPolicyAssignment from "@/components/users/UserPolicyAssignment";
-import { useState, useEffect } from "react";
+import DatabaseUserPolicyAssignment from "@/components/users/DatabaseUserPolicyAssignment";
 
 const UserManagementPage = () => {
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    // This is now handled by the database components
-    setUsers([]);
-  }, []);
-
   return (
     <div className="space-y-6">
       <div>
@@ -32,59 +24,19 @@ const UserManagementPage = () => {
           <TabsTrigger value="import">Import Users</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>Users</CardTitle>
-              <CardDescription>View and manage all users in the system with database integration</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DatabaseUsersList />
-            </CardContent>
-          </Card>
+          <DatabaseUsersList />
         </TabsContent>
         <TabsContent value="add">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add New User</CardTitle>
-              <CardDescription>Create a new user with Supabase authentication and department assignment</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DatabaseAddUserForm />
-            </CardContent>
-          </Card>
+          <DatabaseAddUserForm />
         </TabsContent>
         <TabsContent value="policies">
-          <Card>
-            <CardHeader>
-              <CardTitle>Database Policy Management</CardTitle>
-              <CardDescription>Create and manage policies stored in Supabase with department-specific permissions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DatabasePolicyManagement />
-            </CardContent>
-          </Card>
+          <DatabasePolicyManagement />
         </TabsContent>
         <TabsContent value="assignments">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Policy Assignments</CardTitle>
-              <CardDescription>Assign database-stored policies to users for complete permission control</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <UserPolicyAssignment users={users} />
-            </CardContent>
-          </Card>
+          <DatabaseUserPolicyAssignment />
         </TabsContent>
         <TabsContent value="import">
-          <Card>
-            <CardHeader>
-              <CardTitle>Import Users</CardTitle>
-              <CardDescription>Import multiple users from Excel spreadsheet with department assignments</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ImportUsers />
-            </CardContent>
-          </Card>
+          <ImportUsers />
         </TabsContent>
       </Tabs>
     </div>
