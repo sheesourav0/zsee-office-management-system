@@ -117,8 +117,8 @@ const DatabaseAddUserForm = () => {
             <div className="space-y-2">
               <Label htmlFor="department">Department</Label>
               <Select 
-                value={formData.department_id} 
-                onValueChange={(value) => handleInputChange('department_id', value)}
+                value={formData.department_id || undefined} 
+                onValueChange={(value) => handleInputChange('department_id', value || "")}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
