@@ -60,8 +60,19 @@ export const CardDescription = forwardRef<HTMLDivElement, CardProps>(
   }
 );
 
+export const CardFooter = forwardRef<HTMLDivElement, CardProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <ChakraCard.Footer ref={ref} className={className} {...props}>
+        {children}
+      </ChakraCard.Footer>
+    );
+  }
+);
+
 Card.displayName = 'Card';
 CardHeader.displayName = 'CardHeader';
 CardContent.displayName = 'CardContent';
 CardTitle.displayName = 'CardTitle';
 CardDescription.displayName = 'CardDescription';
+CardFooter.displayName = 'CardFooter';

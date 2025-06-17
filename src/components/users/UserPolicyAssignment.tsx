@@ -1,11 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/chakra/Button";
-import { Select } from "@/components/chakra/Select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
 import { Checkbox } from "@/components/chakra/Checkbox";
 import { Badge } from "@/components/chakra/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@/components/chakra/Modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalTitle } from "@/components/chakra/Modal";
+import { Plus, User, Trash2, Building2, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { User as UserType } from "./UsersList";
 import { 
@@ -298,84 +300,86 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
             <ModalTitle>Assign Department-Based Policies to User</ModalTitle>
           </ModalHeader>
           
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Select User</label>
-              <Select value={selectedUser} onValueChange={setSelectedUser}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a user" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <ModalBody>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Select User</label>
+                <Select value={selectedUser} onValueChange={setSelectedUser}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Department Context (Optional)</label>
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select department for department-specific policies" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Global (No specific department)</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name} ({dept.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Department Context (Optional)</label>
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department for department-specific policies" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Global (No specific department)</SelectItem>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name} ({dept.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Select Policies</label>
-              <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-3">
-                {availablePolicies.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    {selectedUser ? "No policies available for the selected department context" : "Please select a user first"}
-                  </p>
-                ) : (
-                  availablePolicies.map((policy) => {
-                    const userTypeInfo = userTypes[policy.userType];
-                    return (
-                      <div key={policy.id} className="flex items-start space-x-3">
-                        <Checkbox
-                          id={policy.id}
-                          checked={selectedPolicies.includes(policy.id)}
-                          onCheckedChange={() => togglePolicySelection(policy.id)}
-                        />
-                        <div className="space-y-1 leading-none">
-                          <label htmlFor={policy.id} className="text-sm font-medium">
-                            {policy.name}
-                          </label>
-                          <p className="text-xs text-muted-foreground">{policy.description}</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {policy.permissions.length} permissions
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {userTypeInfo.name}
-                            </Badge>
-                            {policy.departmentId && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">Select Policies</label>
+                <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-3">
+                  {availablePolicies.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      {selectedUser ? "No policies available for the selected department context" : "Please select a user first"}
+                    </p>
+                  ) : (
+                    availablePolicies.map((policy) => {
+                      const userTypeInfo = userTypes[policy.userType];
+                      return (
+                        <div key={policy.id} className="flex items-start space-x-3">
+                          <Checkbox
+                            id={policy.id}
+                            checked={selectedPolicies.includes(policy.id)}
+                            onCheckedChange={() => togglePolicySelection(policy.id)}
+                          />
+                          <div className="space-y-1 leading-none">
+                            <label htmlFor={policy.id} className="text-sm font-medium">
+                              {policy.name}
+                            </label>
+                            <p className="text-xs text-muted-foreground">{policy.description}</p>
+                            <div className="flex items-center gap-1 mt-1">
                               <Badge variant="outline" className="text-xs">
-                                <Building2 className="h-3 w-3 mr-1" />
-                                {getDepartmentName(policy.departmentId)}
+                                {policy.permissions.length} permissions
                               </Badge>
-                            )}
+                              <Badge variant="secondary" className="text-xs">
+                                {userTypeInfo.name}
+                              </Badge>
+                              {policy.departmentId && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Building2 className="h-3 w-3 mr-1" />
+                                  {getDepartmentName(policy.departmentId)}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          </ModalBody>
 
           <ModalFooter>
             <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>

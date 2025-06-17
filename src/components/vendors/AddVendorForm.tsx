@@ -1,27 +1,28 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
 import { Textarea } from "@/components/chakra/Textarea";
-import { Select } from "@/components/chakra/Select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/chakra/Form";
+import { FormItem, FormLabel, FormControl, FormMessage, FormField } from "@/components/chakra/Form";
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@/components/chakra/Tabs";
 import { toast } from "@/hooks/use-toast";
-import { vendorSchema } from "./schemas/vendorSchema";
+import { vendorFormSchema } from "./schemas/vendorSchema";
 import { z } from "zod";
 
 interface AddVendorFormProps {
-  onSubmit: (data: z.infer<typeof vendorSchema>) => void;
+  onSubmit: (data: z.infer<typeof vendorFormSchema>) => void;
   onCancel: () => void;
 }
 
 const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
   const [activeTab, setActiveTab] = useState("basic");
 
-  const form = useForm<z.infer<typeof vendorSchema>>({
-    resolver: zodResolver(vendorSchema),
+  const form = useForm<z.infer<typeof vendorFormSchema>>({
+    resolver: zodResolver(vendorFormSchema),
     defaultValues: {
       companyName: "",
       contactName: "",
@@ -39,7 +40,7 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof vendorSchema>) => {
+  const handleSubmit = (values: z.infer<typeof vendorFormSchema>) => {
     onSubmit(values);
   };
 
@@ -158,15 +159,15 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                       <FormLabel>Category</FormLabel>
                       <FormControl>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <Select.Trigger>
-                            <Select.Value placeholder="Select a category" />
-                          </Select.Trigger>
-                          <Select.Content>
-                            <Select.Item value="supplier">Supplier</Select.Item>
-                            <Select.Item value="manufacturer">Manufacturer</Select.Item>
-                            <Select.Item value="service">Service Provider</Select.Item>
-                            <Select.Item value="other">Other</Select.Item>
-                          </Select.Content>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="supplier">Supplier</SelectItem>
+                            <SelectItem value="manufacturer">Manufacturer</SelectItem>
+                            <SelectItem value="service">Service Provider</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
                         </Select>
                       </FormControl>
                       <FormMessage />
