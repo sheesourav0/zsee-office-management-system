@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { policyService, userPolicyService } from "@/lib/supabase-services";
@@ -25,7 +24,16 @@ export const useCreatePolicy = () => {
   return useMutation({
     mutationFn: async (policyData: CreatePolicy) => {
       const validatedData = CreatePolicySchema.parse(policyData);
-      return policyService.create(validatedData);
+      // Transform the validated data to match the service interface
+      const serviceData = {
+        id: validatedData.id,
+        name: validatedData.name,
+        description: validatedData.description,
+        permissions: validatedData.permissions,
+        department_id: validatedData.department_id,
+        user_type: validatedData.user_type,
+      };
+      return policyService.create(serviceData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['policies'] });
@@ -44,8 +52,8 @@ export const useUpdatePolicy = () => {
   return useMutation({
     mutationFn: async (policyData: UpdatePolicy & { id: string }) => {
       const validatedData = UpdatePolicySchema.parse(policyData);
-      const { id, ...updateData } = validatedData;
-      return policyService.update(policyData.id, updateData);
+      const { id, ...updateData } = policyData;
+      return policyService.update(id, updateData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['policies'] });
