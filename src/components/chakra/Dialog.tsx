@@ -2,7 +2,7 @@
 import { 
   DialogRoot,
   DialogBackdrop,
-  DialogContent,
+  DialogContent as ChakraDialogContent,
   DialogHeader,
   DialogFooter,
   DialogBody,
@@ -32,16 +32,16 @@ export const Dialog = forwardRef<HTMLDivElement, DialogProps>(
         {...props}
       >
         <DialogBackdrop />
-        <DialogContent ref={ref}>
+        <ChakraDialogContent ref={ref}>
           {children}
-        </DialogContent>
+        </ChakraDialogContent>
       </DialogRoot>
     );
   }
 );
 
 export { DialogHeader, DialogFooter, DialogBody, DialogCloseTrigger, DialogTitle, DialogDescription };
-export const DialogContent = DialogContent;
+export const DialogContent = ChakraDialogContent;
 export const DialogTrigger = ({ children }: { children: React.ReactNode }) => children;
 
 Dialog.displayName = 'Dialog';

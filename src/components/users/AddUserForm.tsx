@@ -1,11 +1,12 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/chakra/Form";
-import { Select } from "@/components/chakra/Select";
+import { FormItem, FormLabel, FormControl, FormMessage, Form, FormField } from "@/components/chakra/Form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/chakra/Select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { toast } from "@/hooks/use-toast";
 

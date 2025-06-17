@@ -1,54 +1,57 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/chakra/Button";
-import { Input } from "@/components/chakra/Input";
-import { Label } from "@/components/chakra/Label";
-import { Textarea } from "@/components/chakra/Textarea";
-import { Badge } from "@/components/chakra/Badge";
-import { Checkbox } from "@/components/chakra/Checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
-import { Select } from "@/components/chakra/Select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/chakra/Form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Textarea } from "@/components/chakra/Textarea";
+import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/chakra/Form";
+import { Select } from "@/components/chakra/Select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Switch } from "@/components/chakra/Switch";
 import { toast } from "@/hooks/use-toast";
 
 interface DatabasePolicy {
   id: string;
   name: string;
   description: string;
+  isActive: boolean;
   databaseType: string;
   connectionString: string;
   query: string;
-  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const databasePolicySchema = z.object({
-  name: z.string().min(3, { message: "Name must be at least 3 characters." }),
-  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
-  databaseType: z.string().min(1, { message: "Database type is required." }),
-  connectionString: z.string().min(10, { message: "Connection string must be at least 10 characters." }),
-  query: z.string().min(10, { message: "Query must be at least 10 characters." }),
+const databaseTypes = [
+  { id: "mysql", name: "MySQL" },
+  { id: "postgresql", name: "PostgreSQL" },
+  { id: "mongodb", name: "MongoDB" },
+  { id: "others", name: "Others" },
+];
+
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Policy name must be at least 2 characters" }),
+  description: z.string().optional(),
   isActive: z.boolean().default(true),
+  databaseType: z.string({ required_error: "Please select a database type" }),
+  connectionString: z.string().optional(),
+  query: z.string().optional(),
 });
 
 const DatabasePolicyManagement = () => {
   const [policies, setPolicies] = useState<DatabasePolicy[]>([]);
-  const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false);
-  const [selectedPolicy, setSelectedPolicy] = useState<DatabasePolicy | null>(null);
-  const [isEditPolicyOpen, setIsEditPolicyOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof databasePolicySchema>>({
-    resolver: zodResolver(databasePolicySchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
-      databaseType: "",
+      isActive: true,
+      databaseType: "mysql",
       connectionString: "",
       query: "",
-      isActive: true,
     },
   });
 
@@ -57,256 +60,165 @@ const DatabasePolicyManagement = () => {
   }, []);
 
   const loadPolicies = () => {
-    const storedPolicies = localStorage.getItem("databasePolicies");
-    if (storedPolicies) {
-      setPolicies(JSON.parse(storedPolicies));
-    }
+    const storedPolicies = JSON.parse(localStorage.getItem('database_policies') || '[]');
+    setPolicies(storedPolicies);
   };
 
-  const savePolicies = (policiesToSave: DatabasePolicy[]) => {
-    localStorage.setItem("databasePolicies", JSON.stringify(policiesToSave));
-    loadPolicies();
-  };
-
-  const addPolicy = (values: z.infer<typeof databasePolicySchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     const newPolicy: DatabasePolicy = {
       id: Date.now().toString(),
-      ...values,
+      name: values.name,
+      description: values.description || '',
+      isActive: values.isActive,
+      databaseType: values.databaseType,
+      connectionString: values.connectionString || '',
+      query: values.query || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-    const updatedPolicies = [...policies, newPolicy];
-    savePolicies(updatedPolicies);
-    setIsAddPolicyOpen(false);
-    form.reset();
-    toast.success("Policy added successfully!");
-  };
 
-  const updatePolicy = (id: string, values: z.infer<typeof databasePolicySchema>) => {
-    const updatedPolicies = policies.map((policy) =>
-      policy.id === id ? { ...policy, ...values } : policy
-    );
-    savePolicies(updatedPolicies);
-    setIsEditPolicyOpen(false);
-    setSelectedPolicy(null);
-    toast.success("Policy updated successfully!");
-  };
+    setIsSubmitting(true);
+    try {
+      const existingPolicies = JSON.parse(localStorage.getItem('database_policies') || '[]');
+      existingPolicies.push(newPolicy);
+      localStorage.setItem('database_policies', JSON.stringify(existingPolicies));
 
-  const deletePolicy = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this policy?")) {
-      const updatedPolicies = policies.filter((policy) => policy.id !== id);
-      savePolicies(updatedPolicies);
-      toast.success("Policy deleted successfully!");
+      setPolicies(existingPolicies);
+      toast.success("Policy added successfully");
+      form.reset();
+    } catch (error) {
+      toast.error("Failed to add policy");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const togglePolicyStatus = (id: string) => {
-    const updatedPolicies = policies.map((policy) =>
-      policy.id === id ? { ...policy, isActive: !policy.isActive } : policy
-    );
-    savePolicies(updatedPolicies);
-    toast.success("Policy status updated successfully!");
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Database Policies</CardTitle>
+        <CardTitle>Database Policy Management</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <Button onClick={() => setIsAddPolicyOpen(true)}>Add Policy</Button>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Database Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {policies.map((policy) => (
-              <TableRow key={policy.id}>
-                <TableCell className="font-medium">{policy.name}</TableCell>
-                <TableCell>{policy.description}</TableCell>
-                <TableCell>{policy.databaseType}</TableCell>
-                <TableCell>
-                  <Badge variant={policy.isActive ? "default" : "secondary"}>
-                    {policy.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedPolicy(policy);
-                      setIsEditPolicyOpen(true);
-                    }}
-                  >
-                    Edit
-                  </Button>{" "}
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deletePolicy(policy.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Dialog open={isAddPolicyOpen} onOpenChange={setIsAddPolicyOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Database Policy</DialogTitle>
-            </DialogHeader>
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...form.register("name")} />
-              </FormControl>
-              <FormMessage>{form.formState.errors.name?.message}</FormMessage>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...form.register("description")} />
-              </FormControl>
-              <FormMessage>{form.formState.errors.description?.message}</FormMessage>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Database Type</FormLabel>
-              <FormControl>
-                <Select {...form.register("databaseType")}>
-                  <option value="">Select a database type</option>
-                  <option value="MySQL">MySQL</option>
-                  <option value="PostgreSQL">PostgreSQL</option>
-                  <option value="MongoDB">MongoDB</option>
-                </Select>
-              </FormControl>
-              <FormMessage>{form.formState.errors.databaseType?.message}</FormMessage>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Connection String</FormLabel>
-              <FormControl>
-                <Input {...form.register("connectionString")} />
-              </FormControl>
-              <FormMessage>{form.formState.errors.connectionString?.message}</FormMessage>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Query</FormLabel>
-              <FormControl>
-                <Textarea {...form.register("query")} />
-              </FormControl>
-              <FormMessage>{form.formState.errors.query?.message}</FormMessage>
-            </FormItem>
-            <Button onClick={form.handleSubmit(addPolicy)}>Add Policy</Button>
-          </DialogContent>
-        </Dialog>
-        <Dialog open={isEditPolicyOpen} onOpenChange={setIsEditPolicyOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Database Policy</DialogTitle>
-            </DialogHeader>
-            {selectedPolicy && (
-              <EditPolicyForm
-                policy={selectedPolicy}
-                onUpdate={updatePolicy}
-                onClose={() => {
-                  setIsEditPolicyOpen(false);
-                  setSelectedPolicy(null);
-                }}
-              />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Policy Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter policy name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="databaseType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Database Type</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <option value="">Select database type</option>
+                      {databaseTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Policy Description</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Enter policy description" className="resize-none" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </DialogContent>
-        </Dialog>
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="connectionString"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Connection String (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter connection string" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="query"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Query (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter query" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Policy Status</FormLabel>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" loading={isSubmitting} className="w-full">
+            {isSubmitting ? "Adding..." : "Add Policy"}
+          </Button>
+        </form>
+
+        {policies.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Existing Policies</h3>
+            <ul>
+              {policies.map((policy) => (
+                <li key={policy.id} className="py-2 border-b">
+                  {policy.name} - {policy.databaseType}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
-};
-
-interface EditPolicyFormProps {
-  policy: DatabasePolicy;
-  onUpdate: (id: string, values: z.infer<typeof databasePolicySchema>) => void;
-  onClose: () => void;
-}
-
-const EditPolicyForm = ({ policy, onUpdate, onClose }: EditPolicyFormProps) => {
-  const form = useForm<z.infer<typeof databasePolicySchema>>({
-    resolver: zodResolver(databasePolicySchema),
-    defaultValues: {
-      name: policy.name,
-      description: policy.description,
-      databaseType: policy.databaseType,
-      connectionString: policy.connectionString,
-      query: policy.query,
-      isActive: policy.isActive,
-    },
-  });
-
-  const submitUpdate = (values: z.infer<typeof databasePolicySchema>) => {
-    onUpdate(policy.id, values);
-    onClose();
-  };
-
-  return (
-    <form onSubmit={form.handleSubmit(submitUpdate)} className="space-y-4">
-      <FormItem>
-        <FormLabel>Name</FormLabel>
-        <FormControl>
-          <Input {...form.register("name")} />
-        </FormControl>
-        <FormMessage>{form.formState.errors.name?.message}</FormMessage>
-      </FormItem>
-      <FormItem>
-        <FormLabel>Description</FormLabel>
-        <FormControl>
-          <Textarea {...form.register("description")} />
-        </FormControl>
-        <FormMessage>{form.formState.errors.description?.message}</FormMessage>
-      </FormItem>
-      <FormItem>
-        <FormLabel>Database Type</FormLabel>
-        <FormControl>
-          <Select {...form.register("databaseType")}>
-            <option value="">Select a database type</option>
-            <option value="MySQL">MySQL</option>
-            <option value="PostgreSQL">PostgreSQL</option>
-            <option value="MongoDB">MongoDB</option>
-          </Select>
-        </FormControl>
-        <FormMessage>{form.formState.errors.databaseType?.message}</FormMessage>
-      </FormItem>
-      <FormItem>
-        <FormLabel>Connection String</FormLabel>
-        <FormControl>
-          <Input {...form.register("connectionString")} />
-        </FormControl>
-        <FormMessage>{form.formState.errors.connectionString?.message}</FormMessage>
-      </FormItem>
-      <FormItem>
-        <FormLabel>Query</FormLabel>
-        <FormControl>
-          <Textarea {...form.register("query")} />
-        </FormControl>
-        <FormMessage>{form.formState.errors.query?.message}</FormMessage>
-      </FormItem>
-      <FormItem>
-        <FormLabel>Active</FormLabel>
-        <FormControl>
-          <Checkbox
-            checked={form.watch("isActive")}
-            onCheckedChange={(checked) => form.setValue("isActive", checked)}
-          />
-        </FormControl>
-        <FormMessage>{form.formState.errors.isActive?.message}</FormMessage>
-      </FormItem>
-      <Button type="submit">Update Policy</Button>
-    </form>
   );
 };
 

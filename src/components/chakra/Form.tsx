@@ -22,6 +22,10 @@ export const FormField = ({ children, ...props }: any) => {
   return children(props);
 };
 
+export const Form = ({ children, ...props }: any) => {
+  return <form {...props}>{children}</form>;
+};
+
 export const FormControl = FormItem;
 export const FormLabel = ({ children, ...props }: any) => (
   <Field.Label {...props}>{children}</Field.Label>
