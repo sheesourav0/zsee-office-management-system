@@ -6,6 +6,8 @@ import {
   DialogBody as ChakraDialogBody,
   DialogFooter as ChakraDialogFooter,
   DialogTitle as ChakraDialogTitle,
+  DialogBackdrop,
+  DialogCloseTrigger,
 } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
@@ -26,8 +28,10 @@ interface ModalChildProps {
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
   ({ open, onOpenChange, children, className, ...props }, ref) => {
     return (
-      <ChakraDialogRoot open={open} onOpenChange={({ open }) => onOpenChange(open)} ref={ref} className={className} {...props}>
-        {children}
+      <ChakraDialogRoot open={open} onOpenChange={({ open }) => onOpenChange(open)} className={className} {...props}>
+        <ChakraDialogContent ref={ref}>
+          {children}
+        </ChakraDialogContent>
       </ChakraDialogRoot>
     );
   }
@@ -83,9 +87,32 @@ export const ModalTitle = forwardRef<HTMLDivElement, ModalChildProps>(
   }
 );
 
+// Add missing exports for backward compatibility
+export const ModalOverlay = forwardRef<HTMLDivElement, ModalChildProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <DialogBackdrop ref={ref} className={className} {...props}>
+        {children}
+      </DialogBackdrop>
+    );
+  }
+);
+
+export const ModalCloseButton = forwardRef<HTMLButtonElement, ModalChildProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <DialogCloseTrigger ref={ref} className={className} {...props}>
+        {children}
+      </DialogCloseTrigger>
+    );
+  }
+);
+
 Modal.displayName = 'Modal';
 ModalContent.displayName = 'ModalContent';
 ModalHeader.displayName = 'ModalHeader';
 ModalBody.displayName = 'ModalBody';
 ModalFooter.displayName = 'ModalFooter';
 ModalTitle.displayName = 'ModalTitle';
+ModalOverlay.displayName = 'ModalOverlay';
+ModalCloseButton.displayName = 'ModalCloseButton';

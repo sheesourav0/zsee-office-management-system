@@ -24,8 +24,8 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
   const form = useForm<z.infer<typeof vendorFormSchema>>({
     resolver: zodResolver(vendorFormSchema),
     defaultValues: {
-      companyName: "",
-      contactName: "",
+      name: "",
+      contactPerson: "",
       email: "",
       phone: "",
       address: "",
@@ -34,8 +34,8 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
       description: "",
       paymentTerms: "",
       bankName: "",
-      accountName: "",
-      accountNumber: "",
+      accountHolderName: "",
+      bankAccountNumber: "",
       ifscCode: "",
     },
   });
@@ -62,7 +62,7 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="companyName"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Company Name</FormLabel>
@@ -75,7 +75,7 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                   />
                   <FormField
                     control={form.control}
-                    name="contactName"
+                    name="contactPerson"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Contact Name</FormLabel>
@@ -226,7 +226,7 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                   />
                   <FormField
                     control={form.control}
-                    name="accountName"
+                    name="accountHolderName"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Account Name</FormLabel>
@@ -241,7 +241,7 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="accountNumber"
+                    name="bankAccountNumber"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Account Number</FormLabel>

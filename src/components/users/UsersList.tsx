@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Ca
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/chakra/Avatar";
 import { toast } from "@/hooks/use-toast";
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
