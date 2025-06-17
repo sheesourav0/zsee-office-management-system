@@ -90,7 +90,7 @@ const DatabaseUserPolicyAssignment = () => {
     if (!selectedUser) return [];
     
     return policies.filter(policy => {
-      if (!selectedDepartment) {
+      if (selectedDepartment === "no-department") {
         return !policy.department_id;
       }
       return !policy.department_id || policy.department_id === selectedDepartment;
@@ -107,7 +107,7 @@ const DatabaseUserPolicyAssignment = () => {
         await assignPolicyMutation.mutateAsync({
           user_id: selectedUser,
           policy_id: policyId,
-          department_id: selectedDepartment || null,
+          department_id: selectedDepartment === "no-department" ? null : selectedDepartment,
         });
       }
 
@@ -253,7 +253,7 @@ const DatabaseUserPolicyAssignment = () => {
                   <SelectValue placeholder="Select department for department-specific policies" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Global (No specific department)</SelectItem>
+                  <SelectItem value="no-department">Global (No specific department)</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name} ({dept.code})
