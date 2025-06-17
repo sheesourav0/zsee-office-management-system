@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/radix/Input";
+import { Button } from "@/components/radix/Button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/radix/Table";
+import { Badge } from "@/components/radix/Badge";
 import { Search, Filter, Eye } from "lucide-react";
 import { toast } from "sonner";
 

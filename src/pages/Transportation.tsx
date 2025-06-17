@@ -1,8 +1,8 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/radix/Card";
+import { Button } from "@/components/radix/Button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/radix/Tabs";
 import { Plus, Package, Truck } from "lucide-react";
 import { toast } from "sonner";
 import MaterialLogistics from "@/features/transportation/components/MaterialLogistics";
