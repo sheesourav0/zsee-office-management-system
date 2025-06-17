@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,8 +14,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Shield, User, Building2 } from "lucide-react";
-import { toast } from "sonner";
-import { profileService, policyService, departmentService, userPolicyService } from "@/lib/supabase-services";
+import { useQuery } from "@tanstack/react-query";
+import { departmentService } from "@/lib/supabase-services";
+import { useUsers } from "@/hooks/useUsers";
+import { usePolicies, useAssignPolicy, useRemovePolicyAssignment, useUserPolicies } from "@/hooks/usePolicies";
 
 const userTypes = {
   'department-staff': {
@@ -63,39 +65,20 @@ const userTypes = {
 };
 
 const DatabaseUserPolicyAssignment = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [policies, setPolicies] = useState<any[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [assignments, setAssignments] = useState<any[]>([]);
+  const { data: users = [], isLoading: usersLoading } = useUsers();
+  const { data: policies = [], isLoading: policiesLoading } = usePolicies();
+  const { data: departments = [] } = useQuery({
+    queryKey: ['departments'],
+    queryFn: departmentService.getAll,
+  });
+
+  const assignPolicyMutation = useAssignPolicy();
+  const removePolicyMutation = useRemovePolicyAssignment();
+
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [usersData, policiesData, departmentsData] = await Promise.all([
-        profileService.getAll(),
-        policyService.getAll(),
-        departmentService.getAll()
-      ]);
-      
-      setUsers(usersData || []);
-      setPolicies(policiesData || []);
-      setDepartments(departmentsData || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getDepartmentName = (departmentId?: string) => {
     if (!departmentId) return "Global";
@@ -106,59 +89,39 @@ const DatabaseUserPolicyAssignment = () => {
   const getAvailablePolicies = () => {
     if (!selectedUser) return [];
     
-    // Filter policies based on selected department and user type compatibility
     return policies.filter(policy => {
-      // If no department selected, show global policies only
       if (!selectedDepartment) {
         return !policy.department_id;
       }
-      
-      // Show policies for the selected department or global policies
       return !policy.department_id || policy.department_id === selectedDepartment;
     });
   };
 
   const handleAssignPolicies = async () => {
     if (!selectedUser || selectedPolicies.length === 0) {
-      toast.error("Please select a user and at least one policy");
       return;
     }
 
     try {
-      setLoading(true);
-      
       for (const policyId of selectedPolicies) {
-        const assignment = {
+        await assignPolicyMutation.mutateAsync({
           user_id: selectedUser,
           policy_id: policyId,
           department_id: selectedDepartment || null,
-        };
-        await userPolicyService.assignPolicy(assignment);
+        });
       }
 
-      loadData();
       setIsAssignDialogOpen(false);
       setSelectedUser("");
       setSelectedPolicies([]);
       setSelectedDepartment("");
-      toast.success("Policies assigned successfully");
     } catch (error) {
       console.error("Error assigning policies:", error);
-      toast.error("An error occurred while assigning policies");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleRemoveAssignment = async (userId: string, policyId: string) => {
-    try {
-      await userPolicyService.removeAssignment(userId, policyId);
-      loadData();
-      toast.success("Policy assignment removed");
-    } catch (error) {
-      console.error("Error removing assignment:", error);
-      toast.error("An error occurred while removing the assignment");
-    }
+    removePolicyMutation.mutate({ userId, policyId });
   };
 
   const togglePolicySelection = (policyId: string) => {
@@ -171,19 +134,9 @@ const DatabaseUserPolicyAssignment = () => {
     });
   };
 
-  const getUserAssignments = async (userId: string) => {
-    try {
-      const userPolicies = await userPolicyService.getUserPolicies(userId);
-      return userPolicies || [];
-    } catch (error) {
-      console.error('Error fetching user policies:', error);
-      return [];
-    }
-  };
-
   const availablePolicies = getAvailablePolicies();
 
-  if (loading) {
+  if (usersLoading || policiesLoading) {
     return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
 
@@ -320,6 +273,7 @@ const DatabaseUserPolicyAssignment = () => {
                 ) : (
                   availablePolicies.map((policy) => {
                     const userTypeInfo = userTypes[policy.user_type as keyof typeof userTypes];
+                    const policyPermissions = Array.isArray(policy.permissions) ? policy.permissions : [];
                     return (
                       <div key={policy.id} className="flex items-start space-x-3">
                         <Checkbox
@@ -334,7 +288,7 @@ const DatabaseUserPolicyAssignment = () => {
                           <p className="text-xs text-muted-foreground">{policy.description}</p>
                           <div className="flex items-center gap-1 mt-1">
                             <Badge variant="outline" className="text-xs">
-                              {policy.permissions.length} permissions
+                              {policyPermissions.length} permissions
                             </Badge>
                             <Badge variant="secondary" className="text-xs">
                               {userTypeInfo?.name}
@@ -359,8 +313,11 @@ const DatabaseUserPolicyAssignment = () => {
             <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAssignPolicies} disabled={loading}>
-              {loading ? 'Assigning...' : 'Assign Policies'}
+            <Button 
+              onClick={handleAssignPolicies} 
+              disabled={assignPolicyMutation.isPending || !selectedUser || selectedPolicies.length === 0}
+            >
+              {assignPolicyMutation.isPending ? 'Assigning...' : 'Assign Policies'}
             </Button>
           </DialogFooter>
         </DialogContent>

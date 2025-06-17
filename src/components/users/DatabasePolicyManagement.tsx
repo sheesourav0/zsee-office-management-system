@@ -1,17 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -23,10 +17,20 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Plus, Pencil, Trash, Shield, Users, Building2 } from "lucide-react";
-import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Plus, Pencil, Trash, Shield, Building2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { departmentService } from "@/lib/supabase-services";
 import { permissions, RolePermission } from "@/lib/roles";
-import { policyService, departmentService, userPolicyService } from "@/lib/supabase-services";
+import { usePolicies, useCreatePolicy, useUpdatePolicy, useDeletePolicy } from "@/hooks/usePolicies";
+import { CreatePolicy, UpdatePolicy, CreatePolicySchema, UpdatePolicySchema } from "@/lib/schemas/policy";
 
 const userTypes = {
   'department-staff': {
@@ -74,137 +78,92 @@ const userTypes = {
 };
 
 const DatabasePolicyManagement = () => {
-  const [policies, setPolicies] = useState<any[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
+  const { data: policies = [], isLoading: policiesLoading } = usePolicies();
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
+    queryKey: ['departments'],
+    queryFn: departmentService.getAll,
+  });
+
+  const createPolicyMutation = useCreatePolicy();
+  const updatePolicyMutation = useUpdatePolicy();
+  const deletePolicyMutation = useDeletePolicy();
+
   const [currentPolicy, setCurrentPolicy] = useState<any | null>(null);
   const [isPolicyDialogOpen, setIsPolicyDialogOpen] = useState(false);
   const [isNewPolicy, setIsNewPolicy] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [policyName, setPolicyName] = useState("");
-  const [policyDescription, setPolicyDescription] = useState("");
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
-  const [selectedUserType, setSelectedUserType] = useState<string>("");
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [policiesData, departmentsData] = await Promise.all([
-        policyService.getAll(),
-        departmentService.getAll()
-      ]);
-      setPolicies(policiesData || []);
-      setDepartments(departmentsData || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const form = useForm<CreatePolicy | UpdatePolicy>({
+    resolver: zodResolver(isNewPolicy ? CreatePolicySchema : UpdatePolicySchema),
+    defaultValues: {
+      id: "",
+      name: "",
+      description: "",
+      permissions: [],
+      department_id: null,
+      user_type: 'department-staff',
+    },
+  });
 
   const handleEditPolicy = (policy: any) => {
     setCurrentPolicy(policy);
-    setPolicyName(policy.name);
-    setPolicyDescription(policy.description);
-    setSelectedPermissions([...policy.permissions]);
-    setSelectedDepartment(policy.department_id || "");
-    setSelectedUserType(policy.user_type);
+    form.reset({
+      id: policy.id,
+      name: policy.name,
+      description: policy.description,
+      permissions: Array.isArray(policy.permissions) ? policy.permissions : [],
+      department_id: policy.department_id,
+      user_type: policy.user_type,
+    });
     setIsNewPolicy(false);
     setIsPolicyDialogOpen(true);
   };
 
   const handleAddNewPolicy = () => {
     setCurrentPolicy(null);
-    setPolicyName("");
-    setPolicyDescription("");
-    setSelectedPermissions([]);
-    setSelectedDepartment("");
-    setSelectedUserType("");
+    form.reset({
+      id: "",
+      name: "",
+      description: "",
+      permissions: [],
+      department_id: null,
+      user_type: 'department-staff',
+    });
     setIsNewPolicy(true);
     setIsPolicyDialogOpen(true);
   };
 
-  const handleSavePolicy = async () => {
-    try {
-      if (!policyName || !policyDescription || !selectedUserType) {
-        toast.error("Please fill in all required fields");
-        return;
-      }
-
-      if (selectedPermissions.length === 0) {
-        toast.error("Please select at least one permission");
-        return;
-      }
-
-      const userTypeInfo = userTypes[selectedUserType as keyof typeof userTypes];
-      if (userTypeInfo?.departmentSpecific && !selectedDepartment) {
-        toast.error("Please select a department for this user type");
-        return;
-      }
-
-      setLoading(true);
-
-      if (isNewPolicy) {
-        const policyId = policyName.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
-        
-        const newPolicy = {
-          id: policyId,
-          name: policyName,
-          description: policyDescription,
-          permissions: selectedPermissions,
-          department_id: userTypeInfo?.departmentSpecific ? selectedDepartment : null,
-          user_type: selectedUserType,
-        };
-
-        await policyService.create(newPolicy);
-        toast.success("Policy created successfully");
-      } else if (currentPolicy) {
-        const updatedPolicy = {
-          name: policyName,
-          description: policyDescription,
-          permissions: selectedPermissions,
-          department_id: userTypeInfo?.departmentSpecific ? selectedDepartment : null,
-          user_type: selectedUserType,
-        };
-
-        await policyService.update(currentPolicy.id, updatedPolicy);
-        toast.success("Policy updated successfully");
-      }
-
-      loadData();
-      setIsPolicyDialogOpen(false);
-    } catch (error) {
-      console.error("Error saving policy:", error);
-      toast.error("An error occurred while saving the policy");
-    } finally {
-      setLoading(false);
+  const onSubmit = (values: CreatePolicy | UpdatePolicy) => {
+    if (isNewPolicy) {
+      const policyId = values.name?.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+      const createData = { ...values, id: policyId } as CreatePolicy;
+      createPolicyMutation.mutate(createData, {
+        onSuccess: () => {
+          setIsPolicyDialogOpen(false);
+          form.reset();
+        },
+      });
+    } else if (currentPolicy) {
+      const updateData = { ...values, id: currentPolicy.id };
+      updatePolicyMutation.mutate(updateData, {
+        onSuccess: () => {
+          setIsPolicyDialogOpen(false);
+          form.reset();
+        },
+      });
     }
   };
 
-  const handleDeletePolicy = async (policyId: string) => {
-    try {
-      await policyService.delete(policyId);
-      loadData();
-      toast.success("Policy deleted successfully");
-    } catch (error) {
-      console.error("Error deleting policy:", error);
-      toast.error("An error occurred while deleting the policy");
-    }
+  const handleDeletePolicy = (policyId: string) => {
+    deletePolicyMutation.mutate(policyId);
   };
 
   const togglePermission = (permissionId: string) => {
-    setSelectedPermissions(prevPermissions => {
-      if (prevPermissions.includes(permissionId)) {
-        return prevPermissions.filter(id => id !== permissionId);
-      } else {
-        return [...prevPermissions, permissionId];
-      }
-    });
+    const currentPermissions = form.getValues("permissions") || [];
+    const updatedPermissions = currentPermissions.includes(permissionId)
+      ? currentPermissions.filter(id => id !== permissionId)
+      : [...currentPermissions, permissionId];
+    
+    form.setValue("permissions", updatedPermissions);
   };
 
   const groupPermissionsByCategory = () => {
@@ -236,7 +195,7 @@ const DatabasePolicyManagement = () => {
     return acc;
   }, {} as Record<string, any[]>);
 
-  if (loading) {
+  if (policiesLoading || departmentsLoading) {
     return <div className="flex items-center justify-center p-8">Loading policies...</div>;
   }
 
@@ -268,6 +227,7 @@ const DatabasePolicyManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {groupPolicies.map((policy) => {
               const userTypeInfo = userTypes[policy.user_type as keyof typeof userTypes];
+              const policyPermissions = Array.isArray(policy.permissions) ? policy.permissions : [];
               
               return (
                 <Card key={policy.id} className="overflow-hidden">
@@ -285,6 +245,7 @@ const DatabasePolicyManagement = () => {
                           variant="ghost" 
                           size="sm" 
                           onClick={() => handleDeletePolicy(policy.id)}
+                          disabled={deletePolicyMutation.isPending}
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
@@ -295,21 +256,21 @@ const DatabasePolicyManagement = () => {
                     <div className="flex flex-wrap gap-2 mb-4">
                       <Badge variant="outline" className="bg-primary/10 text-primary">
                         <Shield className="h-3 w-3 mr-1" />
-                        {policy.permissions.length} permissions
+                        {policyPermissions.length} permissions
                       </Badge>
                       <Badge variant="secondary">
                         {userTypeInfo?.name}
                       </Badge>
                     </div>
                     <div className="space-y-1 max-h-24 overflow-y-auto">
-                      {policy.permissions.slice(0, 3).map((permId: string) => (
+                      {policyPermissions.slice(0, 3).map((permId: string) => (
                         <div key={permId} className="text-xs text-muted-foreground">
                           • {permissions[permId]?.name}
                         </div>
                       ))}
-                      {policy.permissions.length > 3 && (
+                      {policyPermissions.length > 3 && (
                         <div className="text-xs text-muted-foreground font-medium">
-                          ... and {policy.permissions.length - 3} more
+                          ... and {policyPermissions.length - 3} more
                         </div>
                       )}
                     </div>
@@ -327,63 +288,107 @@ const DatabasePolicyManagement = () => {
             <DialogTitle>{isNewPolicy ? "Create New Policy" : "Edit Policy"}</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="policy-name">Policy Name</Label>
-                <Input 
-                  id="policy-name" 
-                  value={policyName} 
-                  onChange={(e) => setPolicyName(e.target.value)} 
-                  placeholder="e.g. PHED Manager Policy"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {isNewPolicy && (
+                <FormField
+                  control={form.control}
+                  name="id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Policy ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. phed-manager-policy" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
+              )}
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Policy Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g. PHED Manager Policy" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
-              <div className="grid gap-2">
-                <Label htmlFor="policy-description">Description</Label>
-                <Textarea 
-                  id="policy-description" 
-                  value={policyDescription} 
-                  onChange={(e) => setPolicyDescription(e.target.value)} 
-                  placeholder="Brief description of this policy's purpose and scope"
-                  rows={3}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Brief description of this policy's purpose and scope"
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="mb-2 block">User Type</Label>
-                  <Select value={selectedUserType} onValueChange={setSelectedUserType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(userTypes).map(([key, type]) => (
-                        <SelectItem key={key} value={key}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="user_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>User Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select user type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(userTypes).map(([key, type]) => (
+                            <SelectItem key={key} value={key}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                {selectedUserType && userTypes[selectedUserType as keyof typeof userTypes]?.departmentSpecific && (
-                  <div>
-                    <Label className="mb-2 block">Department</Label>
-                    <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {departments.map((dept) => (
-                          <SelectItem key={dept.id} value={dept.id}>
-                            {dept.name} ({dept.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                <FormField
+                  control={form.control}
+                  name="department_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Department (Optional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select department" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Global (No specific department)</SelectItem>
+                          {departments.map((dept) => (
+                            <SelectItem key={dept.id} value={dept.id}>
+                              {dept.name} ({dept.code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div>
@@ -393,40 +398,49 @@ const DatabasePolicyManagement = () => {
                     <div key={category} className="mb-6 last:mb-0">
                       <h4 className="text-sm font-semibold capitalize mb-3">{category} Permissions</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {perms.map((permission) => (
-                          <div key={permission.id} className="flex items-start space-x-2">
-                            <Checkbox 
-                              id={permission.id}
-                              checked={selectedPermissions.includes(permission.id)}
-                              onCheckedChange={() => togglePermission(permission.id)}
-                            />
-                            <div className="space-y-1 leading-none">
-                              <label 
-                                htmlFor={permission.id}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {permission.name}
-                              </label>
-                              <p className="text-xs text-muted-foreground">{permission.description}</p>
+                        {perms.map((permission) => {
+                          const currentPermissions = form.watch("permissions") || [];
+                          return (
+                            <div key={permission.id} className="flex items-start space-x-2">
+                              <Checkbox 
+                                id={permission.id}
+                                checked={currentPermissions.includes(permission.id)}
+                                onCheckedChange={() => togglePermission(permission.id)}
+                              />
+                              <div className="space-y-1 leading-none">
+                                <label 
+                                  htmlFor={permission.id}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                  {permission.name}
+                                </label>
+                                <p className="text-xs text-muted-foreground">{permission.description}</p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPolicyDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSavePolicy} disabled={loading}>
-              {loading ? 'Saving...' : (isNewPolicy ? "Create Policy" : "Save Changes")}
-            </Button>
-          </DialogFooter>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsPolicyDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createPolicyMutation.isPending || updatePolicyMutation.isPending}
+                >
+                  {createPolicyMutation.isPending || updatePolicyMutation.isPending 
+                    ? 'Saving...' 
+                    : (isNewPolicy ? "Create Policy" : "Save Changes")
+                  }
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
