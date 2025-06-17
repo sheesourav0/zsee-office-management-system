@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/radix/Button";
 import {
   Table,
   TableBody,
@@ -8,11 +7,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+} from "@/components/radix/Table";
+import { Badge } from "@/components/radix/Badge";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/radix/Dialog";
+import { Checkbox } from "@/components/radix/Checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/radix/Select";
 import { Plus, Trash2, Shield, User, Building2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { departmentService } from "@/lib/supabase-services";

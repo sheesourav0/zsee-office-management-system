@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/components/radix/Dialog";
 import {
   Form,
   FormControl,
@@ -18,18 +17,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@/components/radix/Form";
+import { Input } from "@/components/radix/Input";
+import { Button } from "@/components/radix/Button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "@/components/radix/Select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/radix/Tabs";
+import { Checkbox } from "@/components/radix/Checkbox";
 import { getPermissionsForRole, permissions, UserRole, roles } from "@/lib/roles";
 import { User } from "./UsersList";
 

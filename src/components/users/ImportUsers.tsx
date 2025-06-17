@@ -1,10 +1,10 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/radix/Button";
+import { Input } from "@/components/radix/Input";
+import { Label } from "@/components/radix/Label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/radix/Card";
+import { Alert, AlertDescription } from "@/components/radix/Alert";
 import { Upload, Download, FileSpreadsheet, Users } from "lucide-react";
 import { toast } from "sonner";
 import { authService, profileService, departmentService } from "@/lib/supabase-services";

@@ -9,17 +9,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@/components/radix/Form";
+import { Input } from "@/components/radix/Input";
+import { Button } from "@/components/radix/Button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@/components/radix/Select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/radix/Card";
 import { UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { departmentService } from "@/lib/supabase-services";

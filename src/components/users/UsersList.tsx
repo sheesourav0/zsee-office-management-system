@@ -7,9 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@/components/radix/Table";
+import { Badge } from "@/components/radix/Badge";
+import { Button } from "@/components/radix/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/radix/DropdownMenu";
 import { MoreHorizontal, UserPlus, Trash, Edit, FileCog } from "lucide-react";
 import { toast } from "sonner";
 import EditUserDialog from "./EditUserDialog";
