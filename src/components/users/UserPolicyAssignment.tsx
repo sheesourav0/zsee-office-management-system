@@ -1,20 +1,12 @@
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Shield, User, Building2 } from "lucide-react";
-import { toast } from "sonner";
+import { Button } from "@/components/chakra/Button";
+import { Select } from "@/components/chakra/Select";
+import { Checkbox } from "@/components/chakra/Checkbox";
+import { Badge } from "@/components/chakra/Badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@/components/chakra/Modal";
+import { toast } from "@/hooks/use-toast";
 import { User as UserType } from "./UsersList";
 import { 
   Policy, 
@@ -300,11 +292,11 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
         </Table>
       </div>
 
-      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Assign Department-Based Policies to User</DialogTitle>
-          </DialogHeader>
+      <Modal open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <ModalContent className="max-w-3xl">
+          <ModalHeader>
+            <ModalTitle>Assign Department-Based Policies to User</ModalTitle>
+          </ModalHeader>
           
           <div className="space-y-4">
             <div>
@@ -385,16 +377,16 @@ const UserPolicyAssignmentComponent = ({ users }: UserPolicyAssignmentProps) => 
             </div>
           </div>
 
-          <DialogFooter>
+          <ModalFooter>
             <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleAssignPolicies}>
               Assign Policies
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

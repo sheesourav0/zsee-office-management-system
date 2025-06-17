@@ -1,22 +1,16 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { DatePicker } from "@/components/ui/date-picker";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form"; 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Select } from "@/components/chakra/Select";
+import { Textarea } from "@/components/chakra/Textarea";
+import { DatePicker } from "@/components/chakra/DatePicker";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/chakra/Form";
+import { Label } from "@/components/chakra/Label";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const departments = [
   { id: "civil", name: "Civil" },

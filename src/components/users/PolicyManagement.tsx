@@ -1,41 +1,20 @@
-
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Plus, Pencil, Trash, Shield, Users, Building2 } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from "react";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Label } from "@/components/chakra/Label";
+import { Textarea } from "@/components/chakra/Textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
+import { Checkbox } from "@/components/chakra/Checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Select } from "@/components/chakra/Select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { toast } from "@/hooks/use-toast";
 import { permissions, RolePermission } from "@/lib/roles";
-import { 
-  Policy, 
-  Department,
-  getPoliciesFromStorage, 
-  savePolicyToStorage, 
-  deletePolicyFromStorage,
-  getUserPolicyAssignments,
-  getDepartmentsFromStorage,
-  userTypes 
-} from "@/lib/policies";
+import { Policy, Department, getPoliciesFromStorage, savePolicyToStorage, deletePolicyFromStorage, getUserPolicyAssignments, getDepartmentsFromStorage, userTypes } from "@/lib/policies";
 
 const PolicyManagement = () => {
   const [policies, setPolicies] = useState<Policy[]>([]);

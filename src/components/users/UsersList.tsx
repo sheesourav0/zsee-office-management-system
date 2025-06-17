@@ -1,191 +1,108 @@
-
 import { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/radix/Table";
-import { Badge } from "@/components/radix/Badge";
-import { Button } from "@/components/radix/Button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/radix/DropdownMenu";
-import { MoreHorizontal, UserPlus, Trash, Edit, FileCog } from "lucide-react";
-import { toast } from "sonner";
-import EditUserDialog from "./EditUserDialog";
-import { UserRole } from "@/lib/roles";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Badge } from "@/components/chakra/Badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/chakra/Avatar";
+import { toast } from "@/hooks/use-toast";
 
-export interface User {
+interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
-  phone?: string;
-  createdAt: string;
-  customPermissions?: Record<string, boolean>;
+  role: string;
+  status: "active" | "inactive" | "pending";
+  avatar?: string;
 }
 
-const getRoleBadgeColor = (role: string) => {
-  switch (role) {
-    case "superadmin":
-      return "bg-purple-500";
-    case "admin":
-      return "bg-red-500";
-    case "manager":
-      return "bg-blue-500";
-    case "viewer":
-      return "bg-green-500";
-    default:
-      return "bg-gray-500";
-  }
-};
+interface UsersListProps {
+  users: User[];
+  onEdit: (user: User) => void;
+  onDelete: (id: string) => void;
+}
 
-const UsersList = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+const UsersList = ({ users, onEdit, onDelete }: UsersListProps) => {
+  const [search, setSearch] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState(users);
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    
-    // Check if there's demo data
-    if (storedUsers.length === 0) {
-      // Add a demo super admin user if none exists
-      const demoUsers: User[] = [
-        {
-          id: "1",
-          name: "Super Admin",
-          email: "superadmin@example.com",
-          role: "superadmin",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          name: "Admin User",
-          email: "admin@example.com",
-          role: "admin",
-          createdAt: new Date().toISOString(),
-        }
-      ];
-      localStorage.setItem("users", JSON.stringify(demoUsers));
-      setUsers(demoUsers);
-    } else {
-      setUsers(storedUsers);
-    }
-  }, []);
-
-  const handleDeleteUser = (id: string) => {
-    try {
-      const updatedUsers = users.filter(user => user.id !== id);
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-      setUsers(updatedUsers);
-      toast.success("User deleted successfully");
-    } catch (error) {
-      toast.error("Failed to delete user");
-    }
-  };
-
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleUserUpdated = (updatedUser: User) => {
-    const updatedUsers = users.map(user => 
-      user.id === updatedUser.id ? updatedUser : user
+    const results = users.filter((user) =>
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase()) ||
+      user.role.toLowerCase().includes(search.toLowerCase())
     );
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    setUsers(updatedUsers);
-    setIsEditDialogOpen(false);
-    setSelectedUser(null);
-    toast.success("User updated successfully");
+    setFilteredUsers(results);
+  }, [search, users]);
+
+  const getUserStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Badge className="status-active">Active</Badge>;
+      case "inactive":
+        return <Badge className="status-inactive">Inactive</Badge>;
+      case "pending":
+        return <Badge className="status-pending">Pending</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">System Users</h3>
-        <Button variant="outline" size="sm">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Export
-        </Button>
-      </div>
-
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.length === 0 ? (
+    <Card>
+      <CardHeader>
+        <CardTitle>Users</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4">
+          <Input
+            type="search"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
-                  No users found. Add your first user to get started.
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ) : (
-              users.map((user) => (
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <Badge className={getRoleBadgeColor(user.role) + " text-white"}>
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Avatar>
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{user.name}</span>
+                    </div>
                   </TableCell>
-                  <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteUser(user.id)}>
-                          <Trash className="h-4 w-4 mr-2" />
-                          Delete User
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>{getUserStatusBadge(user.status)}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
+                      Edit
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => onDelete(user.id)}>
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {selectedUser && (
-        <EditUserDialog
-          user={selectedUser}
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          onUpdate={handleUserUpdated}
-        />
-      )}
-    </div>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

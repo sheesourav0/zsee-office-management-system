@@ -1,5 +1,5 @@
 
-import { ProgressBar } from '@chakra-ui/react';
+import { Progress as ChakraProgress } from '@chakra-ui/react';
 import { forwardRef } from 'react';
 
 interface ProgressProps {
@@ -12,11 +12,11 @@ interface ProgressProps {
 export const Progress = forwardRef<HTMLDivElement, ProgressProps>(
   ({ value, indicatorClassName, ...props }, ref) => {
     return (
-      <ProgressBar.Root ref={ref} value={value} {...props}>
-        <ProgressBar.Track>
-          <ProgressBar.Range className={indicatorClassName} />
-        </ProgressBar.Track>
-      </ProgressBar.Root>
+      <ChakraProgress.Root ref={ref} value={value} {...props}>
+        <ChakraProgress.Track>
+          <ChakraProgress.Range className={indicatorClassName} />
+        </ChakraProgress.Track>
+      </ChakraProgress.Root>
     );
   }
 );

@@ -1,9 +1,9 @@
 
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Badge } from "@/components/chakra/Badge";
+import { Progress } from "@/components/chakra/Progress";
 import { Calendar, ChevronLeft, ChevronRight, Clock, Users, AlertTriangle } from "lucide-react";
 import { BillingProject, WorkPlanStep, ProjectMilestone } from "../types/billingTypes";
 

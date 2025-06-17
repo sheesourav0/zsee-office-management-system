@@ -1,285 +1,236 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/radix/Dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/radix/Form";
-import { Input } from "@/components/radix/Input";
-import { Button } from "@/components/radix/Button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/radix/Select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/radix/Tabs";
-import { Checkbox } from "@/components/radix/Checkbox";
-import { getPermissionsForRole, permissions, UserRole, roles } from "@/lib/roles";
-import { User } from "./UsersList";
-
-// Schema for form validation
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  role: z.enum(["admin", "manager", "viewer", "superadmin"]),
-  phone: z.string().optional(),
-  customPermissions: z.record(z.boolean()).optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { z } from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/chakra/Form";
+import { Input } from "@/components/chakra/Input";
+import { Button } from "@/components/chakra/Button";
+import { Select } from "@/components/chakra/Select";
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@/components/chakra/Tabs";
+import { Checkbox } from "@/components/chakra/Checkbox";
+import { toast } from "@/hooks/use-toast";
 
 interface EditUserDialogProps {
-  user: User;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdate: (user: User) => void;
+  user: any;
+  roles: any[];
+  policies: any[];
+  onUpdateUser: (data: any) => void;
 }
 
-const EditUserDialog = ({ user, open, onOpenChange, onUpdate }: EditUserDialogProps) => {
-  const [activeTab, setActiveTab] = useState("details");
-  const [isUsingCustomPermissions, setIsUsingCustomPermissions] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const userEditSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email.",
+  }),
+  roleId: z.string().min(1, {
+    message: "Please select a role.",
+  }),
+  policyIds: z.string().array().optional(),
+  isAccountActive: z.boolean().default(true),
+  isEmailVerified: z.boolean().default(false),
+});
 
-  // Initialize the form with user data
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+const EditUserDialog = ({
+  open,
+  onOpenChange,
+  user,
+  roles,
+  policies,
+  onUpdateUser,
+}: EditUserDialogProps) => {
+  const [isPoliciesAssigned, setIsPoliciesAssigned] = useState(false);
+
+  const form = useForm<z.infer<typeof userEditSchema>>({
+    resolver: zodResolver(userEditSchema),
     defaultValues: {
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone || "",
-      customPermissions: user.customPermissions || Object.fromEntries(
-        Object.keys(permissions).map(key => [key, false])
-      ),
+      name: user?.name || "",
+      email: user?.email || "",
+      roleId: user?.roleId || "",
+      policyIds: user?.policyIds || [],
+      isAccountActive: user?.isAccountActive || true,
+      isEmailVerified: user?.isEmailVerified || false,
     },
   });
 
-  // Set the initial state of custom permissions checkbox
-  const watchRole = form.watch("role");
-  const watchCustomPermissions = form.watch("customPermissions");
+  useEffect(() => {
+    form.reset({
+      name: user?.name || "",
+      email: user?.email || "",
+      roleId: user?.roleId || "",
+      policyIds: user?.policyIds || [],
+      isAccountActive: user?.isAccountActive || true,
+      isEmailVerified: user?.isEmailVerified || false,
+    });
+  }, [user, form]);
 
-  const onSubmit = async (values: FormValues) => {
-    setIsSubmitting(true);
-    try {
-      // Update the user
-      const updatedUser: User = {
-        ...user,
-        name: values.name,
-        email: values.email,
-        role: values.role,
-        phone: values.phone,
-        customPermissions: isUsingCustomPermissions ? values.customPermissions : undefined,
-      };
-
-      onUpdate(updatedUser);
-    } catch (error) {
-      console.error("Error updating user:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle role change
-  const handleRoleChange = (role: UserRole) => {
-    form.setValue("role", role);
-    // Reset custom permissions when role changes
-    if (isUsingCustomPermissions) {
-      const rolePermissions = roles[role].permissions;
-      const updatedPermissions = Object.fromEntries(
-        Object.keys(permissions).map(key => [key, rolePermissions.includes(key)])
-      );
-      form.setValue("customPermissions", updatedPermissions);
-    }
+  const onSubmit = (values: z.infer<typeof userEditSchema>) => {
+    onUpdateUser({ ...values, id: user.id });
+    toast.success("User updated successfully!");
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
-          <DialogDescription>
-            Update user information and permissions
-          </DialogDescription>
         </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">User Details</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions</TabsTrigger>
-          </TabsList>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
-              <TabsContent value="details" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="user@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+1 (555) 123-4567" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select
-                        onValueChange={(value: UserRole) => handleRoleChange(value)}
-                        defaultValue={field.value}
-                      >
+        <Tabs defaultValue="account">
+          <TabList>
+            <Tab value="account">Account</Tab>
+            <Tab value="roles">Roles & Policies</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel value="account">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a role" />
-                          </SelectTrigger>
+                          <Input placeholder="User name" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="superadmin">Super Admin</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="viewer">Viewer</SelectItem>
-                        </SelectContent>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="user@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="isAccountActive"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Account Status</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isEmailVerified"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Email Verified</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Update Account</Button>
+                </div>
+              </form>
+            </TabPanel>
+            <TabPanel value="roles">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="roleId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>User Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <Select.Trigger />
+                        </FormControl>
+                        <Select.Content>
+                          {roles.map((role: any) => (
+                            <Select.Item key={role.id} value={role.id}>
+                              {role.name}
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </TabsContent>
 
-              <TabsContent value="permissions" className="space-y-4">
-                <div className="flex items-center space-x-2 pb-4">
-                  <Checkbox
-                    id="custom-permissions"
-                    checked={isUsingCustomPermissions}
-                    onCheckedChange={(checked) => {
-                      setIsUsingCustomPermissions(checked as boolean);
-                    }}
-                  />
-                  <label
-                    htmlFor="custom-permissions"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Use custom permissions instead of role-based permissions
-                  </label>
-                </div>
-
-                {isUsingCustomPermissions ? (
-                  <div className="space-y-4">
-                    <div className="border rounded-md p-4">
-                      <h3 className="font-medium mb-4">Custom Permissions</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {Object.entries(permissions).map(([key, permission]) => (
-                          <div key={key} className="flex items-center space-x-2">
-                            <FormField
-                              control={form.control}
-                              name={`customPermissions.${key}`}
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                    />
-                                  </FormControl>
-                                  <div className="space-y-1 leading-none">
-                                    <FormLabel className="font-normal">
-                                      {permission.name}
-                                    </FormLabel>
-                                    <p className="text-xs text-muted-foreground">
-                                      {permission.description}
-                                    </p>
-                                  </div>
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                <FormField
+                  control={form.control}
+                  name="policyIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Policies</FormLabel>
+                        <Button type="button" variant="link" size="sm" onClick={() => setIsPoliciesAssigned(!isPoliciesAssigned)}>
+                          {isPoliciesAssigned ? "Unassign All" : "Assign All"}
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2 max-h-[300px] overflow-y-auto">
+                        {policies.map((policy: any) => (
+                          <FormItem key={policy.id} className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(policy.id)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    field.onChange([...(field.value || []), policy.id]);
+                                  } else {
+                                    field.onChange(field.value?.filter((id: any) => id !== policy.id));
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">{policy.name}</FormLabel>
+                          </FormItem>
                         ))}
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium mb-4">Role-based Permissions ({roles[watchRole].name})</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{roles[watchRole].description}</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {getPermissionsForRole(watchRole).map((permission) => (
-                        <div key={permission.id} className="flex items-center space-x-2">
-                          <Checkbox checked disabled />
-                          <div>
-                            <label className="text-sm font-medium">{permission.name}</label>
-                            <p className="text-xs text-muted-foreground">{permission.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Update Roles & Policies</Button>
+                </div>
+              </form>
+            </TabPanel>
+          </TabPanels>
         </Tabs>
       </DialogContent>
     </Dialog>
