@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
 import { Plus, FileText, Calculator, Settings, CreditCard } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { toast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
 import ProjectManagement from "@/features/billing/components/ProjectManagement";
 import PaymentTracking from "@/features/billing/components/PaymentTracking";
@@ -66,26 +66,26 @@ const ProjectBilling = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="projects" className="flex items-center gap-2">
+        <TabList className="grid w-full grid-cols-4">
+          <Tab value="projects" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Projects
-          </TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="payments" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
             Payment Tracking
-          </TabsTrigger>
-          <TabsTrigger value="invoices" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="invoices" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Invoice Generation
-          </TabsTrigger>
-          <TabsTrigger value="calculator" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="calculator" className="flex items-center gap-2">
             <Calculator className="h-4 w-4" />
             Billing Calculator
-          </TabsTrigger>
-        </TabsList>
+          </Tab>
+        </TabList>
         
-        <TabsContent value="projects" className="space-y-4">
+        <TabPanel value="projects" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Project Management</CardTitle>
@@ -95,9 +95,9 @@ const ProjectBilling = () => {
               <ProjectManagement refreshTrigger={refreshTrigger} />
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
         
-        <TabsContent value="payments" className="space-y-4">
+        <TabPanel value="payments" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Payment Tracking</CardTitle>
@@ -107,9 +107,9 @@ const ProjectBilling = () => {
               <PaymentTracking refreshTrigger={refreshTrigger} />
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
         
-        <TabsContent value="invoices" className="space-y-4">
+        <TabPanel value="invoices" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Invoice Generation</CardTitle>
@@ -119,9 +119,9 @@ const ProjectBilling = () => {
               <InvoiceGeneration refreshTrigger={refreshTrigger} />
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
         
-        <TabsContent value="calculator" className="space-y-4">
+        <TabPanel value="calculator" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Billing Calculator</CardTitle>
@@ -134,7 +134,7 @@ const ProjectBilling = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
       </Tabs>
 
       <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
