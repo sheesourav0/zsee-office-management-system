@@ -5,7 +5,7 @@ import { forwardRef } from 'react';
 
 interface AlertProps {
   children: React.ReactNode;
-  status?: 'info' | 'warning' | 'success' | 'error' | 'loading';
+  status?: 'info' | 'warning' | 'success' | 'error';
 }
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(

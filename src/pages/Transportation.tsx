@@ -1,15 +1,16 @@
 
 import { useState } from "react";
-import { Box, Flex, Heading, Text, Tabs, TabList, TabPanels, Tab, TabPanel, Icon } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Icon } from "@chakra-ui/react";
 import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
 import { Plus, Package, Truck } from "lucide-react";
 import { toast } from "sonner";
 import MaterialLogistics from "@/features/transportation/components/MaterialLogistics";
 import VehicleTransportation from "@/features/transportation/components/VehicleTransportation";
 
 const Transportation = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("0");
 
   const handleAddMaterialShipment = () => {
     toast.info("Add material shipment functionality will be implemented here");
@@ -20,7 +21,7 @@ const Transportation = () => {
   };
 
   return (
-    <Box spacing={6}>
+    <Box gap={6}>
       <Flex 
         direction={{ base: "column", md: "row" }} 
         align={{ md: "center" }} 
@@ -34,15 +35,15 @@ const Transportation = () => {
         </Box>
       </Flex>
 
-      <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabList>
-          <Tab>
+          <Tab value="0">
             <Flex align="center" gap={2}>
               <Icon as={Package} boxSize={4} />
               Material Logistics
             </Flex>
           </Tab>
-          <Tab>
+          <Tab value="1">
             <Flex align="center" gap={2}>
               <Icon as={Truck} boxSize={4} />
               Vehicle Transportation
@@ -51,7 +52,7 @@ const Transportation = () => {
         </TabList>
         
         <TabPanels>
-          <TabPanel p={0} pt={4}>
+          <TabPanel value="0" p={0} pt={4}>
             <Card>
               <CardHeader>
                 <Flex justify="space-between" align="center">
@@ -59,7 +60,8 @@ const Transportation = () => {
                     <CardTitle>Material Logistics</CardTitle>
                     <CardDescription>Track and manage material shipments and deliveries</CardDescription>
                   </Box>
-                  <Button leftIcon={<Plus />} onClick={handleAddMaterialShipment}>
+                  <Button onClick={handleAddMaterialShipment}>
+                    <Plus style={{ marginRight: '8px', width: '16px', height: '16px' }} />
                     Add Shipment
                   </Button>
                 </Flex>
@@ -70,7 +72,7 @@ const Transportation = () => {
             </Card>
           </TabPanel>
           
-          <TabPanel p={0} pt={4}>
+          <TabPanel value="1" p={0} pt={4}>
             <Card>
               <CardHeader>
                 <Flex justify="space-between" align="center">
@@ -78,7 +80,8 @@ const Transportation = () => {
                     <CardTitle>Vehicle Transportation</CardTitle>
                     <CardDescription>Manage vehicle requests and assignments</CardDescription>
                   </Box>
-                  <Button leftIcon={<Plus />} onClick={handleAddVehicleRequest}>
+                  <Button onClick={handleAddVehicleRequest}>
+                    <Plus style={{ marginRight: '8px', width: '16px', height: '16px' }} />
                     Add Vehicle Request
                   </Button>
                 </Flex>

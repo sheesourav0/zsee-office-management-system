@@ -5,14 +5,13 @@ import { forwardRef } from 'react';
 interface FormItemProps {
   children: React.ReactNode;
   invalid?: boolean;
-  isInvalid?: boolean;
   [key: string]: any;
 }
 
 export const FormItem = forwardRef<HTMLDivElement, FormItemProps>(
-  ({ children, invalid, isInvalid, ...props }, ref) => {
+  ({ children, invalid, ...props }, ref) => {
     return (
-      <Field.Root ref={ref} invalid={invalid || isInvalid} {...props}>
+      <Field.Root ref={ref} invalid={invalid} {...props}>
         {children}
       </Field.Root>
     );
