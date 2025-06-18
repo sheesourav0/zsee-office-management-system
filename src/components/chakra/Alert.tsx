@@ -1,6 +1,6 @@
 
 import { Alert as ChakraAlert } from '@chakra-ui/react';
-import { InfoIcon } from '@chakra-ui/icons';
+import { Info } from 'lucide-react';
 import { forwardRef } from 'react';
 
 interface AlertProps {
@@ -13,7 +13,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
     return (
       <ChakraAlert.Root ref={ref} status={status} {...props}>
         <ChakraAlert.Indicator>
-          <InfoIcon />
+          <Info size={16} />
         </ChakraAlert.Indicator>
         <ChakraAlert.Content>
           {children}
