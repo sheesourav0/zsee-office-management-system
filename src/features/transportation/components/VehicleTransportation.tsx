@@ -1,278 +1,366 @@
-import { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Label } from "@/components/chakra/Label";
+import { Select } from "@/components/chakra/Select";
+import { Textarea } from "@/components/chakra/Textarea";
 import { Badge } from "@/components/chakra/Badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
-import { Search, Filter, Plus, Eye, Edit, MapPin } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/chakra/Tabs";
+import { DatePicker } from "@/components/chakra/DatePicker";
+import { Truck, Plus, Calendar, MapPin, Package, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const generateVehicleRequests = () => {
-  return [
-    {
-      id: "VT001",
-      requestDate: "2023-04-12",
-      requesterName: "John Doe",
-      department: "Engineering",
-      projectName: "Amni WTP",
-      vehicleType: "Pickup Truck",
-      purpose: "Equipment Transportation",
-      fromLocation: "Warehouse",
-      toLocation: "Amni Site",
-      departureTime: "09:00 AM",
-      estimatedDuration: "4 hours",
-      passengers: "2",
-      driverName: "Ram Singh",
-      vehicleNumber: "AR-01-AB-1234",
-      fuelAllocation: "200L",
-      status: "assigned",
-      priority: "High",
-      approvedBy: "Site Manager",
-      specialRequirements: "Need loading crane attachment"
-    },
-    {
-      id: "VT002",
-      requestDate: "2023-04-13",
-      requesterName: "Jane Smith",
-      department: "Operations",
-      projectName: "YACHULI",
-      vehicleType: "SUV",
-      purpose: "Site Inspection",
-      fromLocation: "Main Office",
-      toLocation: "Yachuli Site",
-      departureTime: "07:00 AM",
-      estimatedDuration: "6 hours",
-      passengers: "4",
-      driverName: "Suresh Kumar",
-      vehicleNumber: "AR-02-CD-5678",
-      fuelAllocation: "150L",
-      status: "in-transit",
-      priority: "Medium",
-      approvedBy: "Project Manager",
-      specialRequirements: "4WD required for rough terrain"
-    },
-    {
-      id: "VT003",
-      requestDate: "2023-04-14",
-      requesterName: "Mike Johnson",
-      department: "Maintenance",
-      projectName: "Sample Testing",
-      vehicleType: "Van",
-      purpose: "Equipment Delivery",
-      fromLocation: "Storage Facility",
-      toLocation: "Lab",
-      departureTime: "02:00 PM",
-      estimatedDuration: "2 hours",
-      passengers: "1",
-      driverName: "Ravi Sharma",
-      vehicleNumber: "AR-03-EF-9012",
-      fuelAllocation: "100L",
-      status: "completed",
-      priority: "Normal",
-      approvedBy: "Department Head",
-      specialRequirements: "Temperature controlled compartment"
-    },
-    {
-      id: "VT004",
-      requestDate: "2023-04-15",
-      requesterName: "Sarah Wilson",
-      department: "Quality Control",
-      projectName: "Piyong IoT",
-      vehicleType: "Sedan",
-      purpose: "Client Meeting",
-      fromLocation: "Regional Office",
-      toLocation: "Client Office",
-      departureTime: "10:30 AM",
-      estimatedDuration: "3 hours",
-      passengers: "3",
-      driverName: "",
-      vehicleNumber: "",
-      fuelAllocation: "",
-      status: "pending",
-      priority: "Low",
-      approvedBy: "",
-      specialRequirements: "Professional appearance required"
-    },
-    {
-      id: "VT005",
-      requestDate: "2023-04-16",
-      requesterName: "David Brown",
-      department: "Logistics",
-      projectName: "Machuika",
-      vehicleType: "Heavy Truck",
-      purpose: "Heavy Equipment Transport",
-      fromLocation: "Equipment Yard",
-      toLocation: "Machuika Site",
-      departureTime: "05:00 AM",
-      estimatedDuration: "8 hours",
-      passengers: "2",
-      driverName: "",
-      vehicleNumber: "",
-      fuelAllocation: "",
-      status: "pending",
-      priority: "High",
-      approvedBy: "",
-      specialRequirements: "Heavy load permit required"
-    }
-  ];
+interface TransportationRequest {
+  id: string;
+  requestNo: string;
+  vehicleType: string;
+  requestDate: string;
+  deliveryDate: string;
+  pickupLocation: string;
+  dropLocation: string;
+  itemDescription: string;
+  quantity: number;
+  priority: string;
+  status: 'pending' | 'in-transit' | 'delivered' | 'cancelled';
+  remarks?: string;
+}
+
+const mockTransportationRequests: TransportationRequest[] = [
+  {
+    id: "1",
+    requestNo: "TR-2024-001",
+    vehicleType: "Truck",
+    requestDate: "2024-07-15",
+    deliveryDate: "2024-07-20",
+    pickupLocation: "Itanagar",
+    dropLocation: "Naharlagun",
+    itemDescription: "Construction Materials",
+    quantity: 10,
+    priority: "High",
+    status: "in-transit",
+    remarks: "Urgent delivery required",
+  },
+  {
+    id: "2",
+    requestNo: "TR-2024-002",
+    vehicleType: "Van",
+    requestDate: "2024-07-16",
+    deliveryDate: "2024-07-22",
+    pickupLocation: "Banderdewa",
+    dropLocation: "Nirjuli",
+    itemDescription: "Office Supplies",
+    quantity: 5,
+    priority: "Medium",
+    status: "pending",
+    remarks: "Standard delivery",
+  },
+  {
+    id: "3",
+    requestNo: "TR-2024-003",
+    vehicleType: "Truck",
+    requestDate: "2024-07-17",
+    deliveryDate: "2024-07-23",
+    pickupLocation: "Yupia",
+    dropLocation: "Doimukh",
+    itemDescription: "Machinery Parts",
+    quantity: 3,
+    priority: "High",
+    status: "delivered",
+    remarks: "Delivered on time",
+  },
+  {
+    id: "4",
+    requestNo: "TR-2024-004",
+    vehicleType: "Truck",
+    requestDate: "2024-07-18",
+    deliveryDate: "2024-07-24",
+    pickupLocation: "Seppa",
+    dropLocation: "Itanagar",
+    itemDescription: "Raw Materials",
+    quantity: 8,
+    priority: "Low",
+    status: "cancelled",
+    remarks: "Request cancelled due to unavailability",
+  },
+];
+
+const getPriorityBadge = (priority: string) => {
+  switch (priority.toLowerCase()) {
+    case "high":
+      return <Badge className="bg-red-100 text-red-800">High</Badge>;
+    case "medium":
+      return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+    case "low":
+      return <Badge className="bg-green-100 text-green-800">Low</Badge>;
+    default:
+      return <Badge variant="outline">Normal</Badge>;
+  }
 };
 
 const VehicleTransportation = () => {
-  const [requests, setRequests] = useState<any[]>([]);
-  const [filteredRequests, setFilteredRequests] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [activeTab, setActiveTab] = useState("requests");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [transportRequests, setTransportRequests] =
+    useState<TransportationRequest[]>(mockTransportationRequests);
+  const [newRequest, setNewRequest] = useState<Omit<TransportationRequest, 'id'>>({
+    requestNo: "",
+    vehicleType: "Truck",
+    requestDate: new Date().toISOString().split('T')[0],
+    deliveryDate: new Date().toISOString().split('T')[0],
+    pickupLocation: "",
+    dropLocation: "",
+    itemDescription: "",
+    quantity: 1,
+    priority: "Medium",
+    status: "pending",
+    remarks: "",
+  });
 
-  useEffect(() => {
-    const allRequests = generateVehicleRequests();
-    setRequests(allRequests);
-    filterRequests(allRequests);
-  }, [searchQuery, statusFilter]);
-
-  const filterRequests = (requests: any[]) => {
-    if (!searchQuery) {
-      setFilteredRequests(requests);
-      return;
-    }
-    
-    const query = searchQuery.toLowerCase();
-    const filtered = requests.filter(request => 
-      request.requesterName.toLowerCase().includes(query) ||
-      request.department.toLowerCase().includes(query) ||
-      request.projectName.toLowerCase().includes(query) ||
-      request.vehicleType.toLowerCase().includes(query) ||
-      request.purpose.toLowerCase().includes(query) ||
-      request.vehicleNumber.toLowerCase().includes(query)
-    );
-    
-    setFilteredRequests(filtered);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge colorScheme="green">Completed</Badge>;
-      case "in-transit":
-        return <Badge colorScheme="blue">In Transit</Badge>;
-      case "assigned":
-        return <Badge colorScheme="purple">Assigned</Badge>;
-      case "pending":
-        return <Badge colorScheme="yellow">Pending</Badge>;
-      default:
-        return <Badge colorScheme="gray">Unknown</Badge>;
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewRequest(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAddRequest = () => {
-    toast.info("Add vehicle request functionality will be implemented here");
-  };
-
-  const handleViewRequest = (requestId: string) => {
-    toast.info(`Viewing vehicle request ${requestId}`);
-  };
-
-  const handleEditRequest = (requestId: string) => {
-    toast.info(`Editing vehicle request ${requestId}`);
-  };
-
-  const handleTrackVehicle = (requestId: string) => {
-    toast.info(`Tracking vehicle for request ${requestId}`);
+    const newId = Math.random().toString(36).substring(7);
+    setTransportRequests(prev => [...prev, { id: newId, ...newRequest }]);
+    toast.success("Transportation request added successfully!");
+    setIsDialogOpen(false);
   };
 
   return (
-    <Box gap={6}>
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by requester, department, project, or vehicle..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Vehicle Transportation</h1>
+          <p className="text-muted-foreground">
+            Manage vehicle transportation requests and track their status
+          </p>
         </div>
-        <Button variant="outline">
-          <Filter className="mr-2 h-4 w-4" />
-          Filters
-        </Button>
-        <Button variant="outline">
+        <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Request
         </Button>
       </div>
-      
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Request ID</TableHead>
-              <TableHead>Requester</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Vehicle Type</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead>Route</TableHead>
-              <TableHead>Date & Time</TableHead>
-              <TableHead>Vehicle No.</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRequests.map((request) => (
-              <TableRow key={request.id}>
-                <TableCell className="font-medium">{request.id}</TableCell>
-                <TableCell>{request.requesterName}</TableCell>
-                <TableCell>{request.department}</TableCell>
-                <TableCell>{request.projectName}</TableCell>
-                <TableCell>{request.vehicleType}</TableCell>
-                <TableCell>{request.purpose}</TableCell>
-                <TableCell>{request.fromLocation} → {request.toLocation}</TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    <div>{request.requestDate}</div>
-                    <div className="text-muted-foreground">{request.departureTime}</div>
-                  </div>
-                </TableCell>
-                <TableCell>{request.vehicleNumber || "Not assigned"}</TableCell>
-                <TableCell>{getPriorityBadge(request.priority)}</TableCell>
-                <TableCell>{getStatusBadge(request.status)}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleViewRequest(request.id)}
-                    >
-                      View
-                    </Button>
-                    {request.status === "pending" && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleEditRequest(request.id)}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleTrackVehicle(request.id)}
-                    >
-                      Track
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </Box>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="requests" className="flex items-center gap-2">
+            <Truck className="h-4 w-4" />
+            Transportation Requests
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Transportation Reports
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="requests" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Transportation Requests</CardTitle>
+                  <CardDescription>
+                    Manage and track all transportation requests
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Request No.</TableHead>
+                      <TableHead>Vehicle Type</TableHead>
+                      <TableHead>Request Date</TableHead>
+                      <TableHead>Delivery Date</TableHead>
+                      <TableHead>Pickup Location</TableHead>
+                      <TableHead>Drop Location</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transportRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium">{request.requestNo}</TableCell>
+                        <TableCell>{request.vehicleType}</TableCell>
+                        <TableCell>{request.requestDate}</TableCell>
+                        <TableCell>{request.deliveryDate}</TableCell>
+                        <TableCell>{request.pickupLocation}</TableCell>
+                        <TableCell>{request.dropLocation}</TableCell>
+                        <TableCell>{getPriorityBadge(request.priority)}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{request.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">
+                            View Details
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <Card>
+            <CardHeader>
+              <CardTitle>Transportation Reports</CardTitle>
+              <CardDescription>
+                Generate and view transportation reports
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Coming Soon...</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Add Transportation Request</DialogTitle>
+            <CardDescription>
+              Fill in the details for the transportation request
+            </CardDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="requestNo">Request No.</Label>
+                <Input
+                  id="requestNo"
+                  name="requestNo"
+                  value={newRequest.requestNo}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vehicleType">Vehicle Type</Label>
+                <Select
+                  id="vehicleType"
+                  name="vehicleType"
+                  value={newRequest.vehicleType}
+                  onChange={handleInputChange}
+                >
+                  <option value="Truck">Truck</option>
+                  <option value="Van">Van</option>
+                  <option value="Pickup">Pickup</option>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="requestDate">Request Date</Label>
+                <Input
+                  type="date"
+                  id="requestDate"
+                  name="requestDate"
+                  value={newRequest.requestDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deliveryDate">Delivery Date</Label>
+                <Input
+                  type="date"
+                  id="deliveryDate"
+                  name="deliveryDate"
+                  value={newRequest.deliveryDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pickupLocation">Pickup Location</Label>
+                <Input
+                  id="pickupLocation"
+                  name="pickupLocation"
+                  value={newRequest.pickupLocation}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dropLocation">Drop Location</Label>
+                <Input
+                  id="dropLocation"
+                  name="dropLocation"
+                  value={newRequest.dropLocation}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="itemDescription">Item Description</Label>
+              <Textarea
+                id="itemDescription"
+                name="itemDescription"
+                value={newRequest.itemDescription}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  type="number"
+                  id="quantity"
+                  name="quantity"
+                  value={newRequest.quantity.toString()}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  id="priority"
+                  name="priority"
+                  value={newRequest.priority}
+                  onChange={handleInputChange}
+                >
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="remarks">Remarks</Label>
+              <Textarea
+                id="remarks"
+                name="remarks"
+                value={newRequest.remarks}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddRequest}>Add Request</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

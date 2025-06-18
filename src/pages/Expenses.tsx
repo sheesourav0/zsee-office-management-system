@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, FileSpreadsheet, Download } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/chakra/Tabs";
+import { Button } from "@/components/chakra/Button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Plus, Calculator, FileText, DollarSign } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import AddExpenseForm from "@/features/expenses/components/AddExpenseForm";
 import ExpensesList from "@/features/expenses/components/ExpensesList";
+import ExpenseCalculator from "@/features/expenses/components/ExpenseCalculator";
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
-import ExpenseCalculator from "@/features/expenses/components/ExpenseCalculator";
 
 const Expenses = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);

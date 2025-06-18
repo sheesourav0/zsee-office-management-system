@@ -1,30 +1,23 @@
 
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Button } from "@/components/chakra/Button";
+import { useNavigate } from "react-router-dom";
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-      <div className="text-center space-y-6">
-        <h1 className="text-6xl font-bold text-primary">404</h1>
-        <p className="text-2xl text-gray-700">Page Not Found</p>
-        <p className="text-muted-foreground max-w-md">
-          The page you are looking for doesn't exist or has been moved.
-        </p>
-        <Link to="/dashboard">
-          <Button>Back to Dashboard</Button>
-        </Link>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6 text-center">
+        <div className="mb-6">
+          <h1 className="text-6xl font-bold text-gray-300 mb-2">404</h1>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Page Not Found</h2>
+          <p className="text-gray-600">
+            The page you are looking for doesn't exist or has been moved.
+          </p>
+        </div>
+        <Button onClick={() => navigate("/")} className="w-full">
+          Go Back Home
+        </Button>
       </div>
     </div>
   );

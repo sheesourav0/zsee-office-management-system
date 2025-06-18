@@ -1,97 +1,71 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { profileService, authService } from "@/lib/supabase-services";
-import { CreateUser, UpdateUser, CreateUserSchema, UpdateUserSchema } from "@/lib/schemas/user";
+import { useState } from 'react';
+import { toast } from '@/hooks/use-toast';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  department?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
 
 export const useUsers = () => {
-  return useQuery({
-    queryKey: ['users'],
-    queryFn: profileService.getAll,
-  });
-};
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
 
-export const useUser = (id: string) => {
-  return useQuery({
-    queryKey: ['users', id],
-    queryFn: () => profileService.getById(id),
-    enabled: !!id,
-  });
-};
-
-export const useCreateUser = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (userData: CreateUser) => {
-      const validatedData = CreateUserSchema.parse(userData);
-      
-      // Create auth user first
-      const tempPassword = Math.random().toString(36).slice(-12);
-      const authResponse = await authService.signUp(
-        validatedData.email,
-        tempPassword,
-        { name: validatedData.name }
-      );
-      
-      if (!authResponse.user) {
-        throw new Error("Failed to create auth user");
-      }
-      
-      // Create profile
-      const profileData = {
-        id: authResponse.user.id,
-        name: validatedData.name,
-        email: validatedData.email,
-        department_id: validatedData.department_id || null,
-        join_date: validatedData.join_date || new Date().toISOString().split('T')[0],
-        is_active: validatedData.is_active ?? true,
+  const createUser = async (user: Omit<User, 'id' | 'createdAt'>) => {
+    setLoading(true);
+    try {
+      const newUser = { 
+        ...user, 
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString()
       };
-      
-      return profileService.create(profileData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast.success("User created successfully");
-    },
-    onError: (error: any) => {
-      console.error("Error creating user:", error);
-      toast.error(error.message || "Failed to create user");
-    },
-  });
-};
+      setUsers(prev => [...prev, newUser]);
+      toast.success('User created successfully');
+      return newUser;
+    } catch (error) {
+      toast.error('Failed to create user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-export const useUpdateUser = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ id, ...userData }: UpdateUser & { id: string }) => {
-      const validatedData = UpdateUserSchema.parse(userData);
-      return profileService.update(id, validatedData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast.success("User updated successfully");
-    },
-    onError: (error: any) => {
-      console.error("Error updating user:", error);
-      toast.error(error.message || "Failed to update user");
-    },
-  });
-};
+  const updateUser = async (id: string, updates: Partial<User>) => {
+    setLoading(true);
+    try {
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
+      toast.success('User updated successfully');
+    } catch (error) {
+      toast.error('Failed to update user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-export const useDeleteUser = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: profileService.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast.success("User deleted successfully");
-    },
-    onError: (error: any) => {
-      console.error("Error deleting user:", error);
-      toast.error(error.message || "Failed to delete user");
-    },
-  });
+  const deleteUser = async (id: string) => {
+    setLoading(true);
+    try {
+      setUsers(prev => prev.filter(u => u.id !== id));
+      toast.success('User deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    users,
+    loading,
+    createUser,
+    updateUser,
+    deleteUser
+  };
 };

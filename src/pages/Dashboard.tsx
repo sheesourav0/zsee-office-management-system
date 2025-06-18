@@ -1,261 +1,389 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DatePicker } from "@/components/ui/date-picker";
-import { CircleDollarSign, CreditCard, Clock, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import PaymentStatusCard from "@/components/dashboard/PaymentStatusCard";
-import RecentPaymentsTable from "@/components/dashboard/RecentPaymentsTable";
-import ProjectStatusCard from "@/components/dashboard/ProjectStatusCard";
-import { BillingProject, ProjectPayment } from "@/features/billing/types/billingTypes";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/chakra/Tabs";
+import { Plus, Search, Filter } from "lucide-react";
+import { Input } from "@/components/chakra/Input";
+import { Badge } from "@/components/chakra/Badge";
+import { Progress } from "@/components/chakra/Progress";
+import PaymentFilterBar from "@/features/payments/components/PaymentFilterBar";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/chakra/Table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { toast } from "@/hooks/use-toast";
+import { BillingProject } from "@/features/billing/types/billingTypes";
+import AddProjectForm from "@/features/billing/components/AddProjectForm";
 
-const Dashboard = () => {
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [timeframe, setTimeframe] = useState("10d");
+const Payments = () => {
+  const [activeTab, setActiveTab] = useState("projects");
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [projects, setProjects] = useState<BillingProject[]>([]);
-  const [payments, setPayments] = useState<ProjectPayment[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  // Existing payments data
+  const [payments, setPayments] = useState([
+    {
+      id: "1",
+      slNo: 1,
+      description: "Maintain Marxian's amount return",
+      projectName: "Piyong IoT(Namsal)",
+      companyName: "King Longkai (Account Holder Name)",
+      poReference: "PO123456",
+      poDate: "2023-04-15",
+      accountNo: "11822669748",
+      ifscCode: "SBIN0013311",
+      branchBank: "SBI/Namsai",
+      totalAmount: 300000,
+      paid: 0,
+      payDate: "",
+      payableAmount: 300000,
+      priority: "High",
+      remarks: "",
+      transportationStatus: "pending",
+      paymentStatus: "unpaid",
+    },
+    {
+      id: "2",
+      slNo: 2,
+      description: "Supply of Man Power",
+      projectName: "YACHULI",
+      companyName: "A-TEL TECH",
+      poReference: "PO789012",
+      poDate: "2023-05-20",
+      accountNo: "9876543210",
+      ifscCode: "ICIC0004567",
+      branchBank: "ICICI/Itanagar",
+      totalAmount: 150000,
+      paid: 75000,
+      payDate: "2023-06-10",
+      payableAmount: 75000,
+      priority: "Medium",
+      remarks: "Partial payment made",
+      transportationStatus: "in-transit",
+      paymentStatus: "partial",
+    },
+    {
+      id: "3",
+      slNo: 3,
+      description: "Supply of Juniper make 48 port switch",
+      projectName: "Amni WTP",
+      companyName: "BMP SYSTEMS",
+      poReference: "PO345678",
+      poDate: "2023-06-25",
+      accountNo: "2468135790",
+      ifscCode: "HDFC0007890",
+      branchBank: "HDFC/Naharlagun",
+      totalAmount: 80000,
+      paid: 80000,
+      payDate: "2023-07-01",
+      payableAmount: 0,
+      priority: "High",
+      remarks: "Full payment completed",
+      transportationStatus: "delivered",
+      paymentStatus: "paid",
+    },
+    {
+      id: "4",
+      slNo: 4,
+      description: "Supply & Installation of 500KVA",
+      projectName: "Machuika",
+      companyName: "P.R.S ENTERPRISE",
+      poReference: "PO901234",
+      poDate: "2023-07-10",
+      accountNo: "1357924680",
+      ifscCode: "UTIB0002345",
+      branchBank: "Axis/Banderdewa",
+      totalAmount: 220000,
+      paid: 0,
+      payDate: "",
+      payableAmount: 220000,
+      priority: "Normal",
+      remarks: "Payment pending",
+      transportationStatus: "not-applicable",
+      paymentStatus: "unpaid",
+    },
+  ]);
+  const [filteredPayments, setFilteredPayments] = useState(payments);
 
   useEffect(() => {
-    loadData();
-  }, [timeframe, startDate, endDate]);
+    loadProjects();
+  }, [refreshTrigger]);
 
-  const loadData = () => {
-    // Load actual data from Project Billing system
+  const loadProjects = () => {
     const storedProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
-    const storedPayments = JSON.parse(localStorage.getItem('billing_payments') || '[]');
     setProjects(storedProjects);
-    setPayments(storedPayments);
   };
 
-  // Calculate comprehensive payment statistics from actual project data
-  const calculatePaymentStats = () => {
-    const totalAmount = projects.reduce((sum, project) => sum + project.totalCost, 0);
-    const totalReceived = projects.reduce((sum, project) => sum + project.totalReceived, 0);
-    const totalPending = projects.reduce((sum, project) => sum + project.totalPending, 0);
-    
-    // Calculate partial payments (projects with some payment but not fully paid)
-    const partialAmount = projects
-      .filter(project => project.totalReceived > 0 && project.totalPending > 0)
-      .reduce((sum, project) => sum + project.totalReceived, 0);
-    
-    // Calculate unpaid (projects with no payments)
-    const unpaidAmount = projects
-      .filter(project => project.totalReceived === 0)
-      .reduce((sum, project) => sum + project.totalCost, 0);
-    
-    // Calculate fully paid
-    const paidAmount = projects
-      .filter(project => project.totalPending === 0 && project.totalReceived > 0)
-      .reduce((sum, project) => sum + project.totalReceived, 0);
-
-    // Calculate due soon (projects with high completion but pending payments)
-    const dueSoonAmount = projects
-      .filter(project => {
-        const progress = project.totalCost > 0 ? (project.totalReceived / project.totalCost) * 100 : 0;
-        return progress >= 50 && project.totalPending > 0;
-      })
-      .reduce((sum, project) => sum + project.totalPending, 0);
-
-    return {
-      totalAmount,
-      paidAmount,
-      partialAmount,
-      unpaidAmount,
-      dueSoonAmount,
-      totalReceived,
-      totalPending
-    };
+  const handleAddProjectSuccess = () => {
+    setIsProjectDialogOpen(false);
+    setRefreshTrigger(prev => prev + 1);
+    toast.success("Project added successfully!");
   };
 
-  const stats = calculatePaymentStats();
+  const handleFilterChange = (filters: any) => {
+    let newFilteredPayments = [...payments];
 
-  // Convert projects to recent payments format for table
-  const getRecentPayments = () => {
-    return projects.map((project, index) => {
-      // Ensure paymentStatus matches the expected union type
-      let paymentStatus: "paid" | "partial" | "unpaid" | "hold";
-      if (project.totalPending === 0) {
-        paymentStatus = "paid";
-      } else if (project.totalReceived > 0) {
-        paymentStatus = "partial";
-      } else {
-        paymentStatus = "unpaid";
-      }
+    if (filters.project) {
+      newFilteredPayments = newFilteredPayments.filter(
+        (payment) =>
+          payment.projectName &&
+          payment.projectName.toLowerCase().includes(filters.project.toLowerCase())
+      );
+    }
 
-      // Ensure transportStatus matches the expected union type
-      let transportStatus: "pending" | "in-transit" | "delivered" | "not-applicable";
-      if (project.status === "completed") {
-        transportStatus = "delivered";
-      } else if (project.status === "active") {
-        transportStatus = "in-transit";
-      } else {
-        transportStatus = "pending";
-      }
+    if (filters.vendor) {
+      newFilteredPayments = newFilteredPayments.filter(
+        (payment) =>
+          payment.companyName &&
+          payment.companyName.toLowerCase().includes(filters.vendor.toLowerCase())
+      );
+    }
 
-      return {
-        id: project.id,
-        projectName: project.name,
-        companyName: project.projectOwnerDetails || project.projectOwner,
-        amount: project.totalCost,
-        payableAmount: project.totalPending,
-        paymentStatus,
-        transportStatus,
-        date: new Date(project.createdAt).toISOString().split('T')[0]
-      };
-    });
+    if (filters.paymentStatus) {
+      newFilteredPayments = newFilteredPayments.filter(
+        (payment) =>
+          payment.paymentStatus &&
+          payment.paymentStatus.toLowerCase() === filters.paymentStatus.toLowerCase()
+      );
+    }
+
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      newFilteredPayments = newFilteredPayments.filter(
+        (payment) =>
+          payment.poDate && new Date(payment.poDate) >= fromDate
+      );
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      newFilteredPayments = newFilteredPayments.filter(
+        (payment) =>
+          payment.poDate && new Date(payment.poDate) <= toDate
+      );
+    }
+
+    setFilteredPayments(newFilteredPayments);
   };
 
-  const recentPayments = getRecentPayments();
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+      case "active":
+        return <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>;
+      case "planning":
+        return <Badge className="bg-yellow-100 text-yellow-800">Planning</Badge>;
+      case "on-hold":
+        return <Badge className="bg-orange-100 text-orange-800">On Hold</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
 
-  // Calculate percentages
-  const paidPercent = stats.totalAmount > 0 ? Math.round((stats.paidAmount / stats.totalAmount) * 100) : 0;
-  const partialPercent = stats.totalAmount > 0 ? Math.round((stats.partialAmount / stats.totalAmount) * 100) : 0;
-  const unpaidPercent = stats.totalAmount > 0 ? Math.round((stats.unpaidAmount / stats.totalAmount) * 100) : 0;
-  const dueSoonPercent = stats.totalAmount > 0 ? Math.round((stats.dueSoonAmount / stats.totalAmount) * 100) : 0;
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.projectOwner.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || 
+      (statusFilter === "In Progress" && project.status === "active") ||
+      (statusFilter === "Completed" && project.status === "completed") ||
+      (statusFilter === "On Hold" && project.status === "on-hold");
+    return matchesSearch && matchesStatus;
+  });
+
+  const calculateProgress = (project: BillingProject) => {
+    if (project.totalCost === 0) return 0;
+    return Math.round(((project.totalCost - project.totalPending) / project.totalCost) * 100);
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Project Management Dashboard</h1>
-          <p className="text-muted-foreground">Comprehensive overview of all projects, payments, and activities</p>
+          <h1 className="text-3xl font-bold">Projects</h1>
+          <p className="text-muted-foreground">
+            Comprehensive project management with payment tracking
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Tabs defaultValue="10d" value={timeframe} onValueChange={setTimeframe} className="w-[400px]">
-            <TabsList className="grid grid-cols-4">
-              <TabsTrigger value="7d">7 Days</TabsTrigger>
-              <TabsTrigger value="10d">10 Days</TabsTrigger>
-              <TabsTrigger value="30d">30 Days</TabsTrigger>
-              <TabsTrigger value="custom">Custom</TabsTrigger>
-            </TabsList>
-            <TabsContent value="custom" className="mt-2">
-              <div className="flex gap-2">
-                <DatePicker date={startDate} setDate={setStartDate} placeholder="Start date" />
-                <DatePicker date={endDate} setDate={setEndDate} placeholder="End date" />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+        <Button onClick={() => setIsProjectDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Project
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Link to="/project-billing?tab=payments">
-          <PaymentStatusCard 
-            title="Total Paid" 
-            amount={stats.paidAmount} 
-            total={stats.totalAmount}
-            percent={paidPercent}
-            variant="paid" 
-            icon={<CircleDollarSign className="h-4 w-4" />} 
-          />
-        </Link>
-        <Link to="/project-billing?tab=payments">
-          <PaymentStatusCard 
-            title="Partially Paid" 
-            amount={stats.partialAmount} 
-            total={stats.totalAmount}
-            percent={partialPercent}
-            variant="partial" 
-            icon={<CreditCard className="h-4 w-4" />} 
-          />
-        </Link>
-        <Link to="/project-billing?tab=payments">
-          <PaymentStatusCard 
-            title="Unpaid" 
-            amount={stats.unpaidAmount} 
-            total={stats.totalAmount}
-            percent={unpaidPercent}
-            variant="unpaid" 
-            icon={<Clock className="h-4 w-4" />} 
-          />
-        </Link>
-        <Link to="/project-billing?tab=payments">
-          <PaymentStatusCard 
-            title="Payments Due Soon" 
-            amount={stats.dueSoonAmount} 
-            total={stats.totalAmount}
-            percent={dueSoonPercent}
-            variant="pending" 
-            icon={<AlertCircle className="h-4 w-4" />} 
-          />
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Recent Project Activities</CardTitle>
-              <CardDescription>Overview of the latest project payment activities</CardDescription>
+              <CardTitle>Project Management</CardTitle>
+              <p className="text-sm text-muted-foreground">Manage all construction projects</p>
             </div>
-            <Link to="/payments" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              View All Payments →
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <RecentPaymentsTable payments={recentPayments.slice(0, 5)} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Project Status Overview</h2>
-          <Link to="/project-billing" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-            Manage Projects →
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {projects.slice(0, 4).map((project) => {
-            const completionPercentage = project.totalCost > 0 ? 
-              Math.round(((project.totalCost - project.totalPending) / project.totalCost) * 100) : 0;
-            
-            return (
-              <Link key={project.id} to={`/project-billing?project=${project.id}`}>
-                <ProjectStatusCard 
-                  name={project.name}
-                  completionPercentage={completionPercentage}
-                  totalPayments={project.totalCost}
-                  pendingPayments={project.totalPending}
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search projects..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8 w-64"
                 />
-              </Link>
-            );
-          })}
-        </div>
-        {projects.length === 0 && (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground mb-4">No projects found. Start by creating your first project.</p>
-            <Link to="/project-billing">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Create Project
-              </button>
-            </Link>
-          </Card>
-        )}
-      </div>
+              </div>
+              <div className="flex gap-1">
+                {["All", "In Progress", "Completed", "On Hold"].map((status) => (
+                  <Button
+                    key={status}
+                    variant={statusFilter === status ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setStatusFilter(status)}
+                  >
+                    {status}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Project Name</TableHead>
+                  <TableHead>Budget</TableHead>
+                  <TableHead>Spent</TableHead>
+                  <TableHead>Remaining</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payments</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProjects.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      No projects found. Add your first project to get started.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProjects.map((project) => {
+                    const progress = calculateProgress(project);
+                    const spent = project.totalReceived;
+                    const remaining = project.totalPending;
+                    const pendingPayments = project.paymentTerms.filter(term => 
+                      term.percentage * project.totalCost / 100 > project.totalReceived
+                    ).length;
+                    
+                    return (
+                      <TableRow key={project.id}>
+                        <TableCell className="font-medium">{project.name}</TableCell>
+                        <TableCell>₹{project.totalCost.toLocaleString()}</TableCell>
+                        <TableCell className="text-blue-600">₹{spent.toLocaleString()}</TableCell>
+                        <TableCell className="text-red-600">₹{remaining.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={progress} className="h-2 w-20" />
+                            <span className="text-sm">{progress}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(project.status)}</TableCell>
+                        <TableCell>
+                          <span className="text-sm">
+                            {project.paymentTerms.length} 
+                            {pendingPayments > 0 && (
+                              <span className="text-red-600"> ({pendingPayments} pending)</span>
+                            )}
+                          </span>
+                        </TableCell>
+                        <TableCell>{project.startDate || "N/A"}</TableCell>
+                        <TableCell>{project.expectedEndDate || "N/A"}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Quick Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Link to="/project-billing">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-lg">Project Billing</CardTitle>
-              <CardDescription>Manage projects, payments, and billing</CardDescription>
-            </CardHeader>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-1">
+          <TabsTrigger value="payments">Payment Tracking</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="payments" className="space-y-4">
+          <Card>
+            <CardContent>
+              <PaymentFilterBar onFilterChange={handleFilterChange} />
+            </CardContent>
           </Card>
-        </Link>
-        <Link to="/payments">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-lg">Payment Management</CardTitle>
-              <CardDescription>Track and manage all payments</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-      </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">SL No.</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Project</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>PO Reference</TableHead>
+                  <TableHead>Total Amount</TableHead>
+                  <TableHead>Payable Amount</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPayments.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium">{payment.slNo}</TableCell>
+                    <TableCell>{payment.description}</TableCell>
+                    <TableCell>{payment.projectName}</TableCell>
+                    <TableCell>{payment.companyName}</TableCell>
+                    <TableCell>{payment.poReference}</TableCell>
+                    <TableCell>₹{payment.totalAmount.toLocaleString()}</TableCell>
+                    <TableCell>₹{payment.payableAmount.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link to={`/payments/${payment.id}`}>View Details</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredPayments.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center">
+                      No payments found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Project</DialogTitle>
+          </DialogHeader>
+          <AddProjectForm onSuccess={handleAddProjectSuccess} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default Dashboard;
+export default Payments;
