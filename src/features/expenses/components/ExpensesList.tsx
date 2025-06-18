@@ -1,207 +1,167 @@
-import { useState, useEffect } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Trash2 } from "lucide-react";
-import { ExpenseItem } from "../types/expenseTypes";
-import { toast } from "sonner";
 
-interface ExpensesListProps {
-  type: 'project' | 'other';
-  refreshTrigger: number;
+import React, { useState, useMemo } from 'react';
+import { Table } from '@/components/chakra/Table';
+import { Badge } from '@/components/chakra/Badge';
+import { Button } from '@/components/chakra/Button';
+import { Input } from '@/components/chakra/Input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/chakra/Select';
+import { VStack, HStack, Box } from '@chakra-ui/react';
+import { Search, Filter, Edit, Trash2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+
+interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  receipt?: string;
 }
 
-const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
-  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
-  const [filteredExpenses, setFilteredExpenses] = useState<ExpenseItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [transactionFilter, setTransactionFilter] = useState("all");
+interface ExpensesListProps {
+  expenses: Expense[];
+  onEdit?: (expense: Expense) => void;
+  onDelete?: (id: string) => void;
+}
 
-  useEffect(() => {
-    loadExpenses();
-  }, [refreshTrigger]);
+const ExpensesList = ({ expenses, onEdit, onDelete }: ExpensesListProps) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
 
-  useEffect(() => {
-    filterExpenses();
-  }, [expenses, searchQuery, categoryFilter, transactionFilter, type]);
+  const filteredAndSortedExpenses = useMemo(() => {
+    let filtered = expenses.filter(expense => {
+      const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
 
-  const loadExpenses = () => {
-    const storedExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
-    setExpenses(storedExpenses);
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'amount':
+          return b.amount - a.amount;
+        case 'description':
+          return a.description.localeCompare(b.description);
+        case 'date':
+        default:
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+    });
+  }, [expenses, searchTerm, categoryFilter, sortBy]);
+
+  const getCategoryBadge = (category: string) => {
+    const colors: Record<string, string> = {
+      office: 'blue',
+      travel: 'green',
+      meals: 'orange',
+      equipment: 'purple',
+      other: 'gray',
+    };
+    return <Badge colorScheme={colors[category] || 'gray'}>{category}</Badge>;
   };
 
-  const filterExpenses = () => {
-    let filtered = expenses.filter(expense => expense.type === type);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount);
+  };
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(expense =>
-        expense.description.toLowerCase().includes(query) ||
-        expense.category.toLowerCase().includes(query) ||
-        (expense.projectName && expense.projectName.toLowerCase().includes(query))
-      );
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this expense?')) {
+      if (onDelete) {
+        onDelete(id);
+        toast.success('Expense deleted successfully');
+      }
     }
-
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter(expense => expense.category === categoryFilter);
-    }
-
-    if (transactionFilter !== "all") {
-      filtered = filtered.filter(expense => expense.transactionType === transactionFilter);
-    }
-
-    setFilteredExpenses(filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-  };
-
-  const deleteExpense = (id: string) => {
-    const updatedExpenses = expenses.filter(expense => expense.id !== id);
-    setExpenses(updatedExpenses);
-    localStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    toast.success("Expense deleted successfully");
-  };
-
-  const getUniqueCategories = () => {
-    const categories = expenses
-      .filter(expense => expense.type === type)
-      .map(expense => expense.category);
-    return [...new Set(categories)];
-  };
-
-  const getTotalReceived = () => {
-    return filteredExpenses
-      .filter(expense => expense.transactionType === 'received' || expense.transactionType === 'total_received')
-      .reduce((sum, expense) => sum + expense.amount, 0);
-  };
-
-  const getTotalSpent = () => {
-    return filteredExpenses
-      .filter(expense => expense.transactionType === 'spent')
-      .reduce((sum, expense) => sum + expense.amount, 0);
-  };
-
-  const getBalance = () => {
-    return getTotalReceived() - getTotalSpent();
   };
 
   return (
-    <div className="space-y-4">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-green-800">Total Received</h3>
-          <p className="text-2xl font-bold text-green-600">₹{getTotalReceived().toLocaleString()}</p>
-        </div>
-        <div className="bg-red-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
-          <p className="text-2xl font-bold text-red-600">₹{getTotalSpent().toLocaleString()}</p>
-        </div>
-        <div className={`p-4 rounded-lg ${getBalance() >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-          <h3 className={`text-sm font-medium ${getBalance() >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
-          <p className={`text-2xl font-bold ${getBalance() >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-            ₹{getBalance().toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
-          <p className="text-2xl font-bold text-gray-600">{filteredExpenses.length}</p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+    <VStack gap={6} align="stretch">
+      <HStack gap={4}>
+        <Box position="relative" flex={1}>
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search expenses..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            pl={10}
           />
-        </div>
-        
+        </Box>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Filter by category" />
+          <SelectTrigger width="200px">
+            <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {getUniqueCategories().map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
+            <SelectItem value="office">Office Supplies</SelectItem>
+            <SelectItem value="travel">Travel</SelectItem>
+            <SelectItem value="meals">Meals</SelectItem>
+            <SelectItem value="equipment">Equipment</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
           </SelectContent>
         </Select>
-
-        <Select value={transactionFilter} onValueChange={setTransactionFilter}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Filter by type" />
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger width="150px">
+            <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Transactions</SelectItem>
-            <SelectItem value="received">Received</SelectItem>
-            <SelectItem value="spent">Spent</SelectItem>
+            <SelectItem value="date">Date</SelectItem>
+            <SelectItem value="amount">Amount</SelectItem>
+            <SelectItem value="description">Description</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </HStack>
 
-      {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
-              {type === 'project' && <TableHead>Project</TableHead>}
-              <TableHead>Type</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Payment Method</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredExpenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
-                <TableCell className="max-w-xs truncate">{expense.description}</TableCell>
-                <TableCell>{expense.category}</TableCell>
-                {type === 'project' && <TableCell>{expense.projectName || '-'}</TableCell>}
-                <TableCell>
-                  <Badge variant={expense.transactionType === 'spent' ? 'destructive' : 'default'}>
-                    {expense.transactionType === 'received' ? 'Received' : 
-                     expense.transactionType === 'total_received' ? 'Total Received' : 'Spent'}
-                  </Badge>
-                </TableCell>
-                <TableCell className={expense.transactionType === 'spent' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                  {expense.transactionType === 'spent' ? '-' : '+'}₹{expense.amount.toLocaleString()}
-                </TableCell>
-                <TableCell>{expense.paymentMethod}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteExpense(expense.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+      <Box overflowX="auto">
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>Description</Table.ColumnHeader>
+              <Table.ColumnHeader>Amount</Table.ColumnHeader>
+              <Table.ColumnHeader>Category</Table.ColumnHeader>
+              <Table.ColumnHeader>Date</Table.ColumnHeader>
+              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {filteredAndSortedExpenses.map((expense) => (
+              <Table.Row key={expense.id}>
+                <Table.Cell>{expense.description}</Table.Cell>
+                <Table.Cell fontWeight="medium">{formatCurrency(expense.amount)}</Table.Cell>
+                <Table.Cell>{getCategoryBadge(expense.category)}</Table.Cell>
+                <Table.Cell>{new Date(expense.date).toLocaleDateString()}</Table.Cell>
+                <Table.Cell>
+                  <HStack gap={2}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onEdit && onEdit(expense)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={() => handleDelete(expense.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </HStack>
+                </Table.Cell>
+              </Table.Row>
             ))}
-          </TableBody>
-        </Table>
-        
-        {filteredExpenses.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No expenses found matching your criteria.
-          </div>
-        )}
-      </div>
-    </div>
+          </Table.Body>
+        </Table.Root>
+      </Box>
+
+      {filteredAndSortedExpenses.length === 0 && (
+        <Box textAlign="center" py={8}>
+          <p className="text-muted-foreground">No expenses found</p>
+        </Box>
+      )}
+    </VStack>
   );
 };
 

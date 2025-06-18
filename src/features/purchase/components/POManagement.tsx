@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from "react";
-import { Input } from "@/components/radix/Input";
-import { Button } from "@/components/radix/Button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/radix/Table";
-import { Badge } from "@/components/radix/Badge";
+import { Input } from "@/components/chakra/Input";
+import { Button } from "@/components/chakra/Button";
+import { Table } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
+import { VStack, HStack, Box } from "@chakra-ui/react";
 import { Search, Filter, Eye } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const generatePOData = () => {
   return [
@@ -140,28 +140,28 @@ const POManagement = ({ filterType }: POManagementProps) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-blue-100 text-blue-800">Active</Badge>;
+        return <Badge colorScheme="blue">Active</Badge>;
       case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+        return <Badge colorScheme="green">Completed</Badge>;
       case "cancelled":
-        return <Badge variant="destructive">Cancelled</Badge>;
+        return <Badge colorScheme="red">Cancelled</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge>Unknown</Badge>;
     }
   };
 
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
-        return <Badge className="bg-green-100 text-green-800">Paid</Badge>;
+        return <Badge colorScheme="green">Paid</Badge>;
       case "hold":
-        return <Badge className="bg-orange-100 text-orange-800">Hold</Badge>;
+        return <Badge colorScheme="orange">Hold</Badge>;
       case "pending":
-        return <Badge className="bg-red-100 text-red-800">Pending</Badge>;
+        return <Badge colorScheme="red">Pending</Badge>;
       case "cancelled":
-        return <Badge variant="destructive">Cancelled</Badge>;
+        return <Badge colorScheme="red">Cancelled</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge>Unknown</Badge>;
     }
   };
 
@@ -170,52 +170,52 @@ const POManagement = ({ filterType }: POManagementProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+    <VStack gap={6} align="stretch">
+      <HStack gap={4}>
+        <Box position="relative" flex={1}>
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search by PO number, project, vendor, department, requested by..."
-            className="pl-8"
+            pl={10}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
+        </Box>
         <Button variant="outline">
           <Filter className="mr-2 h-4 w-4" />
           Advanced Filters
         </Button>
-      </div>
+      </HStack>
       
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>PO Number</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Requested By</TableHead>
-              <TableHead>Vendor</TableHead>
-              <TableHead>Total Amount</TableHead>
-              <TableHead>PO Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payment Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <Box overflowX="auto" borderWidth={1} borderRadius="md">
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>PO Number</Table.ColumnHeader>
+              <Table.ColumnHeader>Project</Table.ColumnHeader>
+              <Table.ColumnHeader>Department</Table.ColumnHeader>
+              <Table.ColumnHeader>Requested By</Table.ColumnHeader>
+              <Table.ColumnHeader>Vendor</Table.ColumnHeader>
+              <Table.ColumnHeader>Total Amount</Table.ColumnHeader>
+              <Table.ColumnHeader>PO Date</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader>Payment Status</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="right">Actions</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
             {filteredPOs.map((po) => (
-              <TableRow key={po.id}>
-                <TableCell className="font-medium">{po.poNumber}</TableCell>
-                <TableCell>{po.projectName}</TableCell>
-                <TableCell>{po.department}</TableCell>
-                <TableCell>{po.requestedBy}</TableCell>
-                <TableCell>{po.vendorName}</TableCell>
-                <TableCell>₹{po.totalAmount.toLocaleString()}</TableCell>
-                <TableCell>{po.poDate}</TableCell>
-                <TableCell>{getStatusBadge(po.status)}</TableCell>
-                <TableCell>{getPaymentStatusBadge(po.paymentStatus)}</TableCell>
-                <TableCell className="text-right">
+              <Table.Row key={po.id}>
+                <Table.Cell fontWeight="medium">{po.poNumber}</Table.Cell>
+                <Table.Cell>{po.projectName}</Table.Cell>
+                <Table.Cell>{po.department}</Table.Cell>
+                <Table.Cell>{po.requestedBy}</Table.Cell>
+                <Table.Cell>{po.vendorName}</Table.Cell>
+                <Table.Cell>₹{po.totalAmount.toLocaleString()}</Table.Cell>
+                <Table.Cell>{po.poDate}</Table.Cell>
+                <Table.Cell>{getStatusBadge(po.status)}</Table.Cell>
+                <Table.Cell>{getPaymentStatusBadge(po.paymentStatus)}</Table.Cell>
+                <Table.Cell textAlign="right">
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -223,19 +223,19 @@ const POManagement = ({ filterType }: POManagementProps) => {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
-                </TableCell>
-              </TableRow>
+                </Table.Cell>
+              </Table.Row>
             ))}
-          </TableBody>
-        </Table>
-      </div>
+          </Table.Body>
+        </Table.Root>
+      </Box>
       
       {filteredPOs.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
+        <Box textAlign="center" py={8} color="gray.500">
           No purchase orders found matching the current filter criteria.
-        </div>
+        </Box>
       )}
-    </div>
+    </VStack>
   );
 };
 

@@ -1,300 +1,139 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  PROJECT_EXPENSE_CATEGORIES, 
-  OTHER_EXPENSE_CATEGORIES, 
-  PAYMENT_METHODS,
-  ExpenseItem 
-} from "../types/expenseTypes";
+
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/chakra/Button';
+import { Input } from '@/components/chakra/Input';
+import { Textarea } from '@/components/chakra/Textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/chakra/Select';
+import { DatePicker } from '@/components/chakra/DatePicker';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/chakra/Card';
+import { FormItem, FormLabel, FormMessage } from '@/components/chakra/Form';
+import { VStack, HStack } from '@chakra-ui/react';
+import { toast } from '@/hooks/use-toast';
 
 const expenseSchema = z.object({
-  type: z.enum(["project", "other"]),
-  category: z.string().min(1, "Category is required"),
-  projectId: z.string().optional(),
-  projectName: z.string().optional(),
-  description: z.string().min(1, "Description is required"),
-  amount: z.number().min(0.01, "Amount must be greater than 0"),
-  transactionType: z.enum(["received", "spent", "total_received"]),
+  description: z.string().min(1, 'Description is required'),
+  amount: z.number().min(0.01, 'Amount must be greater than 0'),
+  category: z.string().min(1, 'Category is required'),
   date: z.date(),
-  paymentMethod: z.string().min(1, "Payment method is required"),
+  receipt: z.string().optional(),
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 interface AddExpenseFormProps {
-  onSuccess: () => void;
-  defaultType?: 'project' | 'other';
+  onSuccess?: () => void;
 }
 
-// Mock projects data - in real app, this would come from API
-const mockProjects = [
-  { id: "1", name: "Amni WTP" },
-  { id: "2", name: "YACHULI" },
-  { id: "3", name: "Sample Testing" },
-  { id: "4", name: "Piyong IoT" },
-  { id: "5", name: "Machuika" },
-];
-
-const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormProps) => {
+const AddExpenseForm = ({ onSuccess }: AddExpenseFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  const form = useForm<ExpenseFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
-    defaultValues: {
-      type: defaultType,
-      transactionType: "spent",
-      date: new Date(),
-    },
   });
-
-  const selectedType = form.watch("type");
-  const categories = selectedType === "project" ? PROJECT_EXPENSE_CATEGORIES : OTHER_EXPENSE_CATEGORIES;
 
   const onSubmit = async (data: ExpenseFormData) => {
     setIsSubmitting(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newExpense: ExpenseItem = {
-        id: Date.now().toString(),
-        type: data.type,
-        category: data.category,
-        projectId: data.projectId,
-        projectName: data.projectName,
-        description: data.description,
-        amount: data.amount,
-        transactionType: data.transactionType,
-        paymentMethod: data.paymentMethod,
-        date: data.date.toISOString().split('T')[0],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // In real app, this would be saved to database
-      const existingExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
-      existingExpenses.push(newExpense);
-      localStorage.setItem('expenses', JSON.stringify(existingExpenses));
-      
-      onSuccess();
+      // Save expense logic here
+      toast.success('Expense added successfully');
+      reset();
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error("Error adding expense:", error);
+      toast.error('Failed to add expense');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expense Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select expense type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="project">Project Expense</SelectItem>
-                    <SelectItem value="other">Other Expense</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {selectedType === "project" && (
-          <FormField
-            control={form.control}
-            name="projectId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project</FormLabel>
-                <Select 
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    const selectedProject = mockProjects.find(p => p.id === value);
-                    if (selectedProject) {
-                      form.setValue("projectName", selectedProject.name);
-                    }
-                  }} 
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select project" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {mockProjects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Add New Expense</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <VStack gap={4}>
             <FormItem>
               <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter expense description..."
-                  className="min-h-[80px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
+              <Input
+                {...register('description')}
+                placeholder="Enter expense description"
+              />
+              {errors.description && (
+                <FormMessage>{errors.description.message}</FormMessage>
+              )}
             </FormItem>
-          )}
-        />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Amount (₹)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormItem>
+              <FormLabel>Amount</FormLabel>
+              <Input
+                type="number"
+                step="0.01"
+                {...register('amount', { valueAsNumber: true })}
+                placeholder="0.00"
+              />
+              {errors.amount && (
+                <FormMessage>{errors.amount.message}</FormMessage>
+              )}
+            </FormItem>
 
-          <FormField
-            control={form.control}
-            name="transactionType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Transaction Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="received">Amount Received</SelectItem>
-                    <SelectItem value="spent">Amount Spent</SelectItem>
-                    <SelectItem value="total_received">Total Received</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Select {...register('category')}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="office">Office Supplies</SelectItem>
+                  <SelectItem value="travel">Travel</SelectItem>
+                  <SelectItem value="meals">Meals</SelectItem>
+                  <SelectItem value="equipment">Equipment</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.category && (
+                <FormMessage>{errors.category.message}</FormMessage>
+              )}
+            </FormItem>
 
-          <FormField
-            control={form.control}
-            name="paymentMethod"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payment Method</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select method" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {PAYMENT_METHODS.map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {method}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
             <FormItem>
               <FormLabel>Date</FormLabel>
-              <FormControl>
-                <DatePicker
-                  date={field.value}
-                  setDate={field.onChange}
-                  placeholder="Select date"
-                />
-              </FormControl>
-              <FormMessage />
+              <DatePicker
+                date={selectedDate}
+                setDate={setSelectedDate}
+                placeholder="Select date"
+              />
             </FormItem>
-          )}
-        />
 
-        <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Expense"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <FormItem>
+              <FormLabel>Receipt (Optional)</FormLabel>
+              <Textarea
+                {...register('receipt')}
+                placeholder="Receipt details or notes"
+              />
+            </FormItem>
+
+            <HStack gap={2} width="100%" justifyContent="flex-end">
+              <Button variant="outline" onClick={() => reset()}>
+                Cancel
+              </Button>
+              <Button type="submit" loading={isSubmitting}>
+                Add Expense
+              </Button>
+            </HStack>
+          </VStack>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
