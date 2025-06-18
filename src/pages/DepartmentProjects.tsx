@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
+import { Input } from "@/components/chakra/Input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
+import { Progress } from "@/components/chakra/Progress";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -190,11 +191,11 @@ const DepartmentProjects = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+        return <Badge colorScheme="green">Completed</Badge>;
       case "in-progress":
-        return <Badge className="bg-yellow-100 text-yellow-800">In Progress</Badge>;
+        return <Badge colorScheme="yellow">In Progress</Badge>;
       case "on-hold":
-        return <Badge className="bg-orange-100 text-orange-800">On Hold</Badge>;
+        return <Badge colorScheme="orange">On Hold</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
@@ -213,10 +214,16 @@ const DepartmentProjects = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Department Projects</h1>
-      </div>
+    <Box gap={6}>
+      <Flex 
+        direction={{ base: "column", md: "row" }} 
+        align={{ md: "center" }} 
+        justify={{ md: "space-between" }} 
+        gap={4}
+        mb={6}
+      >
+        <Heading size="lg">Department Projects</Heading>
+      </Flex>
       
       {!selectedDepartment ? (
         <Card>
@@ -225,107 +232,118 @@ const DepartmentProjects = () => {
             <CardDescription>View and manage departments and their projects</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Box display="grid" gridTemplateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
               {departments.map(dept => (
-                <Card key={dept.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
+                <Card key={dept.id} cursor="pointer" _hover={{ boxShadow: "md" }} transition="box-shadow 0.2s">
+                  <CardHeader pb={2}>
                     <CardTitle>{dept.name}</CardTitle>
                     <CardDescription>Manager: {dept.manager}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Ongoing Projects:</span>
-                      <Badge variant="outline">{dept.ongoingProjects} / {dept.totalProjects}</Badge>
-                    </div>
-                    <Progress value={(dept.ongoingProjects / dept.totalProjects) * 100} className="h-2" />
-                    <div className="flex justify-between mt-4">
-                      <Button size="sm" variant="outline" onClick={() => handleDepartmentAction(dept.id, 'projects')}>
-                        View Projects
-                      </Button>
-                      <Button size="sm" onClick={() => handleDepartmentAction(dept.id, 'payments')}>
-                        Payments
-                      </Button>
-                    </div>
+                  <CardContent>
+                    <Box gap={2}>
+                      <Flex justify="space-between" align="center">
+                        <Box as="span" fontSize="sm" color="gray.600">Ongoing Projects:</Box>
+                        <Badge variant="outline">{dept.ongoingProjects} / {dept.totalProjects}</Badge>
+                      </Flex>
+                      <Progress value={(dept.ongoingProjects / dept.totalProjects) * 100} size="sm" />
+                      <Flex justify="space-between" mt={4}>
+                        <Button size="sm" variant="outline" onClick={() => handleDepartmentAction(dept.id, 'projects')}>
+                          View Projects
+                        </Button>
+                        <Button size="sm" onClick={() => handleDepartmentAction(dept.id, 'payments')}>
+                          Payments
+                        </Button>
+                      </Flex>
+                    </Box>
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </Box>
           </CardContent>
         </Card>
       ) : (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Project Management</CardTitle>
-              <CardDescription>
-                {departments.find(d => d.id === selectedDepartment)?.name} Department Projects
-              </CardDescription>
-            </div>
-            <Button variant="outline" onClick={() => setSelectedDepartment(null)}>
-              Back to Departments
-            </Button>
+          <CardHeader>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <CardTitle>Project Management</CardTitle>
+                <CardDescription>
+                  {departments.find(d => d.id === selectedDepartment)?.name} Department Projects
+                </CardDescription>
+              </Box>
+              <Button variant="outline" onClick={() => setSelectedDepartment(null)}>
+                Back to Departments
+              </Button>
+            </Flex>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
-                <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-                  <TabsTrigger value="completed">Completed</TabsTrigger>
-                  <TabsTrigger value="on-hold">On Hold</TabsTrigger>
-                </TabsList>
-              </Tabs>
+          <CardContent>
+            <Box gap={6}>
+              <Flex 
+                direction={{ base: "column", md: "row" }} 
+                align={{ md: "center" }} 
+                justify={{ md: "space-between" }} 
+                gap={4}
+              >
+                <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                  <TabList>
+                    <Tab value="all">All</Tab>
+                    <Tab value="in-progress">In Progress</Tab>
+                    <Tab value="completed">Completed</Tab>
+                    <Tab value="on-hold">On Hold</Tab>
+                  </TabList>
+                </Tabs>
+                
+                <Box position="relative" w={{ base: "full", md: "64" }}>
+                  <Search style={{ position: 'absolute', left: '8px', top: '10px', width: '16px', height: '16px', color: '#A0AEC0' }} />
+                  <Input
+                    placeholder="Search projects..."
+                    paddingLeft="32px"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </Box>
+              </Flex>
               
-              <div className="relative w-full md:w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search projects..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Project Name</TableHead>
-                    <TableHead>Budget</TableHead>
-                    <TableHead>Spent</TableHead>
-                    <TableHead>Remaining</TableHead>
-                    <TableHead>Progress</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProjects.map((project) => (
-                    <TableRow key={project.id}>
-                      <TableCell className="font-medium">{project.name}</TableCell>
-                      <TableCell>₹{project.totalBudget.toLocaleString()}</TableCell>
-                      <TableCell>₹{project.spent.toLocaleString()}</TableCell>
-                      <TableCell>₹{project.remaining.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={project.progress} className="h-2 w-20" />
-                          <span className="text-xs">{project.progress}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(project.status)}</TableCell>
-                      <TableCell>{project.startDate}</TableCell>
-                      <TableCell>{project.endDate}</TableCell>
+              <Box borderWidth={1} borderRadius="md">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Project Name</TableHead>
+                      <TableHead>Budget</TableHead>
+                      <TableHead>Spent</TableHead>
+                      <TableHead>Remaining</TableHead>
+                      <TableHead>Progress</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead>End Date</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProjects.map((project) => (
+                      <TableRow key={project.id}>
+                        <TableCell fontWeight="medium">{project.name}</TableCell>
+                        <TableCell>₹{project.totalBudget.toLocaleString()}</TableCell>
+                        <TableCell>₹{project.spent.toLocaleString()}</TableCell>
+                        <TableCell>₹{project.remaining.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Flex align="center" gap={2}>
+                            <Progress value={project.progress} size="sm" w="20" />
+                            <Box as="span" fontSize="xs">{project.progress}%</Box>
+                          </Flex>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(project.status)}</TableCell>
+                        <TableCell>{project.startDate}</TableCell>
+                        <TableCell>{project.endDate}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
       )}
-    </div>
+    </Box>
   );
 };
 

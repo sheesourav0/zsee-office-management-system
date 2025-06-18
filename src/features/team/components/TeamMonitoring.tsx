@@ -1,13 +1,14 @@
-
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MessageSquare, Eye, AlertCircle, CheckCircle, Clock } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Badge } from "@/components/chakra/Badge";
+import { Textarea } from "@/components/chakra/Textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Eye, MessageSquare, Clock, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { toast } from "@/hooks/use-toast";
 import { WorkPlan, WorkPlanComment } from "../types/teamTypes";
 
 const generateMonitoringData = () => {
@@ -129,7 +130,7 @@ const TeamMonitoring = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <Box gap={6}>
       <Card>
         <CardHeader>
           <CardTitle>Team Activity Monitoring</CardTitle>
@@ -312,7 +313,7 @@ const TeamMonitoring = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

@@ -1,18 +1,18 @@
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { WorkPlanPeriod } from "../types/teamTypes";
+import { Box, Flex } from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Label } from "@/components/chakra/Label";
+import { Textarea } from "@/components/chakra/Textarea";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
+import { toast } from "@/hooks/use-toast";
 
 interface AddWorkPlanFormProps {
-  onSuccess: () => void;
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
 }
 
-const AddWorkPlanForm = ({ onSuccess }: AddWorkPlanFormProps) => {
+const AddWorkPlanForm = ({ onSubmit, onCancel }: AddWorkPlanFormProps) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -34,11 +34,11 @@ const AddWorkPlanForm = ({ onSuccess }: AddWorkPlanFormProps) => {
 
     console.log("Adding work plan:", formData);
     toast.success("Work plan added successfully");
-    onSuccess();
+    onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Box as="form" onSubmit={handleSubmit} gap={4}>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="title">Title *</Label>
@@ -119,12 +119,15 @@ const AddWorkPlanForm = ({ onSuccess }: AddWorkPlanFormProps) => {
         </Select>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="submit">
-          Add Work Plan
+      <Flex gap={4} justify="flex-end">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
         </Button>
-      </div>
-    </form>
+        <Button type="submit">
+          Create Work Plan
+        </Button>
+      </Flex>
+    </Box>
   );
 };
 

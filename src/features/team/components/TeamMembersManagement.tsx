@@ -1,14 +1,14 @@
-
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Users, Calendar, MapPin } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TeamMember, UserRole } from "../types/teamTypes";
+import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Badge } from "@/components/chakra/Badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
+import { toast } from "@/hooks/use-toast";
 import AddTeamMemberForm from "./AddTeamMemberForm";
 import WorkPlanManagement from "./WorkPlanManagement";
 import TeamMonitoring from "./TeamMonitoring";
@@ -126,107 +126,123 @@ const TeamMembersManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <Box gap={6}>
+      <Flex 
+        direction={{ base: "column", md: "row" }} 
+        align={{ md: "center" }} 
+        justify={{ md: "space-between" }} 
+        gap={4}
+        mb={6}
+      >
+        <Heading size="lg">Team Members</Heading>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus style={{ marginRight: '8px', width: '16px', height: '16px' }} />
+          Add Team Member
+        </Button>
+      </Flex>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="members" className="flex items-center gap-2">
+        <TabList className="grid w-full grid-cols-3">
+          <Tab value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Team Members
-          </TabsTrigger>
-          <TabsTrigger value="workplans" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="workplans" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Work Plans
-          </TabsTrigger>
-          <TabsTrigger value="monitoring" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="monitoring" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             Monitoring
-          </TabsTrigger>
-        </TabsList>
+          </Tab>
+        </TabList>
 
-        <TabsContent value="members">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Team Members</CardTitle>
-                  <CardDescription>Manage team members and their roles</CardDescription>
+        <TabPanels>
+          <TabPanel value="members">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Team Members</CardTitle>
+                    <CardDescription>Manage team members and their roles</CardDescription>
+                  </div>
+                  <Button onClick={() => setIsAddDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Member
+                  </Button>
                 </div>
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Member
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name, email, department, or role..."
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name, email, department, or role..."
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Join Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMembers.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell className="font-medium">{member.name}</TableCell>
-                        <TableCell>{member.email}</TableCell>
-                        <TableCell>{getRoleBadge(member.role)}</TableCell>
-                        <TableCell>{member.department}</TableCell>
-                        <TableCell>{member.joinDate}</TableCell>
-                        <TableCell>
-                          <Badge className={member.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                            {member.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setSelectedMember(member)}
-                          >
-                            View Details
-                          </Button>
-                        </TableCell>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Join Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {filteredMembers.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No team members found matching the current criteria.
+                    </TableHeader>
+                    <TableBody>
+                      {filteredMembers.map((member) => (
+                        <TableRow key={member.id}>
+                          <TableCell className="font-medium">{member.name}</TableCell>
+                          <TableCell>{member.email}</TableCell>
+                          <TableCell>{getRoleBadge(member.role)}</TableCell>
+                          <TableCell>{member.department}</TableCell>
+                          <TableCell>{member.joinDate}</TableCell>
+                          <TableCell>
+                            <Badge className={member.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                              {member.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedMember(member)}
+                            >
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="workplans">
-          <WorkPlanManagement />
-        </TabsContent>
+                {filteredMembers.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No team members found matching the current criteria.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabPanel>
 
-        <TabsContent value="monitoring">
-          <TeamMonitoring />
-        </TabsContent>
+          <TabPanel value="workplans">
+            <WorkPlanManagement />
+          </TabPanel>
+
+          <TabPanel value="monitoring">
+            <TeamMonitoring />
+          </TabPanel>
+        </TabPanels>
       </Tabs>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -237,7 +253,7 @@ const TeamMembersManagement = () => {
           <AddTeamMemberForm onSuccess={handleAddSuccess} />
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

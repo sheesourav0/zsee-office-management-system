@@ -1,294 +1,212 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Truck, FileUp, ArrowLeft } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
-import { toast } from "sonner";
-import TransportationStatusTracker from "@/features/transportation/components/TransportationStatusTracker";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Badge } from "@/components/chakra/Badge";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Separator } from "@/components/chakra/Separator";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
+import { ArrowLeft, Download, FileText, Calendar, DollarSign, User, Building } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
-const PaymentDetailView = () => {
-  const { id } = useParams();
+interface PaymentDetailViewProps {
+  paymentId: string | null;
+  onBack: () => void;
+}
+
+const PaymentDetailView = ({ paymentId, onBack }: PaymentDetailViewProps) => {
+  const mockPayments = [
+    {
+      id: "1",
+      invoiceNumber: "INV-2023-001",
+      vendor: "King Longkai",
+      project: "Amrit WTP",
+      amount: 75000,
+      paymentDate: "2023-01-15",
+      dueDate: "2023-01-30",
+      status: "paid",
+      invoiceFile: "invoice-001.pdf",
+      notes: "First payment for gateway modules and PC"
+    },
+    {
+      id: "2",
+      invoiceNumber: "INV-2023-002",
+      vendor: "BMP SYSTEMS",
+      project: "YACHULI",
+      amount: 42000,
+      paymentDate: "2023-02-01",
+      dueDate: "2023-02-15",
+      status: "pending",
+      invoiceFile: "invoice-002.pdf",
+      notes: "Payment for Lithium Ion Battery"
+    },
+    {
+      id: "3",
+      invoiceNumber: "INV-2023-003",
+      vendor: "P.R.S ENTERPRISE",
+      project: "Sample Testing",
+      amount: 18000,
+      paymentDate: "2023-02-15",
+      dueDate: "2023-02-28",
+      status: "paid",
+      invoiceFile: "invoice-003.pdf",
+      notes: "Payment for Control Valve"
+    },
+    {
+      id: "4",
+      invoiceNumber: "INV-2023-004",
+      vendor: "SKY MARKETING",
+      project: "Piyong IoT",
+      amount: 28000,
+      paymentDate: "2023-03-01",
+      dueDate: "2023-03-15",
+      status: "overdue",
+      invoiceFile: "invoice-004.pdf",
+      notes: "Payment for Panel Internal Instruments"
+    },
+    {
+      id: "5",
+      invoiceNumber: "INV-2023-005",
+      vendor: "Agmatic Technologies",
+      project: "Machuika",
+      amount: 9500,
+      paymentDate: "2023-03-15",
+      dueDate: "2023-03-31",
+      status: "paid",
+      invoiceFile: "invoice-005.pdf",
+      notes: "Payment for Marxian's Equipment Return"
+    },
+  ];
+
   const [activeTab, setActiveTab] = useState("details");
-  
-  // This would typically come from an API
-  const payment = {
-    id: "1",
-    slNo: 1,
-    description: "Maintain Marxian's amount return",
-    projectName: "Piyong IoT(Namsal)",
-    companyName: "King Longkai (Account Holder Name)",
-    poReference: "PO123456",
-    poDate: "2023-04-15",
-    accountNo: "11822669748",
-    ifscCode: "SBIN0013311",
-    branchBank: "SBI/Namsai",
-    totalAmount: 300000,
-    paid: 0,
-    payDate: "",
-    payableAmount: 300000,
-    priority: "High",
-    remarks: "",
-    transportationStatus: "pending",
-    paymentStatus: "unpaid",
-    documents: [
-      { name: "Invoice-123.pdf", type: "invoice", uploadedAt: "2023-04-10" },
-      { name: "PO-123.pdf", type: "purchase-order", uploadedAt: "2023-04-05" }
-    ],
-    transportInfo: {
-      carrier: "",
-      trackingNumber: "",
-      estimatedDelivery: "",
-      currentStatus: "Not Shipped",
-      updates: []
-    }
-  };
 
-  const getPaymentStatusBadge = (status: string) => {
+  if (!paymentId) {
+    return (
+      <Card>
+        <CardContent p={8} textAlign="center">
+          <Text color="gray.600">Select a payment to view details</Text>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const payment = mockPayments.find(p => p.id === paymentId);
+  
+  if (!payment) {
+    return (
+      <Card>
+        <CardContent p={8} textAlign="center">
+          <Text color="red.600">Payment not found</Text>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
-        return <Badge className="status-paid">Paid</Badge>;
-      case "partial":
-        return <Badge className="status-partial">Partially Paid</Badge>;
-      case "unpaid":
-        return <Badge className="status-unpaid">Unpaid</Badge>;
-      case "hold":
-        return <Badge className="status-hold">On Hold</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
-  const getTransportStatusBadge = (status: string) => {
-    switch (status) {
+        return <Badge colorScheme="green">Paid</Badge>;
       case "pending":
-        return <Badge className="transport-pending">Pending</Badge>;
-      case "in-transit":
-        return <Badge className="transport-in-transit">In Transit</Badge>;
-      case "delivered":
-        return <Badge className="transport-delivered">Delivered</Badge>;
-      case "not-applicable":
-        return <Badge variant="outline">N/A</Badge>;
+        return <Badge colorScheme="yellow">Pending</Badge>;
+      case "overdue":
+        return <Badge colorScheme="red">Overdue</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
-  const handleFileUpload = () => {
-    toast.success("File uploaded successfully");
-  };
-
-  const handlePaymentUpdate = () => {
-    toast.success("Payment information updated");
-  };
-
-  const handleTransportUpdate = () => {
-    toast.success("Transportation information updated");
+  const handleDownloadInvoice = () => {
+    toast.info(`Downloading invoice ${payment.invoiceNumber}`);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to="/payments">
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h2 className="text-2xl font-bold">Payment #{payment.slNo}</h2>
-          <p className="text-muted-foreground">{payment.description}</p>
-        </div>
-      </div>
+    <Box gap={6}>
+      <Flex align="center" gap={4} mb={6}>
+        <Button variant="ghost" onClick={onBack}>
+          <ArrowLeft style={{ marginRight: '8px', width: '16px', height: '16px' }} />
+          Back to Payments
+        </Button>
+        <Heading size="lg">Payment Details</Heading>
+      </Flex>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="details">Payment Details</TabsTrigger>
-          <TabsTrigger value="transportation">Transportation</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="details" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Information</CardTitle>
-              <CardDescription>Details about the payment and vendor</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Project</h3>
-                    <p>{payment.projectName}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Vendor</h3>
-                    <p>{payment.companyName}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">PO Reference</h3>
-                    <p>{payment.poReference || "N/A"}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">PO Date</h3>
-                    <p>{payment.poDate || "N/A"}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Account Number</h3>
-                    <p>{payment.accountNo}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">IFSC Code</h3>
-                    <p>{payment.ifscCode}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Branch/Bank</h3>
-                    <p>{payment.branchBank}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Priority</h3>
-                    <p>{payment.priority || "Normal"}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="font-medium">Payment Status</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-muted-foreground text-sm">Total Amount</div>
-                      <div className="text-xl font-bold">₹{payment.totalAmount.toLocaleString()}</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-muted-foreground text-sm">Paid Amount</div>
-                      <div className="text-xl font-bold">₹{payment.paid.toLocaleString()}</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-muted-foreground text-sm">Payable Amount</div>
-                      <div className="text-xl font-bold">₹{payment.payableAmount.toLocaleString()}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Current Status:</span>
-                  {getPaymentStatusBadge(payment.paymentStatus)}
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button onClick={handlePaymentUpdate}>Update Payment</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="transportation" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transportation Details</CardTitle>
-              <CardDescription>Track the shipping status of materials</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Current Status:</span>
-                  {getTransportStatusBadge(payment.transportationStatus)}
-                </div>
-                
-                <TransportationStatusTracker status={payment.transportInfo.currentStatus} updates={payment.transportInfo.updates} />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Carrier</h3>
-                      <p>{payment.transportInfo.carrier || "Not assigned"}</p>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Tracking Number</h3>
-                      <p>{payment.transportInfo.trackingNumber || "Not available"}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Estimated Delivery</h3>
-                      <p>{payment.transportInfo.estimatedDelivery || "Not available"}</p>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Current Status</h3>
-                      <p>{payment.transportInfo.currentStatus}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button onClick={handleTransportUpdate}>Update Transportation</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="documents" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documents</CardTitle>
-              <CardDescription>Invoices, Purchase Orders, and Chalans</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {payment.documents.length > 0 ? (
-                  <div className="space-y-2">
-                    {payment.documents.map((doc, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 border rounded-md">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">{doc.name}</p>
-                            <p className="text-xs text-muted-foreground">Uploaded on {doc.uploadedAt}</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">View</Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No documents uploaded yet
-                  </div>
-                )}
-                
-                <Button onClick={handleFileUpload} className="w-full">
-                  <FileUp className="mr-2 h-4 w-4" />
-                  Upload New Document
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Information</CardTitle>
+          <CardDescription>Details about this payment</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabList>
+              <Tab value="details">Details</Tab>
+              <Tab value="notes">Notes</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel value="details">
+                <Box gap={4}>
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Invoice Number:</Text>
+                    <Text>{payment.invoiceNumber}</Text>
+                  </Flex>
+                  <Separator />
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Vendor:</Text>
+                    <Text>{payment.vendor}</Text>
+                  </Flex>
+                  <Separator />
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Project:</Text>
+                    <Text>{payment.project}</Text>
+                  </Flex>
+                  <Separator />
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Amount:</Text>
+                    <Text>₹{payment.amount.toLocaleString()}</Text>
+                  </Flex>
+                  <Separator />
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Payment Date:</Text>
+                    <Text>{payment.paymentDate}</Text>
+                  </Flex>
+                  <Separator />
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Due Date:</Text>
+                    <Text>{payment.dueDate}</Text>
+                  </Flex>
+                  <Separator />
+                  <Flex justify="space-between">
+                    <Text fontWeight="medium">Status:</Text>
+                    <Text>{getStatusBadge(payment.status)}</Text>
+                  </Flex>
+                </Box>
+              </TabPanel>
+              <TabPanel value="notes">
+                <Box>
+                  <Text>{payment.notes}</Text>
+                </Box>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Invoice File</CardTitle>
+          <CardDescription>Download the invoice file for this payment</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Flex align="center" justify="space-between">
+            <Flex align="center" gap={2}>
+              <FileText style={{ width: '16px', height: '16px' }} />
+              <Text fontWeight="medium">{payment.invoiceFile}</Text>
+            </Flex>
+            <Button onClick={handleDownloadInvoice}>
+              <Download style={{ marginRight: '8px', width: '16px', height: '16px' }} />
+              Download Invoice
+            </Button>
+          </Flex>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

@@ -1,17 +1,17 @@
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { UserRole } from "../types/teamTypes";
+import { Box, Flex } from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Label } from "@/components/chakra/Label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
+import { toast } from "@/hooks/use-toast";
 
 interface AddTeamMemberFormProps {
-  onSuccess: () => void;
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
 }
 
-const AddTeamMemberForm = ({ onSuccess }: AddTeamMemberFormProps) => {
+const AddTeamMemberForm = ({ onSubmit, onCancel }: AddTeamMemberFormProps) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,11 +48,11 @@ const AddTeamMemberForm = ({ onSuccess }: AddTeamMemberFormProps) => {
 
     console.log("Adding team member:", formData);
     toast.success("Team member added successfully");
-    onSuccess();
+    onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Box as="form" onSubmit={handleSubmit} gap={4}>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name *</Label>
@@ -102,12 +102,15 @@ const AddTeamMemberForm = ({ onSuccess }: AddTeamMemberFormProps) => {
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
+      <Flex gap={4} justify="flex-end">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button type="submit">
           Add Team Member
         </Button>
-      </div>
-    </form>
+      </Flex>
+    </Box>
   );
 };
 

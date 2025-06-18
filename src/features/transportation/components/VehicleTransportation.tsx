@@ -1,10 +1,12 @@
-
 import { useState, useEffect } from "react";
-import { Input } from "@/components/chakra/Input";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
 import { Badge } from "@/components/chakra/Badge";
-import { Search, Filter } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
+import { Search, Filter, Plus, Eye, Edit, MapPin } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const generateVehicleRequests = () => {
@@ -121,12 +123,13 @@ const VehicleTransportation = () => {
   const [requests, setRequests] = useState<any[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     const allRequests = generateVehicleRequests();
     setRequests(allRequests);
     filterRequests(allRequests);
-  }, [searchQuery]);
+  }, [searchQuery, statusFilter]);
 
   const filterRequests = (requests: any[]) => {
     if (!searchQuery) {
@@ -162,29 +165,24 @@ const VehicleTransportation = () => {
     }
   };
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return <Badge colorScheme="red">High</Badge>;
-      case "Medium":
-        return <Badge colorScheme="orange">Medium</Badge>;
-      case "Low":
-        return <Badge colorScheme="gray">Low</Badge>;
-      default:
-        return <Badge colorScheme="gray">Normal</Badge>;
-    }
+  const handleAddRequest = () => {
+    toast.info("Add vehicle request functionality will be implemented here");
   };
 
-  const handleViewDetails = (requestId: string) => {
-    toast({ title: `Vehicle request details for ${requestId} will be shown here` });
+  const handleViewRequest = (requestId: string) => {
+    toast.info(`Viewing vehicle request ${requestId}`);
   };
 
-  const handleAssignVehicle = (requestId: string) => {
-    toast({ title: `Vehicle assignment for ${requestId} will be handled here` });
+  const handleEditRequest = (requestId: string) => {
+    toast.info(`Editing vehicle request ${requestId}`);
+  };
+
+  const handleTrackVehicle = (requestId: string) => {
+    toast.info(`Tracking vehicle for request ${requestId}`);
   };
 
   return (
-    <div className="space-y-6">
+    <Box gap={6}>
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -198,6 +196,10 @@ const VehicleTransportation = () => {
         <Button variant="outline">
           <Filter className="mr-2 h-4 w-4" />
           Filters
+        </Button>
+        <Button variant="outline">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Request
         </Button>
       </div>
       
@@ -243,7 +245,7 @@ const VehicleTransportation = () => {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => handleViewDetails(request.id)}
+                      onClick={() => handleViewRequest(request.id)}
                     >
                       View
                     </Button>
@@ -251,11 +253,18 @@ const VehicleTransportation = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleAssignVehicle(request.id)}
+                        onClick={() => handleEditRequest(request.id)}
                       >
-                        Assign
+                        Edit
                       </Button>
                     )}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleTrackVehicle(request.id)}
+                    >
+                      Track
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -263,7 +272,7 @@ const VehicleTransportation = () => {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </Box>
   );
 };
 
