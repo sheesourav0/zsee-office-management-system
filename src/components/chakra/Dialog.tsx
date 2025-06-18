@@ -1,6 +1,6 @@
 
 import {
-  DialogRoot,
+  Dialog as ChakraDialog,
   DialogContent as ChakraDialogContent,
   DialogHeader as ChakraDialogHeader,
   DialogBody as ChakraDialogBody,
@@ -21,12 +21,12 @@ export interface DialogProps {
 export const Dialog = forwardRef<HTMLDivElement, DialogProps>(
   ({ open, onOpenChange, children, ...props }, ref) => {
     return (
-      <DialogRoot open={open} onOpenChange={({ open }) => onOpenChange?.(open)} {...props}>
+      <ChakraDialog.Root open={open} onOpenChange={({ open }) => onOpenChange?.(open)} {...props}>
         <DialogBackdrop />
         <ChakraDialogContent ref={ref}>
           {children}
         </ChakraDialogContent>
-      </DialogRoot>
+      </ChakraDialog.Root>
     );
   }
 );

@@ -1,7 +1,10 @@
 
 import { 
   Select as ChakraSelect,
-  createListCollection
+  SelectContent as ChakraSelectContent,
+  SelectItem as ChakraSelectItem,
+  SelectTrigger as ChakraSelectTrigger,
+  SelectValueText
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
@@ -10,28 +13,23 @@ export interface SelectProps {
   placeholder?: string;
   children?: ReactNode;
   value?: string;
+  defaultValue?: string;
   className?: string;
   [key: string]: any;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ onValueChange, children, value, placeholder, ...props }, ref) => {
-    // For simple cases, we'll use a native select for compatibility
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (onValueChange) onValueChange(e.target.value);
-    };
-
+  ({ onValueChange, children, value, defaultValue, placeholder, ...props }, ref) => {
     return (
-      <select 
-        ref={ref} 
-        value={value} 
-        onChange={handleChange}
-        className="chakra-select"
+      <ChakraSelect.Root
+        ref={ref}
+        value={value}
+        defaultValue={defaultValue}
+        onValueChange={({ value }) => onValueChange?.(value)}
         {...props}
       >
-        {placeholder && <option value="" disabled>{placeholder}</option>}
         {children}
-      </select>
+      </ChakraSelect.Root>
     );
   }
 );
@@ -39,22 +37,25 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 export interface SelectTriggerProps {
   children: ReactNode;
   className?: string;
-  width?: string;
-  w?: string;
   [key: string]: any;
 }
 
-export const SelectTrigger = ({ children, className, width, w, ...props }: SelectTriggerProps) => {
-  const style = width || w ? { width: width || w } : {};
-  return <div className={className} style={style} {...props}>{children}</div>;
-};
+export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
+  ({ children, ...props }, ref) => {
+    return (
+      <ChakraSelect.Trigger ref={ref} {...props}>
+        {children}
+      </ChakraSelect.Trigger>
+    );
+  }
+);
 
 export interface SelectValueProps {
   placeholder?: string;
 }
 
 export const SelectValue = ({ placeholder }: SelectValueProps) => {
-  return <span>{placeholder}</span>;
+  return <SelectValueText placeholder={placeholder} />;
 };
 
 export interface SelectContentProps {
@@ -62,7 +63,7 @@ export interface SelectContentProps {
 }
 
 export const SelectContent = ({ children }: SelectContentProps) => {
-  return <>{children}</>;
+  return <ChakraSelect.Content>{children}</ChakraSelect.Content>;
 };
 
 export interface SelectItemProps {
@@ -71,7 +72,11 @@ export interface SelectItemProps {
 }
 
 export const SelectItem = ({ value, children }: SelectItemProps) => {
-  return <option value={value}>{children}</option>;
+  return <ChakraSelect.Item item={value}>{children}</ChakraSelect.Item>;
 };
 
 Select.displayName = "Select";
+SelectTrigger.displayName = "SelectTrigger";
+SelectValue.displayName = "SelectValue";
+SelectContent.displayName = "SelectContent";
+SelectItem.displayName = "SelectItem";

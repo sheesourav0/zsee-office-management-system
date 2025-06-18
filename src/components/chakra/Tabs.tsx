@@ -16,7 +16,13 @@ export interface CustomTabsProps {
 export const Tabs = forwardRef<HTMLDivElement, CustomTabsProps>(
   ({ value, onValueChange, defaultValue, children, ...props }, ref) => {
     return (
-      <ChakraTabs.Root ref={ref} value={value} onValueChange={onValueChange} defaultValue={defaultValue} {...props}>
+      <ChakraTabs.Root
+        ref={ref}
+        value={value}
+        onValueChange={({ value }) => onValueChange?.(value)}
+        defaultValue={defaultValue}
+        {...props}
+      >
         {children}
       </ChakraTabs.Root>
     );

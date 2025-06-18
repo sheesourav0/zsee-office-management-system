@@ -5,22 +5,17 @@ import { forwardRef } from 'react';
 interface CheckboxProps {
   children?: React.ReactNode;
   checked?: boolean;
-  onChange?: (checked: boolean) => void;
+  onCheckedChange?: (checked: boolean) => void;
   [key: string]: any;
 }
 
 export const Checkbox = forwardRef<HTMLLabelElement, CheckboxProps>(
-  ({ children, checked, onChange, ...props }, ref) => {
-    const handleChange = (details: any) => {
-      const isChecked = details.checked;
-      if (onChange) onChange(isChecked);
-    };
-
+  ({ children, checked, onCheckedChange, ...props }, ref) => {
     return (
       <ChakraCheckbox.Root
         ref={ref}
         checked={checked}
-        onCheckedChange={handleChange}
+        onCheckedChange={({ checked }) => onCheckedChange?.(checked)}
         {...props}
       >
         <ChakraCheckbox.HiddenInput />
