@@ -1,11 +1,11 @@
 
 import {
   DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogBody,
-  DialogTitle,
+  DialogContent as ChakraDialogContent,
+  DialogHeader as ChakraDialogHeader,
+  DialogFooter as ChakraDialogFooter,
+  DialogBody as ChakraDialogBody,
+  DialogTitle as ChakraDialogTitle,
   DialogBackdrop,
   DialogCloseTrigger,
 } from "@chakra-ui/react";
@@ -24,9 +24,9 @@ export const Dialog = forwardRef<HTMLDivElement, DialogProps>(
     return (
       <DialogRoot open={open} onOpenChange={({ open }) => onOpenChange?.(open)} {...props}>
         <DialogBackdrop />
-        <DialogContent ref={ref}>
+        <ChakraDialogContent ref={ref}>
           {children}
-        </DialogContent>
+        </ChakraDialogContent>
       </DialogRoot>
     );
   }
@@ -38,10 +38,10 @@ export const DialogContent = forwardRef<HTMLDivElement, {
 }>(
   ({ children, className, ...props }, ref) => {
     return (
-      <DialogContent ref={ref} className={className} {...props}>
+      <ChakraDialogContent ref={ref} className={className} {...props}>
         <DialogCloseTrigger />
         {children}
-      </DialogContent>
+      </ChakraDialogContent>
     );
   }
 );
@@ -49,25 +49,25 @@ export const DialogContent = forwardRef<HTMLDivElement, {
 export const DialogHeader = forwardRef<HTMLDivElement, { children: ReactNode }>(
   ({ children, ...props }, ref) => {
     return (
-      <DialogHeader ref={ref} {...props}>
+      <ChakraDialogHeader ref={ref} {...props}>
         {children}
-      </DialogHeader>
+      </ChakraDialogHeader>
     );
   }
 );
 
 export const DialogTitle = forwardRef<HTMLHeadingElement, { children: ReactNode }>(
   ({ children }, ref) => {
-    return <DialogTitle ref={ref}>{children}</DialogTitle>;
+    return <ChakraDialogTitle ref={ref}>{children}</ChakraDialogTitle>;
   }
 );
 
 export const DialogBody = forwardRef<HTMLDivElement, { children: ReactNode }>(
   ({ children, ...props }, ref) => {
     return (
-      <DialogBody ref={ref} {...props}>
+      <ChakraDialogBody ref={ref} {...props}>
         {children}
-      </DialogBody>
+      </ChakraDialogBody>
     );
   }
 );

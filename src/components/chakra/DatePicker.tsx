@@ -6,17 +6,25 @@ export interface DatePickerProps {
   selected?: Date;
   onSelect?: (date: Date | undefined) => void;
   defaultValue?: Date;
+  placeholder?: string;
+  // Legacy props for backward compatibility
+  date?: Date;
+  setDate?: (date: Date | undefined) => void;
 }
 
 export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
-  ({ selected, onSelect, defaultValue, ...props }, ref) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const date = e.target.value ? new Date(e.target.value) : undefined;
-      if (onSelect) onSelect(date);
+  ({ selected, onSelect, defaultValue, placeholder, date, setDate, ...props }, ref) => {
+    // Use legacy props if provided for backward compatibility
+    const currentDate = selected || date;
+    const handleChange = onSelect || setDate;
+    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const dateValue = e.target.value ? new Date(e.target.value) : undefined;
+      if (handleChange) handleChange(dateValue);
     };
 
-    const value = selected 
-      ? selected.toISOString().split('T')[0]
+    const value = currentDate 
+      ? currentDate.toISOString().split('T')[0]
       : defaultValue 
         ? defaultValue.toISOString().split('T')[0]
         : '';
@@ -26,7 +34,8 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         ref={ref}
         type="date"
         value={value}
-        onChange={handleChange}
+        onChange={handleInputChange}
+        placeholder={placeholder}
         {...props}
       />
     );

@@ -10,7 +10,7 @@ export interface AvatarProps {
   [key: string]: any;
 }
 
-export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
+export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
   (props, ref) => {
     return (
       <ChakraAvatar.Root ref={ref} {...props}>
