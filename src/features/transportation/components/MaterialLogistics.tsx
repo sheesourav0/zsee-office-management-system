@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/chakra/Input";
+import { Button } from "@/components/chakra/Button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
 import { Search, Filter } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const generateMaterialShipments = () => {
   return [
@@ -139,35 +139,35 @@ const MaterialLogistics = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "delivered":
-        return <Badge className="transport-delivered">Delivered</Badge>;
+        return <Badge colorScheme="green">Delivered</Badge>;
       case "in-transit":
-        return <Badge className="transport-in-transit">In Transit</Badge>;
+        return <Badge colorScheme="blue">In Transit</Badge>;
       case "pending":
-        return <Badge className="transport-pending">Pending</Badge>;
+        return <Badge colorScheme="yellow">Pending</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge colorScheme="gray">Unknown</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "High":
-        return <Badge variant="destructive">High</Badge>;
+        return <Badge colorScheme="red">High</Badge>;
       case "Medium":
-        return <Badge variant="secondary">Medium</Badge>;
+        return <Badge colorScheme="orange">Medium</Badge>;
       case "Low":
-        return <Badge variant="outline">Low</Badge>;
+        return <Badge colorScheme="gray">Low</Badge>;
       default:
-        return <Badge variant="outline">Normal</Badge>;
+        return <Badge colorScheme="gray">Normal</Badge>;
     }
   };
 
   const handleTrackShipment = (trackingNo: string) => {
     if (!trackingNo) {
-      toast.error("No tracking number available");
+      toast({ title: "No tracking number available", variant: "destructive" });
       return;
     }
-    toast.info(`Tracking information for ${trackingNo} will be shown here`);
+    toast({ title: `Tracking information for ${trackingNo} will be shown here` });
   };
 
   return (

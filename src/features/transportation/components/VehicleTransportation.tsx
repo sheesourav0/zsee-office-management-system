@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/chakra/Input";
+import { Button } from "@/components/chakra/Button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
 import { Search, Filter } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const generateVehicleRequests = () => {
   return [
@@ -150,37 +150,37 @@ const VehicleTransportation = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="transport-delivered">Completed</Badge>;
+        return <Badge colorScheme="green">Completed</Badge>;
       case "in-transit":
-        return <Badge className="transport-in-transit">In Transit</Badge>;
+        return <Badge colorScheme="blue">In Transit</Badge>;
       case "assigned":
-        return <Badge className="bg-blue-500 text-white">Assigned</Badge>;
+        return <Badge colorScheme="purple">Assigned</Badge>;
       case "pending":
-        return <Badge className="transport-pending">Pending</Badge>;
+        return <Badge colorScheme="yellow">Pending</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge colorScheme="gray">Unknown</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "High":
-        return <Badge variant="destructive">High</Badge>;
+        return <Badge colorScheme="red">High</Badge>;
       case "Medium":
-        return <Badge variant="secondary">Medium</Badge>;
+        return <Badge colorScheme="orange">Medium</Badge>;
       case "Low":
-        return <Badge variant="outline">Low</Badge>;
+        return <Badge colorScheme="gray">Low</Badge>;
       default:
-        return <Badge variant="outline">Normal</Badge>;
+        return <Badge colorScheme="gray">Normal</Badge>;
     }
   };
 
   const handleViewDetails = (requestId: string) => {
-    toast.info(`Vehicle request details for ${requestId} will be shown here`);
+    toast({ title: `Vehicle request details for ${requestId} will be shown here` });
   };
 
   const handleAssignVehicle = (requestId: string) => {
-    toast.info(`Vehicle assignment for ${requestId} will be handled here`);
+    toast({ title: `Vehicle assignment for ${requestId} will be handled here` });
   };
 
   return (

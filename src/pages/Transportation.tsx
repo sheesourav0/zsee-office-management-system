@@ -5,7 +5,7 @@ import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
 import { Plus, Package, Truck } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import MaterialLogistics from "@/features/transportation/components/MaterialLogistics";
 import VehicleTransportation from "@/features/transportation/components/VehicleTransportation";
 
@@ -13,11 +13,11 @@ const Transportation = () => {
   const [activeTab, setActiveTab] = useState("0");
 
   const handleAddMaterialShipment = () => {
-    toast.info("Add material shipment functionality will be implemented here");
+    toast({ title: "Add material shipment functionality will be implemented here" });
   };
 
   const handleAddVehicleRequest = () => {
-    toast.info("Add vehicle request functionality will be implemented here");
+    toast({ title: "Add vehicle request functionality will be implemented here" });
   };
 
   return (
