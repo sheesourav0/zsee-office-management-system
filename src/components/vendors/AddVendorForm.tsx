@@ -29,9 +29,14 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
       email: "",
       phone: "",
       address: "",
+      city: "",
+      state: "",
+      pincode: "",
       category: "",
       description: "",
+      gst: "",
       bankName: "",
+      branchName: "",
       accountHolderName: "",
       bankAccountNumber: "",
       ifscCode: "",
@@ -43,7 +48,7 @@ const AddVendorForm = ({ onSubmit, onCancel }: AddVendorFormProps) => {
   };
 
   return (
-    <Card className="w-full">
+    <Card w="full">
       <CardHeader>
         <CardTitle>Add New Vendor</CardTitle>
       </CardHeader>

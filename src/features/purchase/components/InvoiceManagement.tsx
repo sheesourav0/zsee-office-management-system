@@ -1,115 +1,81 @@
 import { useState, useEffect } from "react";
-import { Input } from "@/components/chakra/Input";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
 import { Badge } from "@/components/chakra/Badge";
-import { Search, Filter, Eye, Download } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/chakra/Select";
+import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-interface Invoice {
-  id: string;
-  poNumber: string;
-  vendorName: string;
-  projectName: string;
-  invoiceDate: string;
-  dueDate: string;
-  amount: number;
-  taxAmount: number;
-  totalAmount: number;
-  status: string;
-  paymentDate: string;
-  paymentMethod: string;
-  description: string;
-  currency: string;
-  paymentTerms: string;
-}
 
 const generateInvoices = () => {
   return [
     {
-      id: "INV-2023-001",
+      id: "INV001",
+      invoiceNumber: "INV-2023-001",
       poNumber: "PO-2023-001",
       vendorName: "Agmatic Technologies",
-      projectName: "Amni WTP",
-      invoiceDate: "2023-04-01",
-      dueDate: "2023-04-30",
-      amount: 125000,
-      taxAmount: 22500,
-      totalAmount: 147500,
+      invoiceDate: "2023-01-15",
+      dueDate: "2023-02-15",
+      amount: 50000,
       status: "paid",
-      paymentDate: "2023-04-28",
-      paymentMethod: "Bank Transfer",
-      description: "Gateway module, PC and Accessories",
-      currency: "INR",
-      paymentTerms: "Net 30"
+      items: [
+        { description: "Gateway module", quantity: 5, unitPrice: 5000 },
+        { description: "PC and Accessories", quantity: 1, unitPrice: 25000 }
+      ]
     },
     {
-      id: "INV-2023-002",
+      id: "INV002",
+      invoiceNumber: "INV-2023-002",
       poNumber: "PO-2023-002",
       vendorName: "Ligths Technologies",
-      projectName: "Amni WTP",
-      invoiceDate: "2023-04-05",
-      dueDate: "2023-05-05",
-      amount: 75000,
-      taxAmount: 13500,
-      totalAmount: 88500,
+      invoiceDate: "2023-02-01",
+      dueDate: "2023-03-01",
+      amount: 25000,
       status: "pending",
-      paymentDate: "",
-      paymentMethod: "",
-      description: "Lithium Ion Battery (24VDC)",
-      currency: "INR",
-      paymentTerms: "Net 30"
+      items: [
+        { description: "Lithium Ion Battery (24VDC)", quantity: 10, unitPrice: 2500 }
+      ]
     },
     {
-      id: "INV-2023-003",
+      id: "INV003",
+      invoiceNumber: "INV-2023-003",
       poNumber: "PO-2023-003",
       vendorName: "BMP SYSTEMS",
-      projectName: "Sample Testing",
-      invoiceDate: "2023-03-15",
-      dueDate: "2023-04-14",
-      amount: 45000,
-      taxAmount: 8100,
-      totalAmount: 53100,
-      status: "overdue",
-      paymentDate: "",
-      paymentMethod: "",
-      description: "Control Valve for Sample Testing",
-      currency: "INR",
-      paymentTerms: "Net 30"
+      invoiceDate: "2023-02-15",
+      dueDate: "2023-03-15",
+      amount: 12000,
+      status: "paid",
+      items: [
+        { description: "Control Valve for Sample Testing", quantity: 3, unitPrice: 4000 }
+      ]
     },
     {
-      id: "INV-2023-004",
+      id: "INV004",
+      invoiceNumber: "INV-2023-004",
       poNumber: "PO-2023-004",
       vendorName: "P.R.S ENTERPRISE",
-      projectName: "YACHULI",
-      invoiceDate: "2023-03-10",
-      dueDate: "2023-04-09",
-      amount: 85000,
-      taxAmount: 15300,
-      totalAmount: 100300,
-      status: "paid",
-      paymentDate: "2023-04-07",
-      paymentMethod: "Cheque",
-      description: "Panel Internal Instruments",
-      currency: "INR",
-      paymentTerms: "Net 30"
+      invoiceDate: "2023-03-01",
+      dueDate: "2023-03-31",
+      amount: 36000,
+      status: "overdue",
+      items: [
+        { description: "Panel Internal Instruments", quantity: 8, unitPrice: 4500 }
+      ]
     },
     {
-      id: "INV-2023-005",
+      id: "INV005",
+      invoiceNumber: "INV-2023-005",
       poNumber: "PO-2023-005",
       vendorName: "King Longkai",
-      projectName: "Piyong IoT",
-      invoiceDate: "2023-04-12",
-      dueDate: "2023-05-12",
-      amount: 35000,
-      taxAmount: 6300,
-      totalAmount: 41300,
+      invoiceDate: "2023-03-15",
+      dueDate: "2023-04-15",
+      amount: 7500,
       status: "draft",
-      paymentDate: "",
-      paymentMethod: "",
-      description: "IoT Sensors and Controllers",
-      currency: "INR",
-      paymentTerms: "Net 30"
+      items: [
+        { description: "Marxian's Equipment Return", quantity: 1, unitPrice: 7500 }
+      ]
     }
   ];
 };
@@ -127,24 +93,22 @@ const InvoiceManagement = () => {
   }, [searchQuery, statusFilter]);
 
   const filterInvoices = (invoices: any[]) => {
-    let filtered = invoices;
+    let result = [...invoices];
+    
+    if (statusFilter !== "all") {
+      result = result.filter(invoice => invoice.status === statusFilter);
+    }
     
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(invoice => 
-        invoice.id.toLowerCase().includes(query) ||
-        invoice.poNumber.toLowerCase().includes(query) ||
+      result = result.filter(invoice => 
+        invoice.invoiceNumber.toLowerCase().includes(query) ||
         invoice.vendorName.toLowerCase().includes(query) ||
-        invoice.projectName.toLowerCase().includes(query) ||
-        invoice.description.toLowerCase().includes(query)
+        invoice.poNumber.toLowerCase().includes(query)
       );
     }
     
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(invoice => invoice.status === statusFilter);
-    }
-    
-    setFilteredInvoices(filtered);
+    setFilteredInvoices(result);
   };
 
   const getStatusBadge = (status: string) => {
@@ -158,116 +122,122 @@ const InvoiceManagement = () => {
       case "draft":
         return <Badge colorScheme="gray">Draft</Badge>;
       default:
-        return <Badge colorScheme="gray">Unknown</Badge>;
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    }).format(amount);
+  const handleViewInvoice = (invoiceId: string) => {
+    toast.success(`Viewing invoice ${invoiceId}`);
   };
 
-  const handleViewInvoice = (invoiceId: string) => {
-    toast({ title: `Viewing invoice ${invoiceId}` });
+  const handleEditInvoice = (invoiceId: string) => {
+    toast.success(`Editing invoice ${invoiceId}`);
+  };
+
+  const handleDeleteInvoice = (invoiceId: string) => {
+    toast.success(`Deleting invoice ${invoiceId}`);
   };
 
   const handleDownloadInvoice = (invoiceId: string) => {
-    toast({ title: `Downloading invoice ${invoiceId}` });
-  };
-
-  const handleMarkAsPaid = (invoiceId: string) => {
-    toast({ title: `Marking invoice ${invoiceId} as paid` });
+    toast.success(`Downloading invoice ${invoiceId}`);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+    <Box gap={6}>
+      <Flex 
+        direction={{ base: "column", md: "row" }} 
+        gap={4}
+        mb={4}
+      >
+        <Box position="relative" flex={1}>
+          <Search style={{ position: 'absolute', left: '8px', top: '10px', width: '16px', height: '16px', color: '#A0AEC0' }} />
           <Input
-            placeholder="Search by invoice ID, PO number, vendor, or project..."
-            className="pl-8"
+            placeholder="Search by invoice number, vendor, or PO number..."
+            paddingLeft="32px"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
+        </Box>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger w="200px">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="paid">Paid</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+          </SelectContent>
+        </Select>
         <Button variant="outline">
-          <Filter className="mr-2 h-4 w-4" />
-          Filters
+          <Filter style={{ marginRight: '8px', width: '16px', height: '16px' }} />
+          More Filters
         </Button>
-      </div>
+      </Flex>
       
-      <div className="rounded-md border">
+      <Box borderWidth={1} borderRadius="md">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice ID</TableHead>
+              <TableHead>Invoice #</TableHead>
               <TableHead>PO Number</TableHead>
               <TableHead>Vendor</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Invoice Date</TableHead>
+              <TableHead>Date</TableHead>
               <TableHead>Due Date</TableHead>
               <TableHead>Amount</TableHead>
-              <TableHead>Tax</TableHead>
-              <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead textAlign="right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredInvoices.map((invoice) => (
               <TableRow key={invoice.id}>
-                <TableCell className="font-medium">{invoice.id}</TableCell>
+                <TableCell fontWeight="medium">{invoice.invoiceNumber}</TableCell>
                 <TableCell>{invoice.poNumber}</TableCell>
                 <TableCell>{invoice.vendorName}</TableCell>
-                <TableCell>{invoice.projectName}</TableCell>
-                <TableCell>{new Date(invoice.invoiceDate).toLocaleDateString()}</TableCell>
-                <TableCell>{new Date(invoice.dueDate).toLocaleDateString()}</TableCell>
-                <TableCell>{formatCurrency(invoice.amount)}</TableCell>
-                <TableCell>{formatCurrency(invoice.taxAmount)}</TableCell>
-                <TableCell className="font-medium">{formatCurrency(invoice.totalAmount)}</TableCell>
+                <TableCell>{invoice.invoiceDate}</TableCell>
+                <TableCell>{invoice.dueDate}</TableCell>
+                <TableCell>₹{invoice.amount.toLocaleString()}</TableCell>
                 <TableCell>{getStatusBadge(invoice.status)}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
+                <TableCell textAlign="right">
+                  <Flex gap={1} justify="flex-end">
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleViewInvoice(invoice.id)}
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye style={{ width: '16px', height: '16px' }} />
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleDownloadInvoice(invoice.id)}
                     >
-                      <Download className="h-4 w-4" />
+                      <Download style={{ width: '16px', height: '16px' }} />
                     </Button>
-                    {invoice.status === "pending" && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleMarkAsPaid(invoice.id)}
-                      >
-                        Mark Paid
-                      </Button>
-                    )}
-                  </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditInvoice(invoice.id)}
+                    >
+                      <Edit style={{ width: '16px', height: '16px' }} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDeleteInvoice(invoice.id)}
+                    >
+                      <Trash2 style={{ width: '16px', height: '16px' }} />
+                    </Button>
+                  </Flex>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </div>
-
-      {filteredInvoices.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No invoices found</p>
-        </div>
-      )}
-    </div>
+      </Box>
+    </Box>
   );
 };
 

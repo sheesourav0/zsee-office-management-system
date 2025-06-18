@@ -1,14 +1,14 @@
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
+import { Input } from "@/components/chakra/Input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
 import { Plus, Search } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import AddVendorForm from "@/components/vendors/AddVendorForm";
 
 // Mock vendor data
@@ -115,9 +115,9 @@ const Vendors = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+        return <Badge colorScheme="green">Active</Badge>;
       case "inactive":
-        return <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>;
+        return <Badge colorScheme="gray">Inactive</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
@@ -126,13 +126,13 @@ const Vendors = () => {
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case "supplier":
-        return <Badge className="bg-blue-100 text-blue-800">Supplier</Badge>;
+        return <Badge colorScheme="blue">Supplier</Badge>;
       case "contractor":
-        return <Badge className="bg-purple-100 text-purple-800">Contractor</Badge>;
+        return <Badge colorScheme="purple">Contractor</Badge>;
       case "consultant":
-        return <Badge className="bg-yellow-100 text-yellow-800">Consultant</Badge>;
+        return <Badge colorScheme="yellow">Consultant</Badge>;
       case "service-provider":
-        return <Badge className="bg-indigo-100 text-indigo-800">Service Provider</Badge>;
+        return <Badge colorScheme="cyan">Service Provider</Badge>;
       default:
         return <Badge variant="outline">Other</Badge>;
     }
@@ -145,87 +145,103 @@ const Vendors = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Vendors</h1>
+    <Box gap={6}>
+      <Flex 
+        direction={{ base: "column", md: "row" }} 
+        align={{ md: "center" }} 
+        justify={{ md: "space-between" }} 
+        gap={4}
+        mb={6}
+      >
+        <Heading size="lg">Vendors</Heading>
         <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus style={{ marginRight: '8px', width: '16px', height: '16px' }} />
           Add Vendor
         </Button>
-      </div>
+      </Flex>
 
       <Card>
         <CardHeader>
           <CardTitle>Vendor Management</CardTitle>
           <CardDescription>View and manage all vendors</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="inactive">Inactive</TabsTrigger>
-              </TabsList>
-            </Tabs>
+        <CardContent>
+          <Box gap={6}>
+            <Flex 
+              direction={{ base: "column", md: "row" }} 
+              align={{ md: "center" }} 
+              justify={{ md: "space-between" }} 
+              gap={4}
+            >
+              <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                <TabList>
+                  <Tab value="all">All</Tab>
+                  <Tab value="active">Active</Tab>
+                  <Tab value="inactive">Inactive</Tab>
+                </TabList>
+              </Tabs>
+              
+              <Box position="relative" w={{ base: "full", md: "64" }}>
+                <Search style={{ position: 'absolute', left: '8px', top: '10px', width: '16px', height: '16px', color: '#A0AEC0' }} />
+                <Input
+                  placeholder="Search vendors..."
+                  paddingLeft="32px"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </Box>
+            </Flex>
             
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search vendors..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Vendor Name</TableHead>
-                  <TableHead>Contact Person</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Total Payments</TableHead>
-                  <TableHead>Pending</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredVendors.map((vendor) => (
-                  <TableRow key={vendor.id}>
-                    <TableCell className="font-medium">{vendor.name}</TableCell>
-                    <TableCell>{vendor.contactPerson}</TableCell>
-                    <TableCell>{vendor.email}</TableCell>
-                    <TableCell>{vendor.phone}</TableCell>
-                    <TableCell>{getCategoryBadge(vendor.category)}</TableCell>
-                    <TableCell>{getStatusBadge(vendor.status)}</TableCell>
-                    <TableCell>₹{vendor.totalPayments.toLocaleString()}</TableCell>
-                    <TableCell className={vendor.pendingPayments > 0 ? "text-red-600 font-medium" : "text-green-600"}>
-                      {vendor.pendingPayments > 0 
-                        ? `₹${vendor.pendingPayments.toLocaleString()}`
-                        : "Nil"}
-                    </TableCell>
+            <Box borderWidth={1} borderRadius="md">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Vendor Name</TableHead>
+                    <TableHead>Contact Person</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Total Payments</TableHead>
+                    <TableHead>Pending</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredVendors.map((vendor) => (
+                    <TableRow key={vendor.id}>
+                      <TableCell fontWeight="medium">{vendor.name}</TableCell>
+                      <TableCell>{vendor.contactPerson}</TableCell>
+                      <TableCell>{vendor.email}</TableCell>
+                      <TableCell>{vendor.phone}</TableCell>
+                      <TableCell>{getCategoryBadge(vendor.category)}</TableCell>
+                      <TableCell>{getStatusBadge(vendor.status)}</TableCell>
+                      <TableCell>₹{vendor.totalPayments.toLocaleString()}</TableCell>
+                      <TableCell color={vendor.pendingPayments > 0 ? "red.600" : "green.600"} fontWeight={vendor.pendingPayments > 0 ? "medium" : "normal"}>
+                        {vendor.pendingPayments > 0 
+                          ? `₹${vendor.pendingPayments.toLocaleString()}`
+                          : "Nil"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent maxW="700px" maxH="90vh" overflowY="auto">
           <DialogHeader>
             <DialogTitle>Add New Vendor</DialogTitle>
           </DialogHeader>
-          <AddVendorForm onSuccess={handleAddVendorSuccess} />
+          <AddVendorForm 
+            onSubmit={handleAddVendorSuccess} 
+            onCancel={() => setIsAddDialogOpen(false)} 
+          />
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 
