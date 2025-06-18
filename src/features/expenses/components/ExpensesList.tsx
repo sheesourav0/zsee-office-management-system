@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Table } from '@/components/chakra/Table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/chakra/Table';
 import { Badge } from '@/components/chakra/Badge';
 import { Button } from '@/components/chakra/Button';
 import { Input } from '@/components/chakra/Input';
@@ -114,24 +114,24 @@ const ExpensesList = ({ expenses, onEdit, onDelete }: ExpensesListProps) => {
       </HStack>
 
       <Box overflowX="auto">
-        <Table.Root>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Description</Table.ColumnHeader>
-              <Table.ColumnHeader>Amount</Table.ColumnHeader>
-              <Table.ColumnHeader>Category</Table.ColumnHeader>
-              <Table.ColumnHeader>Date</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Description</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredAndSortedExpenses.map((expense) => (
-              <Table.Row key={expense.id}>
-                <Table.Cell>{expense.description}</Table.Cell>
-                <Table.Cell fontWeight="medium">{formatCurrency(expense.amount)}</Table.Cell>
-                <Table.Cell>{getCategoryBadge(expense.category)}</Table.Cell>
-                <Table.Cell>{new Date(expense.date).toLocaleDateString()}</Table.Cell>
-                <Table.Cell>
+              <TableRow key={expense.id}>
+                <TableCell>{expense.description}</TableCell>
+                <TableCell fontWeight="medium">{formatCurrency(expense.amount)}</TableCell>
+                <TableCell>{getCategoryBadge(expense.category)}</TableCell>
+                <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
+                <TableCell>
                   <HStack gap={2}>
                     <Button
                       size="sm"
@@ -149,11 +149,11 @@ const ExpensesList = ({ expenses, onEdit, onDelete }: ExpensesListProps) => {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </HStack>
-                </Table.Cell>
-              </Table.Row>
+                </TableCell>
+              </TableRow>
             ))}
-          </Table.Body>
-        </Table.Root>
+          </TableBody>
+        </Table>
       </Box>
 
       {filteredAndSortedExpenses.length === 0 && (

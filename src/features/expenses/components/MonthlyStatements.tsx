@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/chakra/Card';
 import { Button } from '@/components/chakra/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/chakra/Select';
-import { Table } from '@/components/chakra/Table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/chakra/Table';
 import { Badge } from '@/components/chakra/Badge';
 import { VStack, HStack, SimpleGrid, Box, Text } from '@chakra-ui/react';
 import { Calendar, Download, FileText, TrendingUp } from 'lucide-react';
@@ -202,26 +202,26 @@ const MonthlyStatements = ({ expenses }: MonthlyStatementsProps) => {
         </CardHeader>
         <CardContent>
           <Box overflowX="auto">
-            <Table.Root>
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>Date</Table.ColumnHeader>
-                  <Table.ColumnHeader>Description</Table.ColumnHeader>
-                  <Table.ColumnHeader>Category</Table.ColumnHeader>
-                  <Table.ColumnHeader>Amount</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {monthlyData.expenses.map((expense) => (
-                  <Table.Row key={expense.id}>
-                    <Table.Cell>{new Date(expense.date).toLocaleDateString()}</Table.Cell>
-                    <Table.Cell>{expense.description}</Table.Cell>
-                    <Table.Cell>{getCategoryBadge(expense.category)}</Table.Cell>
-                    <Table.Cell fontWeight="medium">{formatCurrency(expense.amount)}</Table.Cell>
-                  </Table.Row>
+                  <TableRow key={expense.id}>
+                    <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{expense.description}</TableCell>
+                    <TableCell>{getCategoryBadge(expense.category)}</TableCell>
+                    <TableCell fontWeight="medium">{formatCurrency(expense.amount)}</TableCell>
+                  </TableRow>
                 ))}
-              </Table.Body>
-            </Table.Root>
+              </TableBody>
+            </Table>
           </Box>
 
           {monthlyData.expenses.length === 0 && (
