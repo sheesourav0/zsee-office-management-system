@@ -12,6 +12,32 @@ import ExpenseCalculator from "@/features/expenses/components/ExpenseCalculator"
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
 
+// Mock expenses data for demonstration
+const mockExpenses = [
+  {
+    id: "1",
+    description: "Office supplies",
+    amount: 2500,
+    category: "office",
+    date: "2024-01-15",
+    receipt: "Receipt details here"
+  },
+  {
+    id: "2", 
+    description: "Team lunch",
+    amount: 1200,
+    category: "meals",
+    date: "2024-01-14",
+  },
+  {
+    id: "3",
+    description: "Travel expenses",
+    amount: 5000,
+    category: "travel", 
+    date: "2024-01-13",
+  }
+];
+
 const Expenses = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("project");
@@ -61,7 +87,7 @@ const Expenses = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ExpensesList />
+              <ExpensesList expenses={mockExpenses} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -75,13 +101,13 @@ const Expenses = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ExpensesList />
+              <ExpensesList expenses={mockExpenses} />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="statements" className="space-y-6">
-          <MonthlyStatements />
+          <MonthlyStatements expenses={mockExpenses} />
         </TabsContent>
       </Tabs>
 
