@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,12 +81,12 @@ const EditUserDialog = ({
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>
-        <Tabs.Root defaultValue="account">
-          <Tabs.List>
-            <Tabs.Trigger value="account">Account</Tabs.Trigger>
-            <Tabs.Trigger value="roles">Roles & Policies</Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="account">
+        <Tabs defaultValue="account">
+          <TabsList>
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="roles">Roles & Policies</TabsTrigger>
+          </TabsList>
+          <TabsContent value="account">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -162,8 +163,8 @@ const EditUserDialog = ({
                 </div>
               </form>
             </Form>
-          </Tabs.Content>
-          <Tabs.Content value="roles">
+          </TabsContent>
+          <TabsContent value="roles">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -234,8 +235,8 @@ const EditUserDialog = ({
                 </div>
               </form>
             </Form>
-          </Tabs.Content>
-        </Tabs.Root>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
