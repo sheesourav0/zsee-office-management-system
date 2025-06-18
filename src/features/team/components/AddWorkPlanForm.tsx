@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Box, Flex } from "@chakra-ui/react";
 import { Button } from "@/components/chakra/Button";
@@ -11,6 +12,8 @@ interface AddWorkPlanFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
 }
+
+type WorkPlanPeriod = "daily" | "weekly" | "monthly";
 
 const AddWorkPlanForm = ({ onSubmit, onCancel }: AddWorkPlanFormProps) => {
   const [formData, setFormData] = useState({

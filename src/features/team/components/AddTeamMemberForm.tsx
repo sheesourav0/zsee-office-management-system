@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Box, Flex } from "@chakra-ui/react";
 import { Button } from "@/components/chakra/Button";
@@ -10,6 +11,8 @@ interface AddTeamMemberFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
 }
+
+type UserRole = "administrator" | "admin" | "hr" | "account" | "project-manager" | "project-coordinator" | "team-lead" | "engineer" | "technician" | "helper" | "supervisor" | "sales" | "labor" | "office-boy" | "others";
 
 const AddTeamMemberForm = ({ onSubmit, onCancel }: AddTeamMemberFormProps) => {
   const [formData, setFormData] = useState({

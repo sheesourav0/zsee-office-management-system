@@ -19,8 +19,22 @@ import UserManagementPage from "@/features/users/pages/UserManagementPage";
 import PaymentDetailView from "@/features/payments/components/PaymentDetailView";
 import TeamManagement from "@/pages/TeamManagement";
 import NotFound from "@/pages/NotFound";
+import { useNavigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
+
+const PaymentDetailWrapper = () => {
+  const navigate = useNavigate();
+  // Get payment ID from URL params in a real implementation
+  const paymentId = "1"; // Placeholder
+  
+  return (
+    <PaymentDetailView 
+      paymentId={paymentId} 
+      onBack={() => navigate("/payments")} 
+    />
+  );
+};
 
 const App = () => {
   return (
@@ -34,7 +48,7 @@ const App = () => {
             <Route path="projects" element={<Projects />} />
             <Route path="department-projects" element={<DepartmentProjects />} />
             <Route path="payments" element={<Payments />} />
-            <Route path="payments/:id" element={<PaymentDetailView />} />
+            <Route path="payments/:id" element={<PaymentDetailWrapper />} />
             <Route path="project-billing" element={<ProjectBilling />} />
             <Route path="purchase-billing" element={<PurchaseBilling />} />
             <Route path="transportation" element={<Transportation />} />

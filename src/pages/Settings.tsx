@@ -1,13 +1,13 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Input } from "@/components/chakra/Input";
+import { Textarea } from "@/components/chakra/Textarea";
+import { Switch } from "@/components/chakra/Switch";
+import { Label } from "@/components/chakra/Label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/chakra/Tabs";
+import { toast } from "@/hooks/use-toast";
 
 const UserSettings = () => {
   const [user, setUser] = useState({
@@ -147,7 +147,7 @@ const NotificationSettings = () => {
   const handleToggle = (key: string) => {
     setNotifications({
       ...notifications,
-      [key]: !notifications[key]
+      [key]: !notifications[key as keyof typeof notifications]
     });
   };
 
