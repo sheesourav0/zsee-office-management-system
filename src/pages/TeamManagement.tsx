@@ -1,11 +1,11 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
 import { Plus, Users, Calendar, BarChart3 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { toast } from "@/hooks/use-toast";
 import TeamMembersManagement from "@/features/team/components/TeamMembersManagement";
 import WorkPlanManagement from "@/features/team/components/WorkPlanManagement";
 import TeamMonitoring from "@/features/team/components/TeamMonitoring";
@@ -37,72 +37,74 @@ const TeamManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="members" className="flex items-center gap-2">
+        <TabList className="grid w-full grid-cols-3">
+          <Tab value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Team Members
-          </TabsTrigger>
-          <TabsTrigger value="workplans" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="workplans" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Work Plans
-          </TabsTrigger>
-          <TabsTrigger value="monitoring" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="monitoring" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Monitoring
-          </TabsTrigger>
-        </TabsList>
+          </Tab>
+        </TabList>
         
-        <TabsContent value="members" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Team Members</CardTitle>
-                  <CardDescription>Manage all team members and their roles</CardDescription>
+        <TabPanels>
+          <TabPanel value="members">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Team Members</CardTitle>
+                    <CardDescription>Manage all team members and their roles</CardDescription>
+                  </div>
+                  <Button onClick={() => setIsMemberDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Member
+                  </Button>
                 </div>
-                <Button onClick={() => setIsMemberDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Member
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <TeamMembersManagement />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="workplans" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Work Plans</CardTitle>
-                  <CardDescription>Manage daily, weekly, and monthly work plans</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TeamMembersManagement />
+              </CardContent>
+            </Card>
+          </TabPanel>
+          
+          <TabPanel value="workplans">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Work Plans</CardTitle>
+                    <CardDescription>Manage daily, weekly, and monthly work plans</CardDescription>
+                  </div>
+                  <Button onClick={() => setIsWorkPlanDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Work Plan
+                  </Button>
                 </div>
-                <Button onClick={() => setIsWorkPlanDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Work Plan
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <WorkPlanManagement />
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardHeader>
+              <CardContent>
+                <WorkPlanManagement />
+              </CardContent>
+            </Card>
+          </TabPanel>
 
-        <TabsContent value="monitoring" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Monitoring</CardTitle>
-              <CardDescription>Monitor team activities and provide feedback</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TeamMonitoring />
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabPanel value="monitoring">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Monitoring</CardTitle>
+                <CardDescription>Monitor team activities and provide feedback</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TeamMonitoring />
+              </CardContent>
+            </Card>
+          </TabPanel>
+        </TabPanels>
       </Tabs>
 
       <Dialog open={isMemberDialogOpen} onOpenChange={setIsMemberDialogOpen}>
@@ -110,7 +112,10 @@ const TeamManagement = () => {
           <DialogHeader>
             <DialogTitle>Add New Team Member</DialogTitle>
           </DialogHeader>
-          <AddTeamMemberForm onSuccess={handleAddMemberSuccess} />
+          <AddTeamMemberForm 
+            onSubmit={handleAddMemberSuccess} 
+            onCancel={() => setIsMemberDialogOpen(false)} 
+          />
         </DialogContent>
       </Dialog>
 
@@ -119,7 +124,10 @@ const TeamManagement = () => {
           <DialogHeader>
             <DialogTitle>Add New Work Plan</DialogTitle>
           </DialogHeader>
-          <AddWorkPlanForm onSuccess={handleAddWorkPlanSuccess} />
+          <AddWorkPlanForm 
+            onSubmit={handleAddWorkPlanSuccess} 
+            onCancel={() => setIsWorkPlanDialogOpen(false)} 
+          />
         </DialogContent>
       </Dialog>
     </div>

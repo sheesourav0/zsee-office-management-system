@@ -1,318 +1,186 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
 import { Badge } from "@/components/chakra/Badge";
 import { Textarea } from "@/components/chakra/Textarea";
+import { Alert, AlertDescription } from "@/components/chakra/Alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
-import { Eye, MessageSquare, Clock, CheckCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Search, MessageCircle, Clock, User, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { WorkPlan, WorkPlanComment } from "../types/teamTypes";
 
-const generateMonitoringData = () => {
-  const workPlans: WorkPlan[] = [
-    {
-      id: "wp001",
-      memberId: "tm002",
-      title: "Project Planning Review",
-      description: "Review and update project timelines for Q2",
-      location: "Main Office - Conference Room A",
-      period: "weekly",
-      startDate: "2024-03-01",
-      endDate: "2024-03-07",
-      status: "current",
-      priority: "high",
-      createdAt: "2024-02-28",
-      updatedAt: "2024-03-01",
-      progress: 65
-    },
-    {
-      id: "wp002",
-      memberId: "tm003",
-      title: "Equipment Installation",
-      description: "Install new monitoring equipment at site location",
-      location: "Site B - Plant Area",
-      period: "daily",
-      startDate: "2024-03-15",
-      endDate: "2024-03-15",
-      status: "upcoming",
-      priority: "medium",
-      createdAt: "2024-03-01",
-      updatedAt: "2024-03-01",
-      progress: 0
-    }
-  ];
-
-  const comments: WorkPlanComment[] = [
-    {
-      id: "c001",
-      workPlanId: "wp001",
-      authorId: "tm001",
-      authorName: "John Smith",
-      authorRole: "administrator",
-      content: "Great progress on the timeline review. Please ensure all stakeholders are notified of the changes.",
-      type: "comment",
-      createdAt: "2024-03-02T10:30:00Z",
-      isRead: false
-    },
-    {
-      id: "c002",
-      workPlanId: "wp001",
-      authorId: "tm001",
-      authorName: "John Smith",
-      authorRole: "administrator",
-      content: "What is the expected completion date for the final documentation?",
-      type: "question",
-      createdAt: "2024-03-02T14:15:00Z",
-      isRead: true
-    }
-  ];
-
-  return { workPlans, comments };
-};
+// Mock data for team activities
+const mockActivities = [
+  {
+    id: "1",
+    memberName: "John Smith",
+    activity: "Started work on Site Preparation",
+    timestamp: "2024-01-20 09:00",
+    status: "active",
+    location: "Construction Site A"
+  },
+  {
+    id: "2", 
+    memberName: "Sarah Johnson",
+    activity: "Completed Foundation Work planning",
+    timestamp: "2024-01-20 08:30",
+    status: "completed",
+    location: "Office"
+  },
+  {
+    id: "3",
+    memberName: "Mike Wilson", 
+    activity: "Working on Electrical Wiring design",
+    timestamp: "2024-01-20 07:45",
+    status: "in-progress",
+    location: "Engineering Lab"
+  }
+];
 
 const TeamMonitoring = () => {
-  const [workPlans, setWorkPlans] = useState<WorkPlan[]>([]);
-  const [comments, setComments] = useState<WorkPlanComment[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<WorkPlan | null>(null);
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  const [commentType, setCommentType] = useState<"comment" | "question" | "feedback">("comment");
+  const [activities] = useState(mockActivities);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [selectedMember, setSelectedMember] = useState("");
 
-  useEffect(() => {
-    const { workPlans: plans, comments: planComments } = generateMonitoringData();
-    setWorkPlans(plans);
-    setComments(planComments);
-  }, []);
+  const filteredActivities = activities.filter(activity =>
+    activity.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    activity.activity.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const getStatusIcon = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
+      case "active":
+        return <Badge colorScheme="green">Active</Badge>;
       case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "current":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
-      case "overdue":
-        return <AlertCircle className="h-4 w-4 text-red-600" />;
+        return <Badge colorScheme="blue">Completed</Badge>;
+      case "in-progress":
+        return <Badge colorScheme="yellow">In Progress</Badge>;
       default:
-        return <Clock className="h-4 w-4 text-blue-600" />;
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
-  const handleViewDetails = (plan: WorkPlan) => {
-    setSelectedPlan(plan);
-    setIsDetailDialogOpen(true);
-  };
-
-  const handleAddComment = () => {
-    if (!newComment.trim() || !selectedPlan) return;
-
-    const comment: WorkPlanComment = {
-      id: `c${Date.now()}`,
-      workPlanId: selectedPlan.id,
-      authorId: "current-user", // This would come from auth context
-      authorName: "Current User", // This would come from auth context
-      authorRole: "administrator", // This would come from auth context
-      content: newComment,
-      type: commentType,
-      createdAt: new Date().toISOString(),
-      isRead: false
-    };
-
-    setComments([...comments, comment]);
-    setNewComment("");
-    console.log("Added comment:", comment);
-  };
-
-  const getCommentsForPlan = (planId: string) => {
-    return comments.filter(comment => comment.workPlanId === planId);
+  const handleSendFeedback = () => {
+    if (!selectedMember || !feedback.trim()) {
+      toast.error("Please select a team member and enter feedback");
+      return;
+    }
+    
+    toast.success(`Feedback sent to ${selectedMember}`);
+    setFeedback("");
+    setSelectedMember("");
   };
 
   return (
     <Box gap={6}>
+      <Flex 
+        direction={{ base: "column", md: "row" }} 
+        align={{ md: "center" }} 
+        justify={{ md: "space-between" }} 
+        gap={4}
+        mb={6}
+      >
+        <Heading size="lg">Team Monitoring</Heading>
+      </Flex>
+
+      <Alert status="info" mb={6}>
+        <AlertCircle style={{ width: '16px', height: '16px' }} />
+        <AlertDescription>
+          Monitor real-time team activities and provide feedback to improve productivity.
+        </AlertDescription>
+      </Alert>
+
       <Card>
         <CardHeader>
-          <CardTitle>Team Activity Monitoring</CardTitle>
-          <CardDescription>Monitor team work plans and provide feedback</CardDescription>
+          <CardTitle>Recent Activities</CardTitle>
+          <CardDescription>Track team member activities and progress</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
+          <Box mb={4}>
+            <Box position="relative">
+              <Search style={{ position: 'absolute', left: '8px', top: '10px', width: '16px', height: '16px', color: '#A0AEC0' }} />
+              <Input
+                placeholder="Search activities..."
+                paddingLeft="32px"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </Box>
+          </Box>
+
+          <Box borderWidth={1} borderRadius="md">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Work Plan</TableHead>
                   <TableHead>Member</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Progress</TableHead>
+                  <TableHead>Activity</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead>Comments</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {workPlans.map((plan) => {
-                  const planComments = getCommentsForPlan(plan.id);
-                  const unreadComments = planComments.filter(c => !c.isRead).length;
-                  
-                  return (
-                    <TableRow key={plan.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{plan.title}</div>
-                          <div className="text-sm text-muted-foreground">{plan.description}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">Member {plan.memberId}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(plan.status)}
-                          <Badge className={
-                            plan.status === "completed" ? "bg-green-100 text-green-800" :
-                            plan.status === "current" ? "bg-yellow-100 text-yellow-800" :
-                            plan.status === "overdue" ? "bg-red-100 text-red-800" :
-                            "bg-blue-100 text-blue-800"
-                          }>
-                            {plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
-                              style={{ width: `${plan.progress}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm">{plan.progress}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">{plan.location}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>{planComments.length}</span>
-                          {unreadComments > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {unreadComments} new
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewDetails(plan)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {filteredActivities.map((activity) => (
+                  <TableRow key={activity.id}>
+                    <TableCell>
+                      <Flex align="center" gap={2}>
+                        <User style={{ width: '16px', height: '16px' }} />
+                        <Text fontWeight="medium">{activity.memberName}</Text>
+                      </Flex>
+                    </TableCell>
+                    <TableCell>{activity.activity}</TableCell>
+                    <TableCell>{activity.location}</TableCell>
+                    <TableCell>
+                      <Flex align="center" gap={2}>
+                        <Clock style={{ width: '16px', height: '16px' }} />
+                        <Text>{activity.timestamp}</Text>
+                      </Flex>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(activity.status)}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
-          </div>
+          </Box>
         </CardContent>
       </Card>
 
-      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Work Plan Details & Comments</DialogTitle>
-          </DialogHeader>
-          {selectedPlan && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">{selectedPlan.title}</CardTitle>
-                  <CardDescription>{selectedPlan.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><strong>Location:</strong> {selectedPlan.location}</div>
-                    <div><strong>Period:</strong> {selectedPlan.period}</div>
-                    <div><strong>Start Date:</strong> {selectedPlan.startDate}</div>
-                    <div><strong>End Date:</strong> {selectedPlan.endDate}</div>
-                    <div><strong>Priority:</strong> {selectedPlan.priority}</div>
-                    <div><strong>Progress:</strong> {selectedPlan.progress}%</div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Comments & Questions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3 max-h-60 overflow-y-auto">
-                    {getCommentsForPlan(selectedPlan.id).map((comment) => (
-                      <div key={comment.id} className="border-l-4 border-blue-200 pl-4 py-2">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{comment.authorName}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {comment.authorRole}
-                          </Badge>
-                          <Badge className={
-                            comment.type === "question" ? "bg-orange-100 text-orange-800" :
-                            comment.type === "feedback" ? "bg-purple-100 text-purple-800" :
-                            "bg-blue-100 text-blue-800"
-                          }>
-                            {comment.type}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(comment.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-sm">{comment.content}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t pt-4 space-y-3">
-                    <div className="flex gap-2">
-                      <Button
-                        variant={commentType === "comment" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCommentType("comment")}
-                      >
-                        Comment
-                      </Button>
-                      <Button
-                        variant={commentType === "question" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCommentType("question")}
-                      >
-                        Question
-                      </Button>
-                      <Button
-                        variant={commentType === "feedback" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCommentType("feedback")}
-                      >
-                        Feedback
-                      </Button>
-                    </div>
-                    <Textarea
-                      placeholder={`Add a ${commentType}...`}
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      rows={3}
-                    />
-                    <Button onClick={handleAddComment} disabled={!newComment.trim()}>
-                      Add {commentType.charAt(0).toUpperCase() + commentType.slice(1)}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <Card>
+        <CardHeader>
+          <CardTitle>Send Feedback</CardTitle>
+          <CardDescription>Provide feedback to team members</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Box gap={4}>
+            <Box>
+              <Text mb={2} fontWeight="medium">Select Team Member</Text>
+              <Input
+                placeholder="Enter team member name"
+                value={selectedMember}
+                onChange={(e) => setSelectedMember(e.target.value)}
+              />
+            </Box>
+            
+            <Box>
+              <Text mb={2} fontWeight="medium">Feedback Message</Text>
+              <Textarea
+                placeholder="Enter your feedback here..."
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                rows={4}
+              />
+            </Box>
+            
+            <Button onClick={handleSendFeedback}>
+              <MessageCircle style={{ marginRight: '8px', width: '16px', height: '16px' }} />
+              Send Feedback
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 };

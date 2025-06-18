@@ -1,14 +1,16 @@
+
 import { useState, useEffect } from "react";
-import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
 import { Badge } from "@/components/chakra/Badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, Calendar, BarChart3 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
 import { toast } from "@/hooks/use-toast";
+import { TeamMember, UserRole } from "@/features/team/types/teamTypes";
 import AddTeamMemberForm from "./AddTeamMemberForm";
 import WorkPlanManagement from "./WorkPlanManagement";
 import TeamMonitoring from "./TeamMonitoring";
@@ -152,7 +154,7 @@ const TeamMembersManagement = () => {
             Work Plans
           </Tab>
           <Tab value="monitoring" className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
+            <BarChart3 className="h-4 w-4" />
             Monitoring
           </Tab>
         </TabList>
@@ -250,7 +252,10 @@ const TeamMembersManagement = () => {
           <DialogHeader>
             <DialogTitle>Add New Team Member</DialogTitle>
           </DialogHeader>
-          <AddTeamMemberForm onSuccess={handleAddSuccess} />
+          <AddTeamMemberForm 
+            onSubmit={handleAddSuccess} 
+            onCancel={() => setIsAddDialogOpen(false)} 
+          />
         </DialogContent>
       </Dialog>
     </Box>

@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
 import { Input } from "@/components/chakra/Input";
@@ -250,19 +251,31 @@ const WorkPlanManagement = () => {
             <DialogTitle>Work Plan Details</DialogTitle>
           </DialogHeader>
           {selectedWorkPlan && (
-            <Box>
-              <Text fontWeight="bold">Title:</Text>
-              <Text>{selectedWorkPlan.title}</Text>
-              <Text fontWeight="bold">Team Member:</Text>
-              <Text>{selectedWorkPlan.teamMember}</Text>
-              <Text fontWeight="bold">Start Date:</Text>
-              <Text>{selectedWorkPlan.startDate}</Text>
-              <Text fontWeight="bold">End Date:</Text>
-              <Text>{selectedWorkPlan.endDate}</Text>
-              <Text fontWeight="bold">Status:</Text>
-              <Text>{selectedWorkPlan.status}</Text>
-              <Text fontWeight="bold">Description:</Text>
-              <Text>{selectedWorkPlan.description}</Text>
+            <Box space={4}>
+              <Box>
+                <Text fontWeight="bold">Title:</Text>
+                <Text>{selectedWorkPlan.title}</Text>
+              </Box>
+              <Box>
+                <Text fontWeight="bold">Team Member:</Text>
+                <Text>{selectedWorkPlan.teamMember}</Text>
+              </Box>
+              <Box>
+                <Text fontWeight="bold">Start Date:</Text>
+                <Text>{selectedWorkPlan.startDate}</Text>
+              </Box>
+              <Box>
+                <Text fontWeight="bold">End Date:</Text>
+                <Text>{selectedWorkPlan.endDate}</Text>
+              </Box>
+              <Box>
+                <Text fontWeight="bold">Status:</Text>
+                <Text>{selectedWorkPlan.status}</Text>
+              </Box>
+              <Box>
+                <Text fontWeight="bold">Description:</Text>
+                <Text>{selectedWorkPlan.description}</Text>
+              </Box>
             </Box>
           )}
           <Button onClick={handleCloseViewDialog}>Close</Button>

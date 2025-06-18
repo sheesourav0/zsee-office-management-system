@@ -34,5 +34,8 @@ export const FormMessage = ({ children, ...props }: any) => (
   <Field.ErrorText {...props}>{children}</Field.ErrorText>
 );
 export const FormErrorMessage = FormMessage;
+export const FormDescription = ({ children, ...props }: any) => (
+  <Field.HelperText {...props}>{children}</Field.HelperText>
+);
 
 FormItem.displayName = 'FormItem';
