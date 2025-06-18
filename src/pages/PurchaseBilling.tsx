@@ -1,11 +1,11 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Button } from "@/components/chakra/Button";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
 import { Plus, FileText, Receipt } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { toast } from "@/hooks/use-toast";
 import POManagement from "@/features/purchase/components/POManagement";
 import InvoiceManagement from "@/features/purchase/components/InvoiceManagement";
 import AddPOForm from "@/features/purchase/components/AddPOForm";
@@ -38,18 +38,18 @@ const PurchaseBilling = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="po" className="flex items-center gap-2">
+        <TabList className="grid w-full grid-cols-2">
+          <Tab value="po" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Purchase Orders
-          </TabsTrigger>
-          <TabsTrigger value="invoice" className="flex items-center gap-2">
+          </Tab>
+          <Tab value="invoice" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
             Invoice Management
-          </TabsTrigger>
-        </TabsList>
+          </Tab>
+        </TabList>
         
-        <TabsContent value="po" className="space-y-4">
+        <TabPanel value="po" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -65,23 +65,23 @@ const PurchaseBilling = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <Tabs value={poFilterTab} onValueChange={setPOFilterTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="project">As per Project</TabsTrigger>
-                  <TabsTrigger value="department">Department</TabsTrigger>
-                  <TabsTrigger value="requested-by">Requested By</TabsTrigger>
-                  <TabsTrigger value="paid">Paid</TabsTrigger>
-                  <TabsTrigger value="pending">Pending</TabsTrigger>
-                </TabsList>
+                <TabList className="grid w-full grid-cols-6">
+                  <Tab value="all">All</Tab>
+                  <Tab value="project">As per Project</Tab>
+                  <Tab value="department">Department</Tab>
+                  <Tab value="requested-by">Requested By</Tab>
+                  <Tab value="paid">Paid</Tab>
+                  <Tab value="pending">Pending</Tab>
+                </TabList>
                 <div className="mt-4">
                   <POManagement filterType={poFilterTab} />
                 </div>
               </Tabs>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
         
-        <TabsContent value="invoice" className="space-y-4">
+        <TabPanel value="invoice" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -97,21 +97,21 @@ const PurchaseBilling = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <Tabs value={invoiceFilterTab} onValueChange={setInvoiceFilterTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="project">As per Project</TabsTrigger>
-                  <TabsTrigger value="department">Department</TabsTrigger>
-                  <TabsTrigger value="requested-by">Requested By</TabsTrigger>
-                  <TabsTrigger value="paid">Paid</TabsTrigger>
-                  <TabsTrigger value="pending">Pending</TabsTrigger>
-                </TabsList>
+                <TabList className="grid w-full grid-cols-6">
+                  <Tab value="all">All</Tab>
+                  <Tab value="project">As per Project</Tab>
+                  <Tab value="department">Department</Tab>
+                  <Tab value="requested-by">Requested By</Tab>
+                  <Tab value="paid">Paid</Tab>
+                  <Tab value="pending">Pending</Tab>
+                </TabList>
                 <div className="mt-4">
                   <InvoiceManagement filterType={invoiceFilterTab} />
                 </div>
               </Tabs>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
       </Tabs>
 
       <Dialog open={isPODialogOpen} onOpenChange={setIsPODialogOpen}>

@@ -1,264 +1,214 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/chakra/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/chakra/Card';
-import { Input } from '@/components/chakra/Input';
-import { Select, SelectItem } from '@/components/chakra/Select';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/chakra/Form';
-import { VStack, HStack, Table, TableContainer, Thead, Tbody, Tr, Th, Td, Badge } from '@chakra-ui/react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { Button } from '@/components/chakra/Button';
+import { VStack, HStack, Input, SimpleGrid, Box, Table } from '@chakra-ui/react';
+import { Badge } from '@/components/chakra/Badge';
 import { toast } from '@/hooks/use-toast';
-
-interface PaymentTrackingProps {
-  refreshTrigger: number;
-}
 
 interface Payment {
   id: string;
   projectId: string;
   projectName: string;
   amount: number;
-  paymentDate: string;
-  paymentMethod: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: 'pending' | 'partial' | 'paid';
+  dueDate: string;
+  paidAmount: number;
   description: string;
 }
 
-interface PaymentFormData {
-  projectId: string;
-  amount: number;
-  paymentDate: string;
-  paymentMethod: string;
-  description: string;
+interface PaymentTrackingProps {
+  refreshTrigger: number;
 }
 
 const PaymentTracking = ({ refreshTrigger }: PaymentTrackingProps) => {
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
-  const [isAddingPayment, setIsAddingPayment] = useState(false);
-
-  const form = useForm<PaymentFormData>({
-    defaultValues: {
-      projectId: '',
-      amount: 0,
-      paymentDate: '',
-      paymentMethod: 'bank_transfer',
-      description: ''
-    }
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     loadPayments();
-    loadProjects();
   }, [refreshTrigger]);
 
   const loadPayments = () => {
+    // Load from localStorage or API
     const storedPayments = JSON.parse(localStorage.getItem('billing_payments') || '[]');
     setPayments(storedPayments);
   };
 
-  const loadProjects = () => {
-    const storedProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
-    setProjects(storedProjects);
-  };
-
-  const handleAddPayment = (data: PaymentFormData) => {
-    const project = projects.find(p => p.id === data.projectId);
-    const newPayment: Payment = {
-      id: Date.now().toString(),
-      projectId: data.projectId,
-      projectName: project?.name || 'Unknown Project',
-      amount: data.amount,
-      paymentDate: data.paymentDate,
-      paymentMethod: data.paymentMethod,
-      status: 'completed',
-      description: data.description
-    };
-
-    const updatedPayments = [...payments, newPayment];
-    setPayments(updatedPayments);
-    localStorage.setItem('billing_payments', JSON.stringify(updatedPayments));
-    
-    form.reset();
-    setIsAddingPayment(false);
-    toast.success('Payment added successfully');
-  };
+  const filteredPayments = payments.filter(payment => {
+    const matchesSearch = payment.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         payment.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const getStatusBadge = (status: string) => {
-    const statusColors = {
-      pending: 'yellow',
-      completed: 'green',
-      failed: 'red'
-    };
-    return <Badge colorScheme={statusColors[status as keyof typeof statusColors]}>{status}</Badge>;
+    switch (status) {
+      case 'paid':
+        return <Badge colorScheme="green">Paid</Badge>;
+      case 'partial':
+        return <Badge colorScheme="yellow">Partial</Badge>;
+      case 'pending':
+        return <Badge colorScheme="red">Pending</Badge>;
+      default:
+        return <Badge>Unknown</Badge>;
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount);
+  };
+
+  const handlePaymentUpdate = (paymentId: string, paidAmount: number) => {
+    const updatedPayments = payments.map(payment => {
+      if (payment.id === paymentId) {
+        const newPaidAmount = payment.paidAmount + paidAmount;
+        const newStatus = newPaidAmount >= payment.amount ? 'paid' : 
+                         newPaidAmount > 0 ? 'partial' : 'pending';
+        return {
+          ...payment,
+          paidAmount: newPaidAmount,
+          status: newStatus as 'pending' | 'partial' | 'paid'
+        };
+      }
+      return payment;
+    });
+    
+    setPayments(updatedPayments);
+    localStorage.setItem('billing_payments', JSON.stringify(updatedPayments));
+    toast.success('Payment updated successfully');
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Payment Tracking</h2>
-        <Button onClick={() => setIsAddingPayment(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Payment
-        </Button>
-      </div>
+    <VStack gap={6} align="stretch">
+      <HStack gap={4}>
+        <Input
+          placeholder="Search payments..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border rounded-md"
+        >
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="partial">Partial</option>
+          <option value="paid">Paid</option>
+        </select>
+      </HStack>
 
-      {isAddingPayment && (
+      {filteredPayments.length === 0 ? (
+        <Card>
+          <CardContent>
+            <Box textAlign="center" py={8}>
+              <p className="text-muted-foreground">No payments found</p>
+            </Box>
+          </CardContent>
+        </Card>
+      ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Add New Payment</CardTitle>
+            <CardTitle>Payment Tracking ({filteredPayments.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleAddPayment)}>
-                <VStack gap={4} align="stretch">
-                  <FormField
-                    control={form.control}
-                    name="projectId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Project</FormLabel>
-                        <FormControl>
-                          <Select {...field}>
-                            <option value="">Select Project</option>
-                            {projects.map((project) => (
-                              <option key={project.id} value={project.id}>
-                                {project.name}
-                              </option>
-                            ))}
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Amount</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Enter amount"
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="paymentDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Payment Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Payment Method</FormLabel>
-                        <FormControl>
-                          <Select {...field}>
-                            <option value="bank_transfer">Bank Transfer</option>
-                            <option value="check">Check</option>
-                            <option value="cash">Cash</option>
-                            <option value="upi">UPI</option>
-                            <option value="card">Card</option>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Payment description" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <HStack gap={2}>
-                    <Button type="submit">Add Payment</Button>
-                    <Button variant="outline" onClick={() => setIsAddingPayment(false)}>
-                      Cancel
-                    </Button>
-                  </HStack>
-                </VStack>
-              </form>
-            </Form>
+            <Box overflowX="auto">
+              <Table.Root size="sm">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Project</Table.ColumnHeader>
+                    <Table.ColumnHeader>Description</Table.ColumnHeader>
+                    <Table.ColumnHeader>Total Amount</Table.ColumnHeader>
+                    <Table.ColumnHeader>Paid Amount</Table.ColumnHeader>
+                    <Table.ColumnHeader>Remaining</Table.ColumnHeader>
+                    <Table.ColumnHeader>Status</Table.ColumnHeader>
+                    <Table.ColumnHeader>Due Date</Table.ColumnHeader>
+                    <Table.ColumnHeader>Actions</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {filteredPayments.map((payment) => (
+                    <Table.Row key={payment.id}>
+                      <Table.Cell>{payment.projectName}</Table.Cell>
+                      <Table.Cell>{payment.description}</Table.Cell>
+                      <Table.Cell>{formatCurrency(payment.amount)}</Table.Cell>
+                      <Table.Cell>{formatCurrency(payment.paidAmount)}</Table.Cell>
+                      <Table.Cell>{formatCurrency(payment.amount - payment.paidAmount)}</Table.Cell>
+                      <Table.Cell>{getStatusBadge(payment.status)}</Table.Cell>
+                      <Table.Cell>{new Date(payment.dueDate).toLocaleDateString()}</Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const amount = prompt('Enter payment amount:');
+                            if (amount && !isNaN(Number(amount))) {
+                              handlePaymentUpdate(payment.id, Number(amount));
+                            }
+                          }}
+                        >
+                          Add Payment
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
           </CardContent>
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TableContainer>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Project</Th>
-                  <Th>Amount</Th>
-                  <Th>Date</Th>
-                  <Th>Method</Th>
-                  <Th>Status</Th>
-                  <Th>Description</Th>
-                  <Th>Actions</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {payments.map((payment) => (
-                  <Tr key={payment.id}>
-                    <Td>{payment.projectName}</Td>
-                    <Td>₹{payment.amount.toLocaleString()}</Td>
-                    <Td>{new Date(payment.paymentDate).toLocaleDateString()}</Td>
-                    <Td>{payment.paymentMethod.replace('_', ' ').toUpperCase()}</Td>
-                    <Td>{getStatusBadge(payment.status)}</Td>
-                    <Td>{payment.description}</Td>
-                    <Td>
-                      <HStack gap={1}>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </HStack>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-    </div>
+      <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
+        <Card>
+          <CardContent>
+            <VStack align="start">
+              <p className="text-sm font-medium">Total Pending</p>
+              <p className="text-2xl font-bold text-red-600">
+                {formatCurrency(
+                  filteredPayments
+                    .filter(p => p.status === 'pending')
+                    .reduce((sum, p) => sum + (p.amount - p.paidAmount), 0)
+                )}
+              </p>
+            </VStack>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent>
+            <VStack align="start">
+              <p className="text-sm font-medium">Partial Payments</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {formatCurrency(
+                  filteredPayments
+                    .filter(p => p.status === 'partial')
+                    .reduce((sum, p) => sum + (p.amount - p.paidAmount), 0)
+                )}
+              </p>
+            </VStack>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent>
+            <VStack align="start">
+              <p className="text-sm font-medium">Total Received</p>
+              <p className="text-2xl font-bold text-green-600">
+                {formatCurrency(
+                  filteredPayments.reduce((sum, p) => sum + p.paidAmount, 0)
+                )}
+              </p>
+            </VStack>
+          </CardContent>
+        </Card>
+      </SimpleGrid>
+    </VStack>
   );
 };
 
