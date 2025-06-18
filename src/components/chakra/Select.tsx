@@ -39,10 +39,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 export interface SelectTriggerProps {
   children: ReactNode;
   className?: string;
+  width?: string;
+  w?: string;
+  [key: string]: any;
 }
 
-export const SelectTrigger = ({ children, className }: SelectTriggerProps) => {
-  return <div className={className}>{children}</div>;
+export const SelectTrigger = ({ children, className, width, w, ...props }: SelectTriggerProps) => {
+  const style = width || w ? { width: width || w } : {};
+  return <div className={className} style={style} {...props}>{children}</div>;
 };
 
 export interface SelectValueProps {

@@ -6,13 +6,13 @@ import {
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
-export const FormControl = forwardRef<HTMLDivElement, BoxProps>(
-  (props, ref) => {
-    return <Field.Root ref={ref} {...props} />;
+export const FormControl = forwardRef<HTMLDivElement, BoxProps & { isInvalid?: boolean }>(
+  ({ isInvalid, ...props }, ref) => {
+    return <Field.Root ref={ref} invalid={isInvalid} {...props} />;
   }
 );
 
-export const FormLabel = forwardRef<HTMLLabelElement, { children: ReactNode }>(
+export const FormLabel = forwardRef<HTMLLabelElement, { children: ReactNode; className?: string; [key: string]: any }>(
   ({ children, ...props }, ref) => {
     return <Field.Label ref={ref} {...props}>{children}</Field.Label>;
   }
@@ -25,6 +25,12 @@ export const FormErrorMessage = forwardRef<HTMLDivElement, { children: ReactNode
 );
 
 export const FormHelperText = forwardRef<HTMLDivElement, { children: ReactNode }>(
+  ({ children, ...props }, ref) => {
+    return <Field.HelperText ref={ref} {...props}>{children}</Field.HelperText>;
+  }
+);
+
+export const FormDescription = forwardRef<HTMLDivElement, { children: ReactNode; className?: string }>(
   ({ children, ...props }, ref) => {
     return <Field.HelperText ref={ref} {...props}>{children}</Field.HelperText>;
   }
@@ -74,6 +80,7 @@ FormControl.displayName = "FormControl";
 FormLabel.displayName = "FormLabel";
 FormErrorMessage.displayName = "FormErrorMessage";
 FormHelperText.displayName = "FormHelperText";
+FormDescription.displayName = "FormDescription";
 FormField.displayName = "FormField";
 FormItem.displayName = "FormItem";
 FormMessage.displayName = "FormMessage";

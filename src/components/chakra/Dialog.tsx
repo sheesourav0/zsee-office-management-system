@@ -3,7 +3,6 @@ import {
   DialogRoot,
   DialogContent as ChakraDialogContent,
   DialogHeader as ChakraDialogHeader,
-  DialogFooter as ChakraDialogFooter,
   DialogBody as ChakraDialogBody,
   DialogTitle as ChakraDialogTitle,
   DialogBackdrop,
@@ -72,8 +71,19 @@ export const DialogBody = forwardRef<HTMLDivElement, { children: ReactNode }>(
   }
 );
 
+export const DialogFooter = forwardRef<HTMLDivElement, { children: ReactNode; className?: string }>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <div ref={ref} className={`flex justify-end gap-2 p-4 ${className || ''}`} {...props}>
+        {children}
+      </div>
+    );
+  }
+);
+
 Dialog.displayName = "Dialog";
 DialogContent.displayName = "DialogContent";
 DialogHeader.displayName = "DialogHeader";
 DialogTitle.displayName = "DialogTitle";
 DialogBody.displayName = "DialogBody";
+DialogFooter.displayName = "DialogFooter";

@@ -1,5 +1,5 @@
 
-import {
+import { 
   Table as ChakraTable
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
@@ -14,64 +14,70 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ children, ...props }, ref) => {
     return (
       <ChakraTable.Root ref={ref} {...props}>
-        <ChakraTable.Root>
-          {children}
-        </ChakraTable.Root>
+        {children}
       </ChakraTable.Root>
     );
   }
 );
 
-export const TableHeader = forwardRef<HTMLTableSectionElement, { children: ReactNode }>(
-  ({ children }, ref) => {
-    return <ChakraTable.Header ref={ref}>{children}</ChakraTable.Header>;
+export const TableHeader = forwardRef<HTMLTableSectionElement, { children: ReactNode; className?: string }>(
+  ({ children, ...props }, ref) => {
+    return <ChakraTable.Header ref={ref} {...props}>{children}</ChakraTable.Header>;
   }
 );
 
 export const TableBody = forwardRef<HTMLTableSectionElement, { children: ReactNode }>(
-  ({ children }, ref) => {
-    return <ChakraTable.Body ref={ref}>{children}</ChakraTable.Body>;
+  ({ children, ...props }, ref) => {
+    return <ChakraTable.Body ref={ref} {...props}>{children}</ChakraTable.Body>;
   }
 );
 
-export const TableRow = forwardRef<HTMLTableRowElement, { children: ReactNode }>(
-  ({ children }, ref) => {
-    return <ChakraTable.Row ref={ref}>{children}</ChakraTable.Row>;
+export const TableFooter = forwardRef<HTMLTableSectionElement, { children: ReactNode }>(
+  ({ children, ...props }, ref) => {
+    return <ChakraTable.Footer ref={ref} {...props}>{children}</ChakraTable.Footer>;
+  }
+);
+
+export const TableRow = forwardRef<HTMLTableRowElement, { children: ReactNode; className?: string }>(
+  ({ children, ...props }, ref) => {
+    return <ChakraTable.Row ref={ref} {...props}>{children}</ChakraTable.Row>;
   }
 );
 
 export const TableHead = forwardRef<HTMLTableCellElement, { 
   children: ReactNode; 
-  className?: string; 
+  className?: string;
+  fontWeight?: string;
   textAlign?: string;
 }>(
-  ({ children, textAlign, ...props }, ref) => {
-    return (
-      <ChakraTable.ColumnHeader ref={ref} textAlign={textAlign as any} {...props}>
-        {children}
-      </ChakraTable.ColumnHeader>
-    );
+  ({ children, ...props }, ref) => {
+    return <ChakraTable.ColumnHeader ref={ref} {...props}>{children}</ChakraTable.ColumnHeader>;
   }
 );
 
 export const TableCell = forwardRef<HTMLTableCellElement, { 
   children: ReactNode; 
-  className?: string; 
-  fontWeight?: string; 
+  className?: string;
+  fontWeight?: string;
   textAlign?: string;
+  colSpan?: number;
 }>(
-  ({ children, fontWeight, textAlign, ...props }, ref) => {
-    return (
-      <ChakraTable.Cell ref={ref} fontWeight={fontWeight} textAlign={textAlign as any} {...props}>
-        {children}
-      </ChakraTable.Cell>
-    );
+  ({ children, colSpan, ...props }, ref) => {
+    return <ChakraTable.Cell ref={ref} colSpan={colSpan} {...props}>{children}</ChakraTable.Cell>;
+  }
+);
+
+export const TableCaption = forwardRef<HTMLTableCaptionElement, { children: ReactNode; className?: string }>(
+  ({ children, ...props }, ref) => {
+    return <caption ref={ref} {...props}>{children}</caption>;
   }
 );
 
 Table.displayName = "Table";
 TableHeader.displayName = "TableHeader";
 TableBody.displayName = "TableBody";
+TableFooter.displayName = "TableFooter";
 TableRow.displayName = "TableRow";
 TableHead.displayName = "TableHead";
 TableCell.displayName = "TableCell";
+TableCaption.displayName = "TableCaption";
