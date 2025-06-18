@@ -1,76 +1,73 @@
 
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  ModalProps,
-  ModalContentProps,
-  ModalHeaderProps,
-  ModalBodyProps
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogBody,
+  DialogTitle,
+  DialogBackdrop,
+  DialogCloseTrigger,
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
-export interface DialogProps extends Omit<ModalProps, 'children'> {
+export interface DialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   children: ReactNode;
+  className?: string;
+  [key: string]: any;
 }
 
 export const Dialog = forwardRef<HTMLDivElement, DialogProps>(
-  ({ open, onOpenChange, children, isOpen, onClose, ...props }, ref) => {
-    const handleClose = () => {
-      if (onClose) onClose();
-      if (onOpenChange) onOpenChange(false);
-    };
-
+  ({ open, onOpenChange, children, ...props }, ref) => {
     return (
-      <Modal isOpen={open || isOpen || false} onClose={handleClose} {...props}>
-        <ModalOverlay />
-        <ModalContent ref={ref}>
+      <DialogRoot open={open} onOpenChange={({ open }) => onOpenChange?.(open)} {...props}>
+        <DialogBackdrop />
+        <DialogContent ref={ref}>
           {children}
-        </ModalContent>
-      </Modal>
+        </DialogContent>
+      </DialogRoot>
     );
   }
 );
 
-export const DialogContent = forwardRef<HTMLDivElement, ModalContentProps & { className?: string }>(
+export const DialogContent = forwardRef<HTMLDivElement, { 
+  className?: string; 
+  children: ReactNode;
+}>(
   ({ children, className, ...props }, ref) => {
     return (
-      <ModalContent ref={ref} className={className} {...props}>
-        <ModalCloseButton />
+      <DialogContent ref={ref} className={className} {...props}>
+        <DialogCloseTrigger />
         {children}
-      </ModalContent>
+      </DialogContent>
     );
   }
 );
 
-export const DialogHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(
+export const DialogHeader = forwardRef<HTMLDivElement, { children: ReactNode }>(
   ({ children, ...props }, ref) => {
     return (
-      <ModalHeader ref={ref} {...props}>
+      <DialogHeader ref={ref} {...props}>
         {children}
-      </ModalHeader>
+      </DialogHeader>
     );
   }
 );
 
 export const DialogTitle = forwardRef<HTMLHeadingElement, { children: ReactNode }>(
   ({ children }, ref) => {
-    return <span ref={ref}>{children}</span>;
+    return <DialogTitle ref={ref}>{children}</DialogTitle>;
   }
 );
 
-export const DialogBody = forwardRef<HTMLDivElement, ModalBodyProps>(
+export const DialogBody = forwardRef<HTMLDivElement, { children: ReactNode }>(
   ({ children, ...props }, ref) => {
     return (
-      <ModalBody ref={ref} {...props}>
+      <DialogBody ref={ref} {...props}>
         {children}
-      </ModalBody>
+      </DialogBody>
     );
   }
 );

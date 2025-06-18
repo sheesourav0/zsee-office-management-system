@@ -1,37 +1,48 @@
 
 import { 
   Select as ChakraSelect,
-  SelectProps as ChakraSelectProps
+  createListCollection
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
-export interface SelectProps extends ChakraSelectProps {
+export interface SelectProps {
   onValueChange?: (value: string) => void;
   placeholder?: string;
   children?: ReactNode;
+  value?: string;
+  className?: string;
+  [key: string]: any;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ onValueChange, onChange, children, ...props }, ref) => {
+  ({ onValueChange, children, value, placeholder, ...props }, ref) => {
+    // For simple cases, we'll use a native select for compatibility
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (onChange) onChange(e);
       if (onValueChange) onValueChange(e.target.value);
     };
 
     return (
-      <ChakraSelect ref={ref} onChange={handleChange} {...props}>
+      <select 
+        ref={ref} 
+        value={value} 
+        onChange={handleChange}
+        className="chakra-select"
+        {...props}
+      >
+        {placeholder && <option value="" disabled>{placeholder}</option>}
         {children}
-      </ChakraSelect>
+      </select>
     );
   }
 );
 
 export interface SelectTriggerProps {
   children: ReactNode;
+  className?: string;
 }
 
-export const SelectTrigger = ({ children }: SelectTriggerProps) => {
-  return <>{children}</>;
+export const SelectTrigger = ({ children, className }: SelectTriggerProps) => {
+  return <div className={className}>{children}</div>;
 };
 
 export interface SelectValueProps {
@@ -39,7 +50,7 @@ export interface SelectValueProps {
 }
 
 export const SelectValue = ({ placeholder }: SelectValueProps) => {
-  return <option value="" disabled>{placeholder}</option>;
+  return <span>{placeholder}</span>;
 };
 
 export interface SelectContentProps {

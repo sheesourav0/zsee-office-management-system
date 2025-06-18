@@ -1,44 +1,37 @@
 
 import { 
   Box, 
-  BoxProps, 
-  FormControl as ChakraFormControl,
-  FormControlProps,
-  FormLabel as ChakraFormLabel,
-  FormLabelProps,
-  FormErrorMessage as ChakraFormErrorMessage,
-  FormErrorMessageProps,
-  FormHelperText as ChakraFormHelperText,
-  FormHelperTextProps
+  BoxProps,
+  Field
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
-export const FormControl = forwardRef<HTMLDivElement, FormControlProps>(
+export const FormControl = forwardRef<HTMLDivElement, BoxProps>(
   (props, ref) => {
-    return <ChakraFormControl ref={ref} {...props} />;
+    return <Field.Root ref={ref} {...props} />;
   }
 );
 
-export const FormLabel = forwardRef<HTMLLabelElement, FormLabelProps>(
-  (props, ref) => {
-    return <ChakraFormLabel ref={ref} {...props} />;
+export const FormLabel = forwardRef<HTMLLabelElement, { children: ReactNode }>(
+  ({ children, ...props }, ref) => {
+    return <Field.Label ref={ref} {...props}>{children}</Field.Label>;
   }
 );
 
-export const FormErrorMessage = forwardRef<HTMLDivElement, FormErrorMessageProps>(
-  (props, ref) => {
-    return <ChakraFormErrorMessage ref={ref} {...props} />;
+export const FormErrorMessage = forwardRef<HTMLDivElement, { children: ReactNode }>(
+  ({ children, ...props }, ref) => {
+    return <Field.ErrorText ref={ref} {...props}>{children}</Field.ErrorText>;
   }
 );
 
-export const FormHelperText = forwardRef<HTMLDivElement, FormHelperTextProps>(
-  (props, ref) => {
-    return <ChakraFormHelperText ref={ref} {...props} />;
+export const FormHelperText = forwardRef<HTMLDivElement, { children: ReactNode }>(
+  ({ children, ...props }, ref) => {
+    return <Field.HelperText ref={ref} {...props}>{children}</Field.HelperText>;
   }
 );
 
 export interface FormFieldProps extends BoxProps {
-  children: ReactNode;
+  children?: ReactNode;
   control?: any;
   name?: string;
   render?: any;
@@ -65,7 +58,7 @@ export interface FormMessageProps extends BoxProps {}
 
 export const FormMessage = forwardRef<HTMLDivElement, FormMessageProps>(
   ({ children, ...props }, ref) => {
-    return <ChakraFormErrorMessage ref={ref} {...props}>{children}</ChakraFormErrorMessage>;
+    return <Field.ErrorText ref={ref} {...props}>{children}</Field.ErrorText>;
   }
 );
 

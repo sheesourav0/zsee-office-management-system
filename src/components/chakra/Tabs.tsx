@@ -1,44 +1,41 @@
 
 import {
-  Tabs as ChakraTabs,
-  TabsProps,
-  TabList as ChakraTabList,
-  TabListProps,
-  Tab as ChakraTab,
-  TabProps,
-  TabPanels as ChakraTabPanels,
-  TabPanelsProps,
-  TabPanel as ChakraTabPanel,
-  TabPanelProps
+  Tabs as ChakraTabs
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
-export interface CustomTabsProps extends Omit<TabsProps, 'value' | 'onChange'> {
+export interface CustomTabsProps {
   value?: string;
   onValueChange?: (value: string) => void;
+  children: ReactNode;
+  className?: string;
+  [key: string]: any;
 }
 
 export const Tabs = forwardRef<HTMLDivElement, CustomTabsProps>(
   ({ value, onValueChange, children, ...props }, ref) => {
     return (
-      <ChakraTabs ref={ref} index={0} {...props}>
+      <ChakraTabs.Root ref={ref} value={value} onValueChange={onValueChange} {...props}>
         {children}
-      </ChakraTabs>
+      </ChakraTabs.Root>
     );
   }
 );
 
-export const TabsList = forwardRef<HTMLDivElement, TabListProps & { className?: string }>(
+export const TabsList = forwardRef<HTMLDivElement, { 
+  children: ReactNode; 
+  className?: string; 
+}>(
   ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTabList ref={ref} className={className} {...props}>
+      <ChakraTabs.List ref={ref} className={className} {...props}>
         {children}
-      </ChakraTabList>
+      </ChakraTabs.List>
     );
   }
 );
 
-export interface TabsTriggerProps extends TabProps {
+export interface TabsTriggerProps {
   value: string;
   className?: string;
   children: ReactNode;
@@ -47,27 +44,26 @@ export interface TabsTriggerProps extends TabProps {
 export const TabsTrigger = forwardRef<HTMLButtonElement, TabsTriggerProps>(
   ({ value, children, className, ...props }, ref) => {
     return (
-      <ChakraTab ref={ref} className={className} {...props}>
+      <ChakraTabs.Trigger ref={ref} value={value} className={className} {...props}>
         {children}
-      </ChakraTab>
+      </ChakraTabs.Trigger>
     );
   }
 );
 
-export const TabsContent = forwardRef<HTMLDivElement, TabPanelProps & { value: string; className?: string }>(
+export const TabsContent = forwardRef<HTMLDivElement, { 
+  value: string; 
+  className?: string; 
+  children: ReactNode;
+}>(
   ({ value, children, className, ...props }, ref) => {
     return (
-      <ChakraTabPanel ref={ref} className={className} {...props}>
+      <ChakraTabs.Content ref={ref} value={value} className={className} {...props}>
         {children}
-      </ChakraTabPanel>
+      </ChakraTabs.Content>
     );
   }
 );
-
-export const TabList = ChakraTabList;
-export const Tab = ChakraTab;
-export const TabPanels = ChakraTabPanels;
-export const TabPanel = ChakraTabPanel;
 
 Tabs.displayName = "Tabs";
 TabsList.displayName = "TabsList";

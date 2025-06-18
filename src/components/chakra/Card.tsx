@@ -45,6 +45,18 @@ export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
   }
 );
 
+export interface CardFooterProps extends BoxProps {}
+
+export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ children, ...props }, ref) => {
+    return (
+      <Box ref={ref} p={6} pt={0} {...props}>
+        {children}
+      </Box>
+    );
+  }
+);
+
 export interface CardTitleProps extends BoxProps {}
 
 export const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
@@ -72,5 +84,6 @@ export const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionP
 Card.displayName = "Card";
 CardHeader.displayName = "CardHeader";
 CardContent.displayName = "CardContent";
+CardFooter.displayName = "CardFooter";
 CardTitle.displayName = "CardTitle";
 CardDescription.displayName = "CardDescription";

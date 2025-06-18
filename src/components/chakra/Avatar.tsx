@@ -1,15 +1,23 @@
 
-import { 
-  Avatar as ChakraAvatar, 
-  AvatarProps,
-  AvatarBadge,
-  AvatarGroup
-} from "@chakra-ui/react";
+import { Avatar as ChakraAvatar } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
+
+export interface AvatarProps {
+  src?: string;
+  name?: string;
+  size?: string;
+  className?: string;
+  [key: string]: any;
+}
 
 export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
   (props, ref) => {
-    return <ChakraAvatar ref={ref} {...props} />;
+    return (
+      <ChakraAvatar.Root ref={ref} {...props}>
+        <ChakraAvatar.Image />
+        <ChakraAvatar.Fallback />
+      </ChakraAvatar.Root>
+    );
   }
 );
 
@@ -19,7 +27,7 @@ export interface AvatarImageProps {
 }
 
 export const AvatarImage = ({ src, alt }: AvatarImageProps) => {
-  return null; // In Chakra UI v3, image is handled by the Avatar component itself
+  return <ChakraAvatar.Image src={src} alt={alt} />;
 };
 
 export interface AvatarFallbackProps {
@@ -27,7 +35,7 @@ export interface AvatarFallbackProps {
 }
 
 export const AvatarFallback = ({ children }: AvatarFallbackProps) => {
-  return <>{children}</>; // In Chakra UI v3, fallback is handled by the Avatar component itself
+  return <ChakraAvatar.Fallback>{children}</ChakraAvatar.Fallback>;
 };
 
 Avatar.displayName = "Avatar";
