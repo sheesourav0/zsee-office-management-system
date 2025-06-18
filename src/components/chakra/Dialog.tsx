@@ -34,10 +34,20 @@ export const Dialog = forwardRef<HTMLDivElement, DialogProps>(
 export const DialogContent = forwardRef<HTMLDivElement, { 
   className?: string; 
   children: ReactNode;
+  maxW?: string;
+  maxH?: string;
+  overflowY?: string;
+  [key: string]: any;
 }>(
-  ({ children, className, ...props }, ref) => {
+  ({ children, className, maxW, maxH, overflowY, ...props }, ref) => {
+    const style = {
+      ...(maxW && { maxWidth: maxW }),
+      ...(maxH && { maxHeight: maxH }),
+      ...(overflowY && { overflowY: overflowY as any })
+    };
+    
     return (
-      <ChakraDialogContent ref={ref} className={className} {...props}>
+      <ChakraDialogContent ref={ref} className={className} style={style} {...props}>
         <DialogCloseTrigger />
         {children}
       </ChakraDialogContent>

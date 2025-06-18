@@ -1,4 +1,3 @@
-
 import { 
   Table as ChakraTable
 } from "@chakra-ui/react";
@@ -61,9 +60,11 @@ export const TableCell = forwardRef<HTMLTableCellElement, {
   fontWeight?: string;
   textAlign?: string;
   colSpan?: number;
+  color?: string;
 }>(
-  ({ children, colSpan, ...props }, ref) => {
-    return <ChakraTable.Cell ref={ref} colSpan={colSpan} {...props}>{children}</ChakraTable.Cell>;
+  ({ children, colSpan, color, ...props }, ref) => {
+    const style = color ? { color } : {};
+    return <ChakraTable.Cell ref={ref} colSpan={colSpan} style={style} {...props}>{children}</ChakraTable.Cell>;
   }
 );
 

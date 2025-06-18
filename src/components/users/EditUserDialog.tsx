@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/c
 import { FormItem, FormLabel, FormControl, FormMessage, Form, FormField } from "@/components/chakra/Form";
 import { Input } from "@/components/chakra/Input";
 import { Button } from "@/components/chakra/Button";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/chakra/Select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/chakra/Select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/chakra/Tabs";
 import { Checkbox } from "@/components/chakra/Checkbox";
 import { toast } from "@/hooks/use-toast";
@@ -80,12 +80,12 @@ const EditUserDialog = ({
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="account">
-          <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="roles">Roles & Policies</TabsTrigger>
-          </TabsList>
-          <TabsContent value="account">
+        <Tabs.Root defaultValue="account">
+          <Tabs.List>
+            <Tabs.Trigger value="account">Account</Tabs.Trigger>
+            <Tabs.Trigger value="roles">Roles & Policies</Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="account">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -162,8 +162,8 @@ const EditUserDialog = ({
                 </div>
               </form>
             </Form>
-          </TabsContent>
-          <TabsContent value="roles">
+          </Tabs.Content>
+          <Tabs.Content value="roles">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -234,8 +234,8 @@ const EditUserDialog = ({
                 </div>
               </form>
             </Form>
-          </TabsContent>
-        </Tabs>
+          </Tabs.Content>
+        </Tabs.Root>
       </DialogContent>
     </Dialog>
   );
