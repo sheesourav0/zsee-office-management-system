@@ -69,3 +69,8 @@ export const useUsers = () => {
     deleteUser
   };
 };
+
+export const useCreateUser = () => {
+  const { createUser, loading } = useUsers();
+  return { createUser, loading };
+};

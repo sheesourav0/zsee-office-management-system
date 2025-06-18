@@ -1,230 +1,289 @@
+
 import { useState } from "react";
+import { Box, Stack, Text, Flex } from "@chakra-ui/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
-import { Input } from "@/components/chakra/Input";
-import { Textarea } from "@/components/chakra/Textarea";
-import { Badge } from "@/components/chakra/Badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
 import { Alert } from "@/components/chakra/Alert";
-import { Label } from "@/components/chakra/Label";
-import { Select } from "@/components/chakra/Select";
-import { Box, Text, VStack } from "@chakra-ui/react";
-import { Plus, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  assignee: string;
-  status: "open" | "in progress" | "completed" | "blocked";
-  priority: "high" | "medium" | "low";
-  dueDate: string;
-}
-
-const initialTasks: Task[] = [
-  {
-    id: "1",
-    title: "Design Payment Page",
-    description: "Create wireframes and UI design for the payment processing page.",
-    assignee: "John Doe",
-    status: "in progress",
-    priority: "high",
-    dueDate: "2024-03-15",
-  },
-  {
-    id: "2",
-    title: "Implement User Authentication",
-    description: "Set up user authentication and authorization using OAuth 2.0.",
-    assignee: "Jane Smith",
-    status: "completed",
-    priority: "high",
-    dueDate: "2024-03-10",
-  },
-  {
-    id: "3",
-    title: "Develop API Endpoints",
-    description: "Create RESTful API endpoints for data retrieval and manipulation.",
-    assignee: "Mike Johnson",
-    status: "open",
-    priority: "medium",
-    dueDate: "2024-03-22",
-  },
-  {
-    id: "4",
-    title: "Write Unit Tests",
-    description: "Write unit tests for all components and functions.",
-    assignee: "Emily White",
-    status: "blocked",
-    priority: "low",
-    dueDate: "2024-03-29",
-  },
-];
+import { Badge } from "@/components/chakra/Badge";
+import { Progress } from "@/components/chakra/Progress";
+import { Calendar, Clock, Users, AlertTriangle } from "lucide-react";
 
 const TeamMonitoring = () => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [newTask, setNewTask] = useState<Omit<Task, "id"> | null>(null);
-  const [showAddTaskForm, setShowAddTaskForm] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
-  const handleAddTask = () => {
-    setShowAddTaskForm(true);
-    setNewTask({
-      title: "",
-      description: "",
-      assignee: "",
-      status: "open",
-      priority: "medium",
-      dueDate: "",
-    });
+  // Mock data for team monitoring
+  const teamStats = {
+    totalMembers: 25,
+    activeMembers: 18,
+    tasksInProgress: 12,
+    overdueTasks: 3
   };
 
-  const handleSaveTask = () => {
-    if (!newTask) return;
-
-    if (!newTask.title || !newTask.description || !newTask.assignee || !newTask.dueDate) {
-      toast.error("Please fill in all fields.");
-      return;
+  const recentActivities = [
+    {
+      id: 1,
+      member: "John Doe",
+      action: "Completed task: Site Survey",
+      timestamp: "2 hours ago",
+      type: "completion"
+    },
+    {
+      id: 2,
+      member: "Jane Smith",
+      action: "Started work on: Equipment Installation",
+      timestamp: "4 hours ago",
+      type: "start"
+    },
+    {
+      id: 3,
+      member: "Mike Johnson",
+      action: "Updated progress on: Safety Inspection",
+      timestamp: "6 hours ago",
+      type: "update"
     }
+  ];
 
-    const newTaskWithId: Task = { ...newTask, id: Date.now().toString() };
-    setTasks([...tasks, newTaskWithId]);
-    setShowAddTaskForm(false);
-    setNewTask(null);
-    toast.success("Task added successfully!");
+  const activeTasks = [
+    {
+      id: 1,
+      title: "Site Preparation",
+      assignee: "John Doe",
+      progress: 75,
+      dueDate: "2023-12-15",
+      priority: "High",
+      status: "in-progress"
+    },
+    {
+      id: 2,
+      title: "Equipment Setup",
+      assignee: "Jane Smith",
+      progress: 45,
+      dueDate: "2023-12-20",
+      priority: "Medium",
+      status: "in-progress"
+    },
+    {
+      id: 3,
+      title: "Quality Check",
+      assignee: "Mike Johnson",
+      progress: 20,
+      dueDate: "2023-12-10",
+      priority: "High",
+      status: "overdue"
+    }
+  ];
+
+  const handleTaskClick = (task: any) => {
+    setSelectedTask(task);
+    setIsDetailDialogOpen(true);
   };
 
-  const handleCancelTask = () => {
-    setShowAddTaskForm(false);
-    setNewTask(null);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, field: string) => {
-    if (!newTask) return;
-    setNewTask({ ...newTask, [field]: e.target.value });
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case "in progress":
-        return <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>;
-      case "open":
-        return <Badge className="bg-yellow-100 text-yellow-800">Open</Badge>;
-      case "blocked":
-        return <Badge className="bg-red-100 text-red-800">Blocked</Badge>;
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case "High":
+        return <Badge colorScheme="red">{priority}</Badge>;
+      case "Medium":
+        return <Badge colorScheme="yellow">{priority}</Badge>;
+      case "Low":
+        return <Badge colorScheme="green">{priority}</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge>{priority}</Badge>;
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "completion":
+        return <Calendar className="h-4 w-4 text-green-500" />;
+      case "start":
+        return <Clock className="h-4 w-4 text-blue-500" />;
+      case "update":
+        return <Users className="h-4 w-4 text-orange-500" />;
+      default:
+        return <AlertTriangle className="h-4 w-4 text-gray-500" />;
     }
   };
 
   return (
-    <div className="space-y-6">
-      <Alert status="info" className="mb-4">
-        <div className="flex items-center gap-2">
+    <Box gap={6}>
+      {/* Team Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Users className="h-8 w-8 text-blue-500" />
+              <div>
+                <Text fontSize="sm" color="gray.500">Total Members</Text>
+                <Text fontSize="2xl" fontWeight="bold">{teamStats.totalMembers}</Text>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Users className="h-8 w-8 text-green-500" />
+              <div>
+                <Text fontSize="sm" color="gray.500">Active Members</Text>
+                <Text fontSize="2xl" fontWeight="bold">{teamStats.activeMembers}</Text>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Clock className="h-8 w-8 text-orange-500" />
+              <div>
+                <Text fontSize="sm" color="gray.500">In Progress</Text>
+                <Text fontSize="2xl" fontWeight="bold">{teamStats.tasksInProgress}</Text>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <div>
+                <Text fontSize="sm" color="gray.500">Overdue</Text>
+                <Text fontSize="2xl" fontWeight="bold">{teamStats.overdueTasks}</Text>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Alert for overdue tasks */}
+      {teamStats.overdueTasks > 0 && (
+        <Alert status="info" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
-          <Text>Real-time monitoring of team activities and work progress</Text>
-        </div>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Tasks Overview</CardTitle>
-            <Button onClick={handleAddTask}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Task
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <VStack spacing={4} align="stretch">
-            {tasks.map((task) => (
-              <Box key={task.id} className="p-4 rounded-md shadow-sm border">
-                <HStack justify="space-between">
-                  <Text fontWeight="bold">{task.title}</Text>
-                  {getStatusBadge(task.status)}
-                </HStack>
-                <Text fontSize="sm" color="gray.500">
-                  {task.description}
-                </Text>
-                <HStack justify="space-between" mt={2}>
-                  <Text>
-                    Assignee: <Text fontWeight="medium">{task.assignee}</Text>
-                  </Text>
-                  <Text>
-                    Due Date: <Text fontWeight="medium">{task.dueDate}</Text>
-                  </Text>
-                </HStack>
-              </Box>
-            ))}
-          </VStack>
-        </CardContent>
-      </Card>
-
-      {showAddTaskForm && newTask && (
-        <Dialog open={showAddTaskForm} onOpenChange={setShowAddTaskForm}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Add New Task</DialogTitle>
-            </DialogHeader>
-            <VStack spacing={4} align="stretch">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={newTask.title}
-                onChange={(e) => handleInputChange(e, "title")}
-                placeholder="Task Title"
-              />
-
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={newTask.description}
-                onChange={(e) => handleInputChange(e, "description")}
-                placeholder="Task Description"
-              />
-
-              <Label htmlFor="assignee">Assignee</Label>
-              <Input
-                id="assignee"
-                value={newTask.assignee}
-                onChange={(e) => handleInputChange(e, "assignee")}
-                placeholder="Assignee"
-              />
-
-              <Label htmlFor="status">Status</Label>
-              <Select id="status" value={newTask.status} onChange={(e) => handleInputChange(e, "status")}>
-                <option value="open">Open</option>
-                <option value="in progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="blocked">Blocked</option>
-              </Select>
-
-              <Label htmlFor="priority">Priority</Label>
-              <Select id="priority" value={newTask.priority} onChange={(e) => handleInputChange(e, "priority")}>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </Select>
-
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input
-                type="date"
-                id="dueDate"
-                value={newTask.dueDate}
-                onChange={(e) => handleInputChange(e, "dueDate")}
-              />
-            </VStack>
-            <DialogFooter>
-              <Button variant="ghost" onClick={handleCancelTask}>
-                Cancel
-              </Button>
-              <Button onClick={handleSaveTask}>Save</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          <Text>You have {teamStats.overdueTasks} overdue tasks that need attention.</Text>
+        </Alert>
       )}
-    </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Active Tasks */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Stack gap={4}>
+              {activeTasks.map((task) => (
+                <Flex
+                  key={task.id}
+                  p={3}
+                  border="1px"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  cursor="pointer"
+                  onClick={() => handleTaskClick(task)}
+                  _hover={{ bg: "gray.50" }}
+                >
+                  <Box flex={1}>
+                    <Flex justify="space-between" align="center" mb={2}>
+                      <Text fontWeight="medium">{task.title}</Text>
+                      {getPriorityBadge(task.priority)}
+                    </Flex>
+                    <Text fontSize="sm" color="gray.600" mb={2}>
+                      Assigned to: {task.assignee}
+                    </Text>
+                    <Flex align="center" gap={2}>
+                      <Progress value={task.progress} size="sm" flex={1} />
+                      <Text fontSize="sm">{task.progress}%</Text>
+                    </Flex>
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      Due: {task.dueDate}
+                    </Text>
+                  </Box>
+                </Flex>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activities */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Stack gap={4}>
+              {recentActivities.map((activity) => (
+                <Flex key={activity.id} align="start" gap={3}>
+                  {getActivityIcon(activity.type)}
+                  <Box flex={1}>
+                    <Text fontSize="sm" fontWeight="medium">
+                      {activity.member}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {activity.action}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      {activity.timestamp}
+                    </Text>
+                  </Box>
+                </Flex>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Task Detail Dialog */}
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Task Details</DialogTitle>
+          </DialogHeader>
+          {selectedTask && (
+            <Stack gap={4}>
+              <Box>
+                <Text fontWeight="medium" mb={2}>Task: {selectedTask.title}</Text>
+                <Text fontSize="sm" color="gray.600" mb={2}>
+                  Assigned to: {selectedTask.assignee}
+                </Text>
+                <Flex align="center" gap={2} mb={2}>
+                  <Text fontSize="sm">Progress:</Text>
+                  <Progress value={selectedTask.progress} size="sm" flex={1} />
+                  <Text fontSize="sm">{selectedTask.progress}%</Text>
+                </Flex>
+                <Text fontSize="sm" color="gray.600" mb={2}>
+                  Due Date: {selectedTask.dueDate}
+                </Text>
+                <Flex align="center" gap={2}>
+                  <Text fontSize="sm">Priority:</Text>
+                  {getPriorityBadge(selectedTask.priority)}
+                </Flex>
+              </Box>
+              
+              <Text fontSize="sm" color="gray.600">
+                Status: {selectedTask.status === "overdue" ? (
+                  <Badge colorScheme="red">Overdue</Badge>
+                ) : (
+                  <Badge colorScheme="blue">In Progress</Badge>
+                )}
+              </Text>
+              
+              <Flex gap={2} justify="flex-end">
+                <Button variant="outline" onClick={() => setIsDetailDialogOpen(false)}>
+                  Close
+                </Button>
+                <Button>
+                  Update Task
+                </Button>
+              </Flex>
+            </Stack>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 };
 

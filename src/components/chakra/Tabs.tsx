@@ -68,4 +68,9 @@ export const TabPanel = forwardRef<HTMLDivElement, any>(
   }
 );
 
+// Export the old names for compatibility
+export const TabsContent = TabPanel;
+export const TabsList = TabList;
+export const TabsTrigger = Tab;
+
 Tabs.displayName = 'Tabs';

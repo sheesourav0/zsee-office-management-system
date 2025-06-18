@@ -1,15 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/chakra/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
+import { Tabs, TabList, Tab } from "@/components/chakra/Tabs";
+import { Input } from "@/components/chakra/Input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/chakra/Table";
+import { Badge } from "@/components/chakra/Badge";
+import { Progress } from "@/components/chakra/Progress";
 import { Plus, Search } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import AddProjectForm from "@/components/projects/AddProjectForm";
 
 // Simulated data - in a real app, this would come from an API
@@ -152,12 +152,12 @@ const Projects = () => {
         <CardContent className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="on-hold">On Hold</TabsTrigger>
-              </TabsList>
+              <TabList>
+                <Tab value="all">All</Tab>
+                <Tab value="in-progress">In Progress</Tab>
+                <Tab value="completed">Completed</Tab>
+                <Tab value="on-hold">On Hold</Tab>
+              </TabList>
             </Tabs>
             
             <div className="relative w-full md:w-64">

@@ -6,77 +6,90 @@ import { forwardRef } from 'react';
 
 interface TableProps {
   children: React.ReactNode;
+  className?: string;
   [key: string]: any;
 }
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ children, ...props }, ref) => {
+  ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTable.ScrollArea>
-        <ChakraTable.Root ref={ref} variant="outline" {...props}>
-          {children}
-        </ChakraTable.Root>
-      </ChakraTable.ScrollArea>
+      <ChakraTable.Root ref={ref} className={className} {...props}>
+        <ChakraTable.ScrollArea>
+          <ChakraTable.Table>
+            {children}
+          </ChakraTable.Table>
+        </ChakraTable.ScrollArea>
+      </ChakraTable.Root>
     );
   }
 );
 
-export const TableHeader = forwardRef<HTMLTableSectionElement, any>(
-  ({ children, ...props }, ref) => {
+export const TableHeader = forwardRef<HTMLTableSectionElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTable.Header ref={ref} {...props}>
+      <ChakraTable.Header ref={ref} className={className} {...props}>
         {children}
       </ChakraTable.Header>
     );
   }
 );
 
-export const TableBody = forwardRef<HTMLTableSectionElement, any>(
-  ({ children, ...props }, ref) => {
+export const TableBody = forwardRef<HTMLTableSectionElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTable.Body ref={ref} {...props}>
+      <ChakraTable.Body ref={ref} className={className} {...props}>
         {children}
       </ChakraTable.Body>
     );
   }
 );
 
-export const TableFooter = forwardRef<HTMLTableSectionElement, any>(
-  ({ children, ...props }, ref) => {
+export const TableRow = forwardRef<HTMLTableRowElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTable.Footer ref={ref} {...props}>
-        {children}
-      </ChakraTable.Footer>
-    );
-  }
-);
-
-export const TableRow = forwardRef<HTMLTableRowElement, any>(
-  ({ children, ...props }, ref) => {
-    return (
-      <ChakraTable.Row ref={ref} {...props}>
+      <ChakraTable.Row ref={ref} className={className} {...props}>
         {children}
       </ChakraTable.Row>
     );
   }
 );
 
-export const TableHead = forwardRef<HTMLTableCellElement, any>(
-  ({ children, ...props }, ref) => {
+export const TableHead = forwardRef<HTMLTableCellElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTable.ColumnHeader ref={ref} {...props}>
+      <ChakraTable.ColumnHeader ref={ref} className={className} {...props}>
         {children}
       </ChakraTable.ColumnHeader>
     );
   }
 );
 
-export const TableCell = forwardRef<HTMLTableCellElement, any>(
-  ({ children, ...props }, ref) => {
+export const TableCell = forwardRef<HTMLTableCellElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
     return (
-      <ChakraTable.Cell ref={ref} {...props}>
+      <ChakraTable.Cell ref={ref} className={className} {...props}>
         {children}
       </ChakraTable.Cell>
+    );
+  }
+);
+
+export const TableFooter = forwardRef<HTMLTableSectionElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <ChakraTable.Footer ref={ref} className={className} {...props}>
+        {children}
+      </ChakraTable.Footer>
+    );
+  }
+);
+
+export const TableCaption = forwardRef<HTMLTableCaptionElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <ChakraTable.Caption ref={ref} className={className} {...props}>
+        {children}
+      </ChakraTable.Caption>
     );
   }
 );
@@ -84,7 +97,8 @@ export const TableCell = forwardRef<HTMLTableCellElement, any>(
 Table.displayName = 'Table';
 TableHeader.displayName = 'TableHeader';
 TableBody.displayName = 'TableBody';
-TableFooter.displayName = 'TableFooter';
 TableRow.displayName = 'TableRow';
 TableHead.displayName = 'TableHead';
 TableCell.displayName = 'TableCell';
+TableFooter.displayName = 'TableFooter';
+TableCaption.displayName = 'TableCaption';
