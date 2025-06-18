@@ -2,7 +2,7 @@ import { Badge } from "@/components/chakra/Badge";
 import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Separator } from "@/components/chakra/Separator";
-import { Tabs } from "@/components/chakra/Tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/chakra/Tabs";
 import { FileText, Truck, FileCheck, FileUp, ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import TransportationStatus from "../transportation/TransportationStatus";
@@ -103,28 +103,13 @@ const PaymentDetailView = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="grid w-full grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg">
-          <Button 
-            variant={activeTab === "details" ? "solid" : "ghost"}
-            onClick={() => setActiveTab("details")}
-          >
-            Payment Details
-          </Button>
-          <Button 
-            variant={activeTab === "transportation" ? "solid" : "ghost"}
-            onClick={() => setActiveTab("transportation")}
-          >
-            Transportation
-          </Button>
-          <Button 
-            variant={activeTab === "documents" ? "solid" : "ghost"}
-            onClick={() => setActiveTab("documents")}
-          >
-            Documents
-          </Button>
-        </div>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="details">Payment Details</TabsTrigger>
+          <TabsTrigger value="transportation">Transportation</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+        </TabsList>
         
-        {activeTab === "details" && (
+        <TabsContent value="details">
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -217,9 +202,9 @@ const PaymentDetailView = () => {
               </CardFooter>
             </Card>
           </div>
-        )}
+        </TabsContent>
         
-        {activeTab === "transportation" && (
+        <TabsContent value="transportation">
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -267,9 +252,9 @@ const PaymentDetailView = () => {
               </CardFooter>
             </Card>
           </div>
-        )}
+        </TabsContent>
         
-        {activeTab === "documents" && (
+        <TabsContent value="documents">
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -307,7 +292,7 @@ const PaymentDetailView = () => {
               </CardContent>
             </Card>
           </div>
-        )}
+        </TabsContent>
       </Tabs>
     </div>
   );

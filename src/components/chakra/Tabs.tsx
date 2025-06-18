@@ -7,15 +7,16 @@ import { forwardRef, ReactNode } from "react";
 export interface CustomTabsProps {
   value?: string;
   onValueChange?: (value: string) => void;
+  defaultValue?: string;
   children: ReactNode;
   className?: string;
   [key: string]: any;
 }
 
 export const Tabs = forwardRef<HTMLDivElement, CustomTabsProps>(
-  ({ value, onValueChange, children, ...props }, ref) => {
+  ({ value, onValueChange, defaultValue, children, ...props }, ref) => {
     return (
-      <ChakraTabs.Root ref={ref} value={value} onValueChange={onValueChange} {...props}>
+      <ChakraTabs.Root ref={ref} value={value} onValueChange={onValueChange} defaultValue={defaultValue} {...props}>
         {children}
       </ChakraTabs.Root>
     );
@@ -64,6 +65,12 @@ export const TabsContent = forwardRef<HTMLDivElement, {
     );
   }
 );
+
+// Legacy exports for backward compatibility
+export const TabList = TabsList;
+export const Tab = TabsTrigger;
+export const TabPanels = ({ children }: { children: ReactNode }) => <>{children}</>;
+export const TabPanel = TabsContent;
 
 Tabs.displayName = "Tabs";
 TabsList.displayName = "TabsList";
