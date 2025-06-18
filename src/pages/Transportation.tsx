@@ -1,99 +1,85 @@
 
 import { useState } from "react";
-import { Box, Flex, Heading, Text, Icon } from "@chakra-ui/react";
-import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@/components/chakra/Tabs";
-import { Plus, Package, Truck } from "lucide-react";
+import { Button } from "@/components/chakra/Button";
+import { Tabs, TabList, Tab, TabPanel, TabPanels } from "@/components/chakra/Tabs";
+import { Plus, Truck, Package, BarChart3 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/chakra/Dialog";
 import { toast } from "@/hooks/use-toast";
-import MaterialLogistics from "@/features/transportation/components/MaterialLogistics";
 import VehicleTransportation from "@/features/transportation/components/VehicleTransportation";
+import MaterialLogistics from "@/features/transportation/components/MaterialLogistics";
+import TransportationStatusTracker from "@/features/transportation/components/TransportationStatusTracker";
 
 const Transportation = () => {
-  const [activeTab, setActiveTab] = useState("0");
+  const [activeTab, setActiveTab] = useState("vehicles");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const handleAddMaterialShipment = () => {
-    toast({ title: "Add material shipment functionality will be implemented here" });
+  const handleAddTransportation = () => {
+    setIsAddDialogOpen(true);
+    toast.success("Add transportation functionality coming soon!");
   };
 
-  const handleAddVehicleRequest = () => {
-    toast({ title: "Add vehicle request functionality will be implemented here" });
+  const handleSuccess = () => {
+    setIsAddDialogOpen(false);
+    toast.success("Transportation record added successfully!");
   };
 
   return (
-    <Box gap={6}>
-      <Flex 
-        direction={{ base: "column", md: "row" }} 
-        align={{ md: "center" }} 
-        justify={{ md: "space-between" }} 
-        gap={4}
-        mb={6}
-      >
-        <Box>
-          <Heading size="lg" mb={2}>Transportation Management</Heading>
-          <Text color="gray.600">Manage material logistics and vehicle transportation</Text>
-        </Box>
-      </Flex>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Transportation Management</h1>
+          <p className="text-muted-foreground">Manage vehicles, logistics, and transportation tracking</p>
+        </div>
+        <Button onClick={handleAddTransportation}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Transportation
+        </Button>
+      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabList>
-          <Tab value="0">
-            <Flex align="center" gap={2}>
-              <Icon as={Package} boxSize={4} />
-              Material Logistics
-            </Flex>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabList className="grid w-full grid-cols-3">
+          <Tab value="vehicles" className="flex items-center gap-2">
+            <Truck className="h-4 w-4" />
+            Vehicle Transportation
           </Tab>
-          <Tab value="1">
-            <Flex align="center" gap={2}>
-              <Icon as={Truck} boxSize={4} />
-              Vehicle Transportation
-            </Flex>
+          <Tab value="materials" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            Material Logistics
+          </Tab>
+          <Tab value="tracking" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Status Tracking
           </Tab>
         </TabList>
-        
+
         <TabPanels>
-          <TabPanel value="0" p={0} pt={4}>
-            <Card>
-              <CardHeader>
-                <Flex justify="space-between" align="center">
-                  <Box>
-                    <CardTitle>Material Logistics</CardTitle>
-                    <CardDescription>Track and manage material shipments and deliveries</CardDescription>
-                  </Box>
-                  <Button onClick={handleAddMaterialShipment}>
-                    <Plus style={{ marginRight: '8px', width: '16px', height: '16px' }} />
-                    Add Shipment
-                  </Button>
-                </Flex>
-              </CardHeader>
-              <CardContent>
-                <MaterialLogistics />
-              </CardContent>
-            </Card>
+          <TabPanel value="vehicles">
+            <VehicleTransportation />
           </TabPanel>
-          
-          <TabPanel value="1" p={0} pt={4}>
-            <Card>
-              <CardHeader>
-                <Flex justify="space-between" align="center">
-                  <Box>
-                    <CardTitle>Vehicle Transportation</CardTitle>
-                    <CardDescription>Manage vehicle requests and assignments</CardDescription>
-                  </Box>
-                  <Button onClick={handleAddVehicleRequest}>
-                    <Plus style={{ marginRight: '8px', width: '16px', height: '16px' }} />
-                    Add Vehicle Request
-                  </Button>
-                </Flex>
-              </CardHeader>
-              <CardContent>
-                <VehicleTransportation />
-              </CardContent>
-            </Card>
+
+          <TabPanel value="materials">
+            <MaterialLogistics />
+          </TabPanel>
+
+          <TabPanel value="tracking">
+            <TransportationStatusTracker />
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </Box>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Add Transportation Record</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Add transportation form coming soon...</p>
+            <Button onClick={handleSuccess}>Save</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

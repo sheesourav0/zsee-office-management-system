@@ -17,7 +17,7 @@ export type UserRole =
   | "others";
 
 export type WorkPlanPeriod = "daily" | "weekly" | "monthly";
-export type WorkPlanStatus = "upcoming" | "current" | "completed" | "overdue";
+export type WorkPlanStatus = "upcoming" | "current" | "completed" | "overdue" | "active" | "scheduled" | "on-hold";
 
 export interface TeamMember {
   id: string;
@@ -45,6 +45,7 @@ export interface WorkPlan {
   updatedAt: string;
   completedAt?: string;
   progress: number;
+  teamLead?: string;
 }
 
 export interface WorkPlanComment {

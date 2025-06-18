@@ -161,13 +161,13 @@ const TeamMonitoring = () => {
 
       {/* Alert for overdue tasks */}
       {teamStats.overdueTasks > 0 && (
-        <Alert status="info" className="mb-6">
+        <Alert status="info">
           <AlertTriangle className="h-4 w-4" />
           <Text>You have {teamStats.overdueTasks} overdue tasks that need attention.</Text>
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Active Tasks */}
         <Card>
           <CardHeader>

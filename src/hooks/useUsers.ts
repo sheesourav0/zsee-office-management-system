@@ -72,5 +72,11 @@ export const useUsers = () => {
 
 export const useCreateUser = () => {
   const { createUser, loading } = useUsers();
-  return { createUser, loading };
+  
+  return {
+    mutate: createUser,
+    isPending: loading,
+    createUser,
+    loading
+  };
 };

@@ -15,9 +15,7 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(
     return (
       <ChakraTable.Root ref={ref} className={className} {...props}>
         <ChakraTable.ScrollArea>
-          <ChakraTable.Table>
-            {children}
-          </ChakraTable.Table>
+          {children}
         </ChakraTable.ScrollArea>
       </ChakraTable.Root>
     );

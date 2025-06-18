@@ -24,7 +24,9 @@ const WorkPlanManagement = () => {
       location: "Site A",
       progress: 65,
       createdAt: "2023-11-20",
+      updatedAt: "2023-11-20",
       memberId: "member1",
+      period: "daily",
       teamLead: "John Doe"
     },
     {
@@ -38,7 +40,9 @@ const WorkPlanManagement = () => {
       location: "Site B",
       progress: 0,
       createdAt: "2023-11-22",
+      updatedAt: "2023-11-22",
       memberId: "member2",
+      period: "weekly",
       teamLead: "Jane Smith"
     },
     {
@@ -52,7 +56,9 @@ const WorkPlanManagement = () => {
       location: "All Sites",
       progress: 0,
       createdAt: "2023-11-25",
+      updatedAt: "2023-11-25",
       memberId: "member3",
+      period: "daily",
       teamLead: "Mike Johnson"
     }
   ]);
@@ -119,7 +125,7 @@ const WorkPlanManagement = () => {
 
   const handleUpdateStatus = (id: string, newStatus: string) => {
     setWorkPlans(prev => prev.map(plan => 
-      plan.id === id ? { ...plan, status: newStatus } : plan
+      plan.id === id ? { ...plan, status: newStatus as any } : plan
     ));
     toast.success("Work plan status updated!");
   };
@@ -277,10 +283,12 @@ const WorkPlanManagement = () => {
                   <Text color="gray.600">Location:</Text>
                   <Text>{workPlan.location}</Text>
                 </Flex>
-                <Flex justify="space-between" fontSize="sm">
-                  <Text color="gray.600">Team Lead:</Text>
-                  <Text>{workPlan.teamLead}</Text>
-                </Flex>
+                {workPlan.teamLead && (
+                  <Flex justify="space-between" fontSize="sm">
+                    <Text color="gray.600">Team Lead:</Text>
+                    <Text>{workPlan.teamLead}</Text>
+                  </Flex>
+                )}
                 <Flex justify="space-between" fontSize="sm">
                   <Text color="gray.600">Progress:</Text>
                   <Text>{workPlan.progress}%</Text>
@@ -334,10 +342,12 @@ const WorkPlanManagement = () => {
                   <Text fontSize="sm" fontWeight="medium" color="gray.500">Location</Text>
                   <Text>{selectedWorkPlan.location}</Text>
                 </Box>
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.500">Team Lead</Text>
-                  <Text>{selectedWorkPlan.teamLead}</Text>
-                </Box>
+                {selectedWorkPlan.teamLead && (
+                  <Box>
+                    <Text fontSize="sm" fontWeight="medium" color="gray.500">Team Lead</Text>
+                    <Text>{selectedWorkPlan.teamLead}</Text>
+                  </Box>
+                )}
                 <Box>
                   <Text fontSize="sm" fontWeight="medium" color="gray.500">Status</Text>
                   <Box mt={1}>{getStatusBadge(selectedWorkPlan.status)}</Box>
