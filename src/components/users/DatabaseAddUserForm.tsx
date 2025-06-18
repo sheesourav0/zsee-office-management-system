@@ -38,11 +38,12 @@ const DatabaseAddUserForm = () => {
   });
 
   const onSubmit = async (values: CreateUser) => {
-    createUserMutation.mutate(values, {
-      onSuccess: () => {
-        form.reset();
-      },
-    });
+    try {
+      await createUserMutation.createUser(values);
+      form.reset();
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
   };
 
   if (loadingDepartments) {
@@ -110,9 +111,9 @@ const DatabaseAddUserForm = () => {
             <Button 
               type="submit" 
               width="full" 
-              loading={createUserMutation.isPending}
+              loading={createUserMutation.loading}
             >
-              {createUserMutation.isPending ? "Creating..." : "Create User"}
+              {createUserMutation.loading ? "Creating..." : "Create User"}
             </Button>
           </VStack>
         </Box>

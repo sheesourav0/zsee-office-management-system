@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Button } from "@/components/chakra/Button";
@@ -62,7 +63,7 @@ const Billing = () => {
               <CardDescription>Track payments for all projects</CardDescription>
             </CardHeader>
             <CardContent>
-              <PaymentTracking />
+              <PaymentTracking refreshTrigger={refreshTrigger} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -74,7 +75,7 @@ const Billing = () => {
               <CardDescription>Generate invoices for projects</CardDescription>
             </CardHeader>
             <CardContent>
-              <InvoiceGeneration />
+              <InvoiceGeneration refreshTrigger={refreshTrigger} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/chakra/Tabs";
@@ -31,7 +32,7 @@ const Expenses = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-3xl font-bold">Expenses Management</h1>
         <div className="flex gap-2">
-          <ExcelImportExport onDataChange={refreshData} />
+          <ExcelImportExport />
           <Button onClick={() => setIsAddDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Expense
@@ -48,7 +49,7 @@ const Expenses = () => {
         </TabsList>
 
         <TabsContent value="calculator" className="space-y-6">
-          <ExpenseCalculator refreshTrigger={refreshTrigger} />
+          <ExpenseCalculator />
         </TabsContent>
 
         <TabsContent value="project" className="space-y-6">
@@ -60,10 +61,7 @@ const Expenses = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ExpensesList 
-                type="project" 
-                refreshTrigger={refreshTrigger}
-              />
+              <ExpensesList />
             </CardContent>
           </Card>
         </TabsContent>
@@ -77,16 +75,13 @@ const Expenses = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ExpensesList 
-                type="other" 
-                refreshTrigger={refreshTrigger}
-              />
+              <ExpensesList />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="statements" className="space-y-6">
-          <MonthlyStatements refreshTrigger={refreshTrigger} />
+          <MonthlyStatements />
         </TabsContent>
       </Tabs>
 
@@ -95,10 +90,7 @@ const Expenses = () => {
           <DialogHeader>
             <DialogTitle>Add New Expense</DialogTitle>
           </DialogHeader>
-          <AddExpenseForm 
-            onSuccess={handleAddExpenseSuccess}
-            defaultType={activeTab === "project" ? "project" : "other"}
-          />
+          <AddExpenseForm onSuccess={handleAddExpenseSuccess} />
         </DialogContent>
       </Dialog>
     </div>

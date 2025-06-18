@@ -14,10 +14,20 @@ import UsersList from "@/components/users/UsersList";
 import RolesManagement from "@/components/users/RolesManagement";
 import PolicyManagement from "@/components/users/PolicyManagement";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  status: "active" | "inactive" | "pending";
+  joinDate: string;
+}
+
 const UserManagement = () => {
   const [activeTab, setActiveTab] = useState("users");
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const [users, setUsers] = useState([
+  const [users, setUsers] = useState<User[]>([
     {
       id: "1",
       name: "John Doe",
@@ -47,7 +57,7 @@ const UserManagement = () => {
     toast.success("User added successfully!");
   };
 
-  const handleEditUser = (userId: string) => {
+  const handleEditUser = (user: User) => {
     toast.info("Edit user functionality coming soon!");
   };
 
@@ -125,7 +135,7 @@ const UserManagement = () => {
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
-          <AddUserForm onSuccess={handleUserAdded} />
+          <AddUserForm />
         </DialogContent>
       </Dialog>
     </div>

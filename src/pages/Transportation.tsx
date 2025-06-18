@@ -63,7 +63,7 @@ const Transportation = () => {
           </TabPanel>
 
           <TabPanel value="tracking">
-            <TransportationStatusTracker />
+            <TransportationStatusTracker status="in-progress" updates={[]} />
           </TabPanel>
         </TabPanels>
       </Tabs>
