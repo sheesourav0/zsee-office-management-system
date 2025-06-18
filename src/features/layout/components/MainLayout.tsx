@@ -3,7 +3,6 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import MainNavigation from './MainNavigation';
 import { Box, Flex } from '@chakra-ui/react';
-import { toast } from '@/hooks/use-toast';
 
 const MainLayout = () => {
   return (

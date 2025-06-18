@@ -1,102 +1,63 @@
 
-import { 
-  Table as ChakraTable
-} from '@chakra-ui/react';
-import { forwardRef } from 'react';
-
-interface TableProps {
-  children: React.ReactNode;
-  className?: string;
-  [key: string]: any;
-}
+import {
+  Table as ChakraTable,
+  TableProps,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableContainer,
+  TableContainerProps
+} from "@chakra-ui/react";
+import { forwardRef, ReactNode } from "react";
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
+  ({ children, ...props }, ref) => {
     return (
-      <ChakraTable.Root ref={ref} className={className} {...props}>
-        <ChakraTable.ScrollArea>
+      <TableContainer>
+        <ChakraTable ref={ref} {...props}>
           {children}
-        </ChakraTable.ScrollArea>
-      </ChakraTable.Root>
+        </ChakraTable>
+      </TableContainer>
     );
   }
 );
 
-export const TableHeader = forwardRef<HTMLTableSectionElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.Header ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.Header>
-    );
+export const TableHeader = forwardRef<HTMLTableSectionElement, { children: ReactNode }>(
+  ({ children }, ref) => {
+    return <Thead ref={ref}>{children}</Thead>;
   }
 );
 
-export const TableBody = forwardRef<HTMLTableSectionElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.Body ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.Body>
-    );
+export const TableBody = forwardRef<HTMLTableSectionElement, { children: ReactNode }>(
+  ({ children }, ref) => {
+    return <Tbody ref={ref}>{children}</Tbody>;
   }
 );
 
-export const TableRow = forwardRef<HTMLTableRowElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.Row ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.Row>
-    );
+export const TableRow = forwardRef<HTMLTableRowElement, { children: ReactNode }>(
+  ({ children }, ref) => {
+    return <Tr ref={ref}>{children}</Tr>;
   }
 );
 
-export const TableHead = forwardRef<HTMLTableCellElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.ColumnHeader ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.ColumnHeader>
-    );
+export const TableHead = forwardRef<HTMLTableCellElement, { children: ReactNode; className?: string; textAlign?: string }>(
+  ({ children, textAlign, ...props }, ref) => {
+    return <Th ref={ref} textAlign={textAlign as any} {...props}>{children}</Th>;
   }
 );
 
-export const TableCell = forwardRef<HTMLTableCellElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.Cell ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.Cell>
-    );
+export const TableCell = forwardRef<HTMLTableCellElement, { children: ReactNode; className?: string; fontWeight?: string; textAlign?: string }>(
+  ({ children, fontWeight, textAlign, ...props }, ref) => {
+    return <Td ref={ref} fontWeight={fontWeight} textAlign={textAlign as any} {...props}>{children}</Td>;
   }
 );
 
-export const TableFooter = forwardRef<HTMLTableSectionElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.Footer ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.Footer>
-    );
-  }
-);
-
-export const TableCaption = forwardRef<HTMLTableCaptionElement, TableProps>(
-  ({ children, className, ...props }, ref) => {
-    return (
-      <ChakraTable.Caption ref={ref} className={className} {...props}>
-        {children}
-      </ChakraTable.Caption>
-    );
-  }
-);
-
-Table.displayName = 'Table';
-TableHeader.displayName = 'TableHeader';
-TableBody.displayName = 'TableBody';
-TableRow.displayName = 'TableRow';
-TableHead.displayName = 'TableHead';
-TableCell.displayName = 'TableCell';
-TableFooter.displayName = 'TableFooter';
-TableCaption.displayName = 'TableCaption';
+Table.displayName = "Table";
+TableHeader.displayName = "TableHeader";
+TableBody.displayName = "TableBody";
+TableRow.displayName = "TableRow";
+TableHead.displayName = "TableHead";
+TableCell.displayName = "TableCell";

@@ -1,28 +1,33 @@
 
-import { Avatar as ChakraAvatar } from '@chakra-ui/react';
-import { forwardRef } from 'react';
+import { 
+  Avatar as ChakraAvatar, 
+  AvatarProps,
+  AvatarBadge,
+  AvatarGroup
+} from "@chakra-ui/react";
+import { forwardRef, ReactNode } from "react";
 
-interface AvatarProps {
-  children?: React.ReactNode;
-  [key: string]: any;
-}
-
-export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <ChakraAvatar.Root ref={ref} {...props}>
-        {children}
-      </ChakraAvatar.Root>
-    );
+export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
+  (props, ref) => {
+    return <ChakraAvatar ref={ref} {...props} />;
   }
 );
 
-export const AvatarFallback = ({ children }: { children: React.ReactNode }) => (
-  <ChakraAvatar.Fallback>{children}</ChakraAvatar.Fallback>
-);
+export interface AvatarImageProps {
+  src?: string;
+  alt?: string;
+}
 
-export const AvatarImage = ({ src, alt }: { src: string; alt?: string }) => (
-  <ChakraAvatar.Image src={src} alt={alt} />
-);
+export const AvatarImage = ({ src, alt }: AvatarImageProps) => {
+  return null; // In Chakra UI v3, image is handled by the Avatar component itself
+};
 
-Avatar.displayName = 'Avatar';
+export interface AvatarFallbackProps {
+  children: ReactNode;
+}
+
+export const AvatarFallback = ({ children }: AvatarFallbackProps) => {
+  return <>{children}</>; // In Chakra UI v3, fallback is handled by the Avatar component itself
+};
+
+Avatar.displayName = "Avatar";

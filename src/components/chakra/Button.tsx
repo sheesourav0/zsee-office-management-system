@@ -1,22 +1,17 @@
 
-import { Button as ChakraButton } from '@chakra-ui/react';
-import { forwardRef } from 'react';
+import { Button as ChakraButton, ButtonProps } from "@chakra-ui/react";
+import { forwardRef } from "react";
 
-interface CustomButtonProps {
-  variant?: 'solid' | 'outline' | 'ghost' | 'subtle';
-  size?: 'sm' | 'md' | 'lg';
+export interface CustomButtonProps extends ButtonProps {
   loading?: boolean;
-  children: React.ReactNode;
-  [key: string]: any;
 }
 
 export const Button = forwardRef<HTMLButtonElement, CustomButtonProps>(
-  ({ variant = 'solid', size = 'md', children, loading, ...props }, ref) => {
+  ({ loading, disabled, children, ...props }, ref) => {
     return (
       <ChakraButton
         ref={ref}
-        variant={variant}
-        size={size}
+        disabled={disabled || loading}
         loading={loading}
         {...props}
       >
@@ -26,4 +21,4 @@ export const Button = forwardRef<HTMLButtonElement, CustomButtonProps>(
   }
 );
 
-Button.displayName = 'Button';
+Button.displayName = "Button";

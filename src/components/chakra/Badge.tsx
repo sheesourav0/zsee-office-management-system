@@ -1,22 +1,11 @@
 
-import { Badge as ChakraBadge } from '@chakra-ui/react';
-import { forwardRef } from 'react';
-
-interface BadgeProps {
-  children: React.ReactNode;
-  variant?: 'solid' | 'outline' | 'subtle';
-  className?: string;
-  [key: string]: any;
-}
+import { Badge as ChakraBadge, BadgeProps } from "@chakra-ui/react";
+import { forwardRef } from "react";
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ children, variant = 'solid', ...props }, ref) => {
-    return (
-      <ChakraBadge ref={ref} variant={variant} {...props}>
-        {children}
-      </ChakraBadge>
-    );
+  (props, ref) => {
+    return <ChakraBadge ref={ref} {...props} />;
   }
 );
 
-Badge.displayName = 'Badge';
+Badge.displayName = "Badge";

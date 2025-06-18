@@ -1,26 +1,11 @@
 
-import { Field } from '@chakra-ui/react';
-import { forwardRef } from 'react';
+import { FormLabel, FormLabelProps } from "@chakra-ui/react";
+import { forwardRef } from "react";
 
-interface LabelProps {
-  children: React.ReactNode;
-  htmlFor?: string;
-  [key: string]: any;
-}
-
-export const Label = forwardRef<HTMLLabelElement, LabelProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <Field.Label
-        ref={ref}
-        fontWeight="medium"
-        fontSize="sm"
-        {...props}
-      >
-        {children}
-      </Field.Label>
-    );
+export const Label = forwardRef<HTMLLabelElement, FormLabelProps>(
+  (props, ref) => {
+    return <FormLabel ref={ref} {...props} />;
   }
 );
 
-Label.displayName = 'Label';
+Label.displayName = "Label";

@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
   VStack,
-  Button as ChakraButton,
 } from "@chakra-ui/react";
 import { Input } from "@/components/chakra/Input";
 import { Button } from "@/components/chakra/Button";
