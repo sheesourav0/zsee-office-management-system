@@ -34,7 +34,12 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
         collection={collection}
         {...props}
       >
-        {children}
+        <ChakraSelect.Trigger>
+          <ChakraSelect.ValueText placeholder={placeholder} />
+        </ChakraSelect.Trigger>
+        <ChakraSelect.Content>
+          {children}
+        </ChakraSelect.Content>
       </ChakraSelect.Root>
     );
   }
