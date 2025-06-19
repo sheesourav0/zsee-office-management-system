@@ -18,7 +18,7 @@ export interface SelectProps {
   [key: string]: any;
 }
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+export const Select = forwardRef<HTMLDivElement, SelectProps>(
   ({ onValueChange, children, value, defaultValue, placeholder, ...props }, ref) => {
     return (
       <ChakraSelect.Root

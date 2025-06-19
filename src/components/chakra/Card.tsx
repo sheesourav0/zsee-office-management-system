@@ -1,5 +1,5 @@
 
-import { Card as ChakraCard, CardBody, CardHeader, CardFooter } from "@chakra-ui/react";
+import { Card as ChakraCard, CardBody, CardHeader as ChakraCardHeader, CardFooter as ChakraCardFooter } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
 export interface CardProps {
@@ -43,9 +43,9 @@ export interface CardHeaderProps {
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ children, ...props }, ref) => {
     return (
-      <CardHeader ref={ref} {...props}>
+      <ChakraCardHeader ref={ref} {...props}>
         {children}
-      </CardHeader>
+      </ChakraCardHeader>
     );
   }
 );
@@ -59,9 +59,9 @@ export interface CardFooterProps {
 export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
   ({ children, ...props }, ref) => {
     return (
-      <CardFooter ref={ref} {...props}>
+      <ChakraCardFooter ref={ref} {...props}>
         {children}
-      </CardFooter>
+      </ChakraCardFooter>
     );
   }
 );
