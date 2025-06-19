@@ -10,7 +10,7 @@ import { Input } from "@/components/chakra/Input";
 import { Button } from "@/components/chakra/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/chakra/Card";
 import { FormControl, FormLabel, FormErrorMessage } from "@/components/chakra/Form";
-import { Select } from "@/components/chakra/Select";
+import { SimpleSelect } from "@/components/chakra/SimpleSelect";
 import { UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { departmentService } from "@/lib/supabase-services";
@@ -87,10 +87,7 @@ const DatabaseAddUserForm = () => {
 
             <FormControl isInvalid={!!form.formState.errors.department_id}>
               <FormLabel>Department (Optional)</FormLabel>
-              <Select 
-                placeholder="Select a department"
-                {...form.register("department_id")}
-              >
+              <SimpleSelect {...form.register("department_id")}>
                 <option value="">No Department</option>
                 {departments
                   .filter(dept => dept?.id && typeof dept.id === 'string' && dept.id.trim() !== '')
@@ -99,7 +96,7 @@ const DatabaseAddUserForm = () => {
                       {dept.name} ({dept.code})
                     </option>
                   ))}
-              </Select>
+              </SimpleSelect>
               <FormErrorMessage>
                 {form.formState.errors.department_id?.message}
               </FormErrorMessage>

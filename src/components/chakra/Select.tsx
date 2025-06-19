@@ -1,12 +1,9 @@
 
 import { 
   Select as ChakraSelect,
-  SelectContent as ChakraSelectContent,
-  SelectItem as ChakraSelectItem,
-  SelectTrigger as ChakraSelectTrigger,
-  SelectValueText
+  createListCollection
 } from "@chakra-ui/react";
-import { forwardRef, ReactNode } from "react";
+import { forwardRef, ReactNode, useMemo } from "react";
 
 export interface SelectProps {
   onValueChange?: (value: string) => void;
@@ -20,12 +17,21 @@ export interface SelectProps {
 
 export const Select = forwardRef<HTMLDivElement, SelectProps>(
   ({ onValueChange, children, value, defaultValue, placeholder, ...props }, ref) => {
+    // Create a simple collection for basic select functionality
+    const collection = useMemo(() => {
+      return createListCollection({
+        items: [
+          { label: placeholder || "Select option", value: "" }
+        ]
+      });
+    }, [placeholder]);
+
     return (
       <ChakraSelect.Root
         ref={ref}
-        value={value}
-        defaultValue={defaultValue}
-        onValueChange={({ value }) => onValueChange?.(value)}
+        value={value ? [value] : defaultValue ? [defaultValue] : []}
+        onValueChange={({ value }) => onValueChange?.(value[0])}
+        collection={collection}
         {...props}
       >
         {children}
@@ -55,7 +61,7 @@ export interface SelectValueProps {
 }
 
 export const SelectValue = ({ placeholder }: SelectValueProps) => {
-  return <SelectValueText placeholder={placeholder} />;
+  return <ChakraSelect.ValueText placeholder={placeholder} />;
 };
 
 export interface SelectContentProps {
@@ -72,7 +78,11 @@ export interface SelectItemProps {
 }
 
 export const SelectItem = ({ value, children }: SelectItemProps) => {
-  return <ChakraSelect.Item item={value}>{children}</ChakraSelect.Item>;
+  return (
+    <ChakraSelect.Item item={{ label: children as string, value }}>
+      {children}
+    </ChakraSelect.Item>
+  );
 };
 
 Select.displayName = "Select";

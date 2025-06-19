@@ -1,14 +1,18 @@
 
 import { 
-  Box, 
-  BoxProps,
-  Field
+  Field,
+  Box,
+  BoxProps
 } from "@chakra-ui/react";
 import { forwardRef, ReactNode } from "react";
 
 export const FormControl = forwardRef<HTMLDivElement, BoxProps & { isInvalid?: boolean }>(
-  ({ isInvalid, ...props }, ref) => {
-    return <Field.Root ref={ref} invalid={isInvalid} {...props} />;
+  ({ isInvalid, children, ...props }, ref) => {
+    return (
+      <Field.Root ref={ref} invalid={isInvalid} {...props}>
+        {children}
+      </Field.Root>
+    );
   }
 );
 
@@ -46,9 +50,17 @@ export interface FormFieldProps extends BoxProps {
 export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(
   ({ children, control, name, render, ...props }, ref) => {
     if (render && control && name) {
-      return render({ field: { name, value: "", onChange: () => {} } });
+      return (
+        <Field.Root ref={ref} {...props}>
+          {render({ field: { name, value: "", onChange: () => {} } })}
+        </Field.Root>
+      );
     }
-    return <Box ref={ref} {...props}>{children}</Box>;
+    return (
+      <Field.Root ref={ref} {...props}>
+        {children}
+      </Field.Root>
+    );
   }
 );
 
@@ -56,7 +68,11 @@ export interface FormItemProps extends BoxProps {}
 
 export const FormItem = forwardRef<HTMLDivElement, FormItemProps>(
   ({ children, ...props }, ref) => {
-    return <Box ref={ref} mb={4} {...props}>{children}</Box>;
+    return (
+      <Field.Root ref={ref} mb={4} {...props}>
+        {children}
+      </Field.Root>
+    );
   }
 );
 
